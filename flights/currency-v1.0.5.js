@@ -1,5 +1,5 @@
 (() => {
-  // v1.0.5: Belavia prices must preserve the source currency. For the current
+  // v1.0.05: Belavia prices must preserve the source currency. For the current
   // Belarus-region booking flow, the source display is BYN (shown by Belavia as “Б”).
   AIRLINES.B2.demoCurrency = 'BYN';
   AIRLINES.B2.baggage.cabin = '经济舱：1×10kg 手提行李；商务舱：2×10kg 手提行李';
@@ -25,8 +25,6 @@
   demoPrice = function(route, dateIso, direction) {
     const seed = hashNumber(`${route.code}-${dateIso}-${direction}`);
     if (route.airline === 'B2') {
-      // Demo only. Keep a BYN-shaped quote so the UI exercises the correct
-      // currency pipeline. It is intentionally not presented as a live fare.
       const base = { URC: 1450, SYX: 1750 }[route.code] || 1550;
       const amount = Math.max(850, Math.round((base + (seed % 420) - 150) * 100) / 100);
       return { amount, currency: 'BYN', source: '白航 BYN 演示价 · 非实时' };
@@ -49,8 +47,10 @@
     let node;
     while ((node = walker.nextNode())) nodes.push(node);
     nodes.forEach((n) => {
-      if (n.nodeValue?.includes('v1.0.4')) n.nodeValue = n.nodeValue.replaceAll('v1.0.4', 'v1.0.5');
-      if (n.nodeValue?.includes('1.0.4')) n.nodeValue = n.nodeValue.replaceAll('1.0.4', '1.0.5');
+      if (n.nodeValue?.includes('v1.0.4')) n.nodeValue = n.nodeValue.replaceAll('v1.0.4', 'v1.0.05');
+      if (n.nodeValue?.includes('1.0.4')) n.nodeValue = n.nodeValue.replaceAll('1.0.4', '1.0.05');
+      if (n.nodeValue?.includes('v1.0.5')) n.nodeValue = n.nodeValue.replaceAll('v1.0.5', 'v1.0.05');
+      if (n.nodeValue?.includes('1.0.5')) n.nodeValue = n.nodeValue.replaceAll('1.0.5', '1.0.05');
     });
   }
 
