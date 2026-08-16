@@ -4,10 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b57d0" />
-  <title>白俄留学生机票比价 · v1.0.4</title>
+  <title>白俄留学生机票比价 · v1.0.5</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./currency.css" />
   <link rel="stylesheet" href="./ui-v1.0.4.css" />
+  <link rel="stylesheet" href="./currency-v1.0.5.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -16,7 +17,7 @@
         <span class="brand-mark">✈</span>
         <span><strong>白俄留学生机票比价</strong><small>China ⇄ Belarus · Direct flights</small></span>
       </a>
-      <span class="version">v1.0.4</span>
+      <span class="version">v1.0.5</span>
     </header>
 
     <main>
@@ -67,9 +68,9 @@
           <button id="searchButton" class="primary-button" type="button">
             <span id="searchButtonText">搜索时间段内的直飞</span><span aria-hidden="true">→</span>
           </button>
-          <div class="currency-rule"><span>💱</span><span><strong>价格显示规则：</strong>航空公司原始币种优先显示；人民币只作为参考换算，不把白航官网价格伪装成人民币报价。</span></div>
+          <div class="currency-rule"><span>💱</span><span><strong>价格显示规则：</strong>航空公司原始币种优先显示；白航当前演示按 BYN（白俄罗斯卢布）展示，人民币只作为参考换算。</span></div>
           <div id="fxStatus" class="fx-status">正在获取参考汇率…</div>
-          <p class="demo-note"><strong>v1.0.4：</strong>国航卡片改用包含红色凤凰的完整组合标识；行李额度默认折叠，点击后在当前航班卡片内展开查看。航班票价暂为演示数据，实际航变、票价、汇率和附加行李收费以航空公司最终出票页面为准。</p>
+          <p class="demo-note"><strong>v1.0.5：</strong>根据白航实际购票页面修正货币显示：白俄罗斯航空演示价改为 BYN，并用“Б（BYN）”标识；人民币只作参考换算。当前票价仍为演示数据，不代表白航官网实时库存与实时价格。实际航变、票价、汇率和附加行李收费以航空公司最终出票页面为准。</p>
         </div>
       </section>
 
@@ -92,9 +93,10 @@
       </section>
     </main>
 
-    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.4 · 紧凑航班卡片</span></footer>
+    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.5 · 白航 BYN 原币展示</span></footer>
   </div>
   <script src="./app.js"></script>
   <script src="./ui-v1.0.4.js"></script>
+  <script src="./currency-v1.0.5.js"></script>
 </body>
 </html>
