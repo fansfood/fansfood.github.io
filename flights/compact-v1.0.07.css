@@ -1,0 +1,46 @@
+/* v1.0.07 — simpler one-line comparison rows */
+.compact-help{display:none!important}
+.winner-card{display:none!important}
+.results-heading{margin-bottom:12px!important}
+.flight-list{gap:7px!important}
+.itinerary-card .itinerary-head{
+  grid-template-columns:minmax(0,1fr) auto 22px!important;
+  gap:10px!important;
+  min-height:72px!important;
+  padding:12px 14px!important;
+}
+.itinerary-card .itinerary-head>div:first-child{min-width:0!important}
+.itinerary-card .itinerary-head .tag{margin:0 0 5px!important;padding:4px 7px!important;font-size:8px!important}
+.itinerary-card .itinerary-head strong{
+  font-size:16px!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+.itinerary-card .itinerary-head small{margin-top:3px!important;font-size:10px!important;white-space:nowrap}
+.itinerary-card .price-block{min-width:112px!important;text-align:right!important}
+.price-rmb-main{font-size:23px!important;font-weight:900!important;letter-spacing:-.03em}
+.price-native-secondary{margin-top:3px!important;font-size:9px!important;white-space:nowrap}
+.tax-summary{display:flex;justify-content:flex-end;align-items:center;gap:5px;margin-top:4px;font-size:9px;white-space:nowrap;color:#7b8999}
+.tax-red{color:#d52b2b;font-weight:900}
+.bundle-secondary{display:block;margin-top:3px;font-size:9px;font-weight:800;color:#a45212;white-space:nowrap}
+.compact-status{min-width:22px!important;width:22px!important;display:flex!important;justify-content:center!important;align-items:center!important}
+.compact-status .availability-pill,.compact-status .tax-pill{display:none!important}
+.compact-status .expand-chevron{font-size:18px!important;color:#8697aa!important}
+.tax-breakdown-box .estimated-tax{color:#d52b2b;font-weight:900}
+.tax-breakdown-box .estimated-total{color:#0b57d0;font-weight:900}
+@media(max-width:620px){
+  .results{padding-top:24px!important}
+  .itinerary-card .itinerary-head{
+    grid-template-columns:minmax(145px,1fr) auto 18px!important;
+    gap:7px!important;
+    min-height:68px!important;
+    padding:11px 12px!important;
+  }
+  .itinerary-card .itinerary-head strong{font-size:15px!important}
+  .itinerary-card .price-block{min-width:100px!important}
+  .price-rmb-main{font-size:20px!important}
+  .price-native-secondary,.tax-summary,.bundle-secondary{font-size:8px!important}
+  .compact-status{grid-column:auto!important;margin:0!important}
+  .flights-panel{padding:10px!important}
+}
