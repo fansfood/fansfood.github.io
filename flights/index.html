@@ -4,8 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b57d0" />
-  <title>白俄留学生机票比价 · v1.0.2</title>
+  <title>白俄留学生机票比价 · v1.0.3</title>
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./currency.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -14,7 +15,7 @@
         <span class="brand-mark">✈</span>
         <span><strong>白俄留学生机票比价</strong><small>China ⇄ Belarus · Direct flights</small></span>
       </a>
-      <span class="version">v1.0.2</span>
+      <span class="version">v1.0.3</span>
     </header>
 
     <main>
@@ -65,19 +66,21 @@
           <button id="searchButton" class="primary-button" type="button">
             <span id="searchButtonText">搜索时间段内的直飞</span><span aria-hidden="true">→</span>
           </button>
-          <p class="demo-note"><strong>v1.0.2：</strong>航班号、班期、时刻与行李规则按已核信息展示；票价暂为演示数据。实际航变、票价和附加行李收费以航空公司最终出票页面为准。</p>
+          <div class="currency-rule"><span>💱</span><span><strong>价格显示规则：</strong>航空公司原始币种优先显示；人民币只作为参考换算，不把白航官网价格伪装成人民币报价。</span></div>
+          <div id="fxStatus" class="fx-status">正在获取参考汇率…</div>
+          <p class="demo-note"><strong>v1.0.3：</strong>白俄罗斯航空使用对应 Belavia Logo；白航演示票价以 EUR 显示并动态换算人民币。未来接入真实票价后，将直接保留数据源返回的 EUR / BYN 等原始币种。实际航变、票价、汇率和附加行李收费以航空公司最终出票页面为准。</p>
         </div>
       </section>
 
       <section id="results" class="results hidden" aria-live="polite">
         <div class="results-heading">
           <div><span class="eyebrow">搜索结果</span><h2 id="resultTitle">时间段直飞比价</h2></div>
-          <div class="sort-control"><label for="sortSelect">排序</label><select id="sortSelect"><option value="price">价格最低</option><option value="date">去程最早</option><option value="duration">飞行时间最短</option></select></div>
+          <div class="sort-control"><label for="sortSelect">排序</label><select id="sortSelect"><option value="price">折算人民币最低</option><option value="date">去程最早</option><option value="duration">飞行时间最短</option></select></div>
         </div>
         <article id="winnerCard" class="winner-card"></article>
         <div class="content-grid">
           <section class="panel calendar-panel">
-            <div class="panel-title"><div><span class="eyebrow">日期视角</span><h3 id="calendarTitle">去程价格日历</h3></div><span class="legend"><i></i> 最低价</span></div>
+            <div class="panel-title"><div><span class="eyebrow">日期视角</span><h3 id="calendarTitle">去程价格日历</h3></div><span class="legend"><i></i> 折算后最低价</span></div>
             <div id="calendarList" class="calendar-list"></div>
           </section>
           <section class="panel flights-panel">
@@ -88,7 +91,7 @@
       </section>
     </main>
 
-    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.2 · 直飞专版</span></footer>
+    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.3 · 原始币种优先</span></footer>
   </div>
   <script src="./app.js"></script>
 </body>
