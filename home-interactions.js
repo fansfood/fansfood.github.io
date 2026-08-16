@@ -232,3 +232,5 @@ if (dialogContent) {
 window.addEventListener('hashchange', () => setTimeout(refreshHomeEnhancements, 0));
 window.addEventListener('focus', refreshHomeEnhancements);
 setTimeout(refreshHomeEnhancements, 0);
+
+import('./shopping-dates.js').catch(error => console.warn('shopping date module failed', error));
