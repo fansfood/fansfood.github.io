@@ -18,10 +18,10 @@
 
   <header class="topbar">
     <a class="brand" href="#home" aria-label="食光首页">
-      <span class="brand-mark">🍴</span><span>食光</span><small>v2</small>
+      <span class="brand-mark">🍴</span><span>食光</span><small>v3</small>
     </a>
     <nav class="nav" id="nav">
-      <a href="#home">首页</a><a href="#menu">本周菜单</a><a href="#recipes">食谱</a><a href="#shopping">采购</a><a href="#pantry">我的冰箱</a>
+      <a href="#home">首页</a><a href="#tomorrow">明天吃什么</a><a href="#menu">本周菜单</a><a href="#recipes">食谱</a><a href="#shopping">采购</a><a href="#pantry">我的冰箱</a>
     </nav>
     <div class="top-actions">
       <span class="cloud-pill" id="cloudPill">本机体验</span>
@@ -37,7 +37,7 @@
           <span class="eyebrow">今天也好好吃饭</span>
           <h1>今晚吃什么？</h1>
           <p>从食谱到菜单，再到采购与库存。登录后，手机和电脑会读取同一份云端数据。</p>
-          <div class="hero-actions"><button class="btn primary" id="randomMealBtn">🎲 不知道吃什么</button><a class="btn ghost" href="#recipes">浏览食谱</a></div>
+          <div class="hero-actions"><a class="btn primary" href="#tomorrow">🍽 明天我想吃什么</a><button class="btn ghost" id="randomMealBtn">🎲 随机今日菜单</button><a class="btn ghost" href="#recipes">浏览食谱</a></div>
           <div class="sync-note"><span class="dot" id="syncDot"></span><span id="syncText">当前为本机体验模式</span></div>
         </div>
         <div class="hero-photo-wrap" aria-hidden="true"><img class="hero-photo" src="assets/images/hero-table.svg" alt="" /></div>
@@ -49,6 +49,40 @@
         <article class="card stat-card"><span class="stat-icon">🧊</span><div><b id="pantryCount">0</b><span>种库存食材</span></div></article>
         <article class="card stat-card"><span class="stat-icon">❤️</span><div><b id="favoriteCount">0</b><span>道收藏食谱</span></div></article>
       </div>
+    </section>
+
+    <section class="page" id="tomorrow">
+      <div class="tomorrow-hero card">
+        <div>
+          <span class="eyebrow">TOMORROW'S CHOICE</span>
+          <h1>明天我想吃什么？</h1>
+          <p>从下面挑一道你最想吃的菜。每台设备每天默认只能选择一次，结果会匿名汇总给主人。</p>
+          <div class="tomorrow-date-pill">📅 <span id="tomorrowDateLabel">明天</span></div>
+        </div>
+        <div class="tomorrow-emoji" aria-hidden="true">🍲</div>
+      </div>
+
+      <div class="section-head">
+        <div><span class="eyebrow">PICK ONE</span><h2>选一道最想吃的</h2></div>
+        <div id="voteStatus" class="vote-status"></div>
+      </div>
+      <div class="dish-vote-grid" id="tomorrowDishGrid"></div>
+
+      <section class="admin-vote-panel card" id="adminVotePanel" hidden>
+        <div class="admin-panel-head">
+          <div><span class="eyebrow">OWNER VIEW</span><h2>明日意向汇总</h2><p>只有管理员登录后可以看到这里。</p></div>
+          <div class="admin-panel-actions">
+            <button class="btn ghost" id="refreshVotesBtn" type="button">刷新汇总</button>
+            <button class="btn primary" id="manageDishesBtn" type="button">＋ 管理菜品</button>
+          </div>
+        </div>
+        <div class="vote-overview">
+          <article class="vote-kpi"><b id="voteParticipantCount">0</b><span>参与人数</span></article>
+          <article class="vote-kpi"><b id="voteDishCount">0</b><span>有票菜品</span></article>
+          <article class="vote-kpi"><b id="voteTopDish">—</b><span>当前第一名</span></article>
+        </div>
+        <div class="vote-summary-list" id="voteSummaryList"></div>
+      </section>
     </section>
 
     <section class="page" id="menu">
@@ -98,8 +132,29 @@
     </form>
   </dialog>
 
+  <dialog id="dishManagerDialog" class="account-dialog wide-dialog">
+    <button class="dialog-close" id="dishManagerClose" aria-label="关闭">×</button>
+    <div class="dish-manager">
+      <span class="eyebrow">DISH MANAGER</span>
+      <h2>自定义“明天吃什么”菜品</h2>
+      <p>上传你自己的菜品照片，访客在投票页会直接看到。图片存入云端，不依赖你的电脑或手机。</p>
+      <form id="dishForm" class="dish-form">
+        <label>菜名<input id="dishName" required maxlength="80" placeholder="例如：糖醋排骨" /></label>
+        <div class="form-two">
+          <label>分类<select id="dishCategory"><option>家常菜</option><option>主食</option><option>高蛋白</option><option>早餐</option><option>汤</option><option>甜品</option><option>其他</option></select></label>
+          <label>菜品照片<input id="dishImage" type="file" accept="image/*" required /></label>
+        </div>
+        <label>一句介绍<textarea id="dishDescription" rows="2" maxlength="180" placeholder="例如：酸甜开胃，配米饭很好吃。"></textarea></label>
+        <button class="btn primary" id="saveDishBtn" type="submit">上传并加入菜品</button>
+      </form>
+      <div class="dish-manager-head"><h3>当前菜品</h3><span id="dishManagerCount" class="meal-meta"></span></div>
+      <div class="dish-manager-list" id="dishManagerList"></div>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast"></div>
   <script src="config.js"></script>
   <script type="module" src="app.js"></script>
+  <script type="module" src="tomorrow.js"></script>
 </body>
 </html>
