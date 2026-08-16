@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b57d0" />
-  <title>白俄留学生机票比价 · v1.0.0</title>
+  <title>白俄留学生机票比价 · v1.0.1</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -17,7 +17,7 @@
           <small>China ⇄ Belarus · Direct flights</small>
         </span>
       </a>
-      <span class="version">v1.0.0</span>
+      <span class="version">v1.0.1</span>
     </header>
 
     <main>
@@ -35,15 +35,9 @@
           </div>
 
           <div class="date-grid">
-            <label>
-              <span>最早出发</span>
-              <input id="startDate" type="date" />
-            </label>
+            <label><span>最早出发</span><input id="startDate" type="date" /></label>
             <div class="date-arrow">→</div>
-            <label>
-              <span>最晚出发</span>
-              <input id="endDate" type="date" />
-            </label>
+            <label><span>最晚出发</span><input id="endDate" type="date" /></label>
           </div>
 
           <div class="origin-block">
@@ -55,63 +49,27 @@
           </div>
 
           <button id="searchButton" class="primary-button" type="button">
-            <span>帮我找这段时间最合适的直飞</span>
-            <span aria-hidden="true">→</span>
+            <span>帮我找这段时间最合适的直飞</span><span aria-hidden="true">→</span>
           </button>
-          <p class="demo-note">v1.0.0 当前使用演示票价验证比价逻辑；实时数据接口将在后续小版本接入。</p>
+          <p class="demo-note">v1.0.1：乌鲁木齐 ⇄ 明斯克 B2752/B2751 已按当前核验班期修正为每周一；票价仍为演示数据。其他航线班期会继续逐条核验后替换。</p>
         </div>
       </section>
 
       <section id="results" class="results hidden" aria-live="polite">
         <div class="results-heading">
-          <div>
-            <span class="eyebrow">搜索结果</span>
-            <h2 id="resultTitle">这段时间最值得买的直飞</h2>
-          </div>
-          <div class="sort-control">
-            <label for="sortSelect">排序</label>
-            <select id="sortSelect">
-              <option value="price">价格最低</option>
-              <option value="date">日期最早</option>
-              <option value="duration">飞行时间最短</option>
-            </select>
-          </div>
+          <div><span class="eyebrow">搜索结果</span><h2 id="resultTitle">这段时间最值得买的直飞</h2></div>
+          <div class="sort-control"><label for="sortSelect">排序</label><select id="sortSelect"><option value="price">价格最低</option><option value="date">日期最早</option><option value="duration">飞行时间最短</option></select></div>
         </div>
-
         <article id="winnerCard" class="winner-card"></article>
-
         <div class="content-grid">
-          <section class="panel">
-            <div class="panel-title">
-              <div>
-                <span class="eyebrow">日期视角</span>
-                <h3>价格日历</h3>
-              </div>
-              <span class="legend"><i></i> 最低价日期</span>
-            </div>
-            <div id="calendarList" class="calendar-list"></div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-title">
-              <div>
-                <span class="eyebrow">方案视角</span>
-                <h3>航班横向比较</h3>
-              </div>
-              <span id="resultCount" class="count-pill"></span>
-            </div>
-            <div id="flightList" class="flight-list"></div>
-          </section>
+          <section class="panel"><div class="panel-title"><div><span class="eyebrow">日期视角</span><h3>价格日历</h3></div><span class="legend"><i></i> 最低价日期</span></div><div id="calendarList" class="calendar-list"></div></section>
+          <section class="panel"><div class="panel-title"><div><span class="eyebrow">方案视角</span><h3>航班横向比较</h3></div><span id="resultCount" class="count-pill"></span></div><div id="flightList" class="flight-list"></div></section>
         </div>
       </section>
     </main>
 
-    <footer>
-      <span>白俄留学生机票比价</span>
-      <span>版本 v1.0.0 · 仅比较直飞方案</span>
-    </footer>
+    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.1 · 仅比较直飞方案</span></footer>
   </div>
-
   <script src="./app.js"></script>
 </body>
 </html>
