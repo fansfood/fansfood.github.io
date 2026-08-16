@@ -1,0 +1,10 @@
+{
+  "name":"食光 · 家庭饮食管理",
+  "short_name":"食光",
+  "start_url":"./#home",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#f6f6f1",
+  "theme_color":"#5f7455",
+  "icons":[{"src":"assets/images/app-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
