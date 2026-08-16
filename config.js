@@ -1,8 +1,13 @@
-// 食光 v2 云端配置
-// 1) 在 Supabase 项目 Settings → API 中复制 Project URL
-// 2) 复制 Publishable key（若界面仍显示 anon public key，也可使用该 public/anon key）
-// 3) 不要把 service_role / secret key 放到网页里。
+// 食光云端配置
+// 仅保留浏览器可公开使用的 Supabase Project URL 与 Publishable key。
+// 不要把 service_role / secret key 放到网页里。
 window.SHIGUANG_CONFIG = {
   SUPABASE_URL: "https://wcjcbbnvaejwynnrhfld.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
+
+// v1.0.011：主页使用独立的功能入口模块。
+const homeLauncherModule = document.createElement('script');
+homeLauncherModule.type = 'module';
+homeLauncherModule.src = './home-dashboard-v10011.js';
+document.head.appendChild(homeLauncherModule);
