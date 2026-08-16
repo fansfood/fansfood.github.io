@@ -4,9 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b57d0" />
-  <title>白俄留学生机票比价 · v1.0.3</title>
+  <title>白俄留学生机票比价 · v1.0.4</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./currency.css" />
+  <link rel="stylesheet" href="./ui-v1.0.4.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -15,7 +16,7 @@
         <span class="brand-mark">✈</span>
         <span><strong>白俄留学生机票比价</strong><small>China ⇄ Belarus · Direct flights</small></span>
       </a>
-      <span class="version">v1.0.3</span>
+      <span class="version">v1.0.4</span>
     </header>
 
     <main>
@@ -68,7 +69,7 @@
           </button>
           <div class="currency-rule"><span>💱</span><span><strong>价格显示规则：</strong>航空公司原始币种优先显示；人民币只作为参考换算，不把白航官网价格伪装成人民币报价。</span></div>
           <div id="fxStatus" class="fx-status">正在获取参考汇率…</div>
-          <p class="demo-note"><strong>v1.0.3：</strong>白俄罗斯航空使用对应 Belavia Logo；白航演示票价以 EUR 显示并动态换算人民币。未来接入真实票价后，将直接保留数据源返回的 EUR / BYN 等原始币种。实际航变、票价、汇率和附加行李收费以航空公司最终出票页面为准。</p>
+          <p class="demo-note"><strong>v1.0.4：</strong>国航卡片改用包含红色凤凰的完整组合标识；行李额度默认折叠，点击后在当前航班卡片内展开查看。航班票价暂为演示数据，实际航变、票价、汇率和附加行李收费以航空公司最终出票页面为准。</p>
         </div>
       </section>
 
@@ -91,8 +92,9 @@
       </section>
     </main>
 
-    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.3 · 原始币种优先</span></footer>
+    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.4 · 紧凑航班卡片</span></footer>
   </div>
   <script src="./app.js"></script>
+  <script src="./ui-v1.0.4.js"></script>
 </body>
 </html>
