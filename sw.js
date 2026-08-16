@@ -1,4 +1,4 @@
-const CACHE='shiguang-v1-0-009';
+const CACHE='shiguang-v1-0-010';
 const ASSETS=['./','./index.html','./styles.css','./groups.css','./home.css','./app.js','./tomorrow.js','./account-v2.js','./groups.js','./home-interactions.js','./shopping-dates.js','./shopping-ui-v10009.js','./config.js','./manifest.webmanifest','./assets/images/app-icon.svg','./assets/images/hero-table.svg','./assets/images/tomato-beef-pasta.svg','./assets/images/chicken-broccoli.svg','./assets/images/breakfast-wrap.svg','./assets/images/mushroom-soup.svg','./assets/images/salmon-avocado.svg','./assets/images/yogurt-oats.svg','./assets/images/recipe-placeholder.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
