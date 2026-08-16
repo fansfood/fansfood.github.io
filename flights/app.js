@@ -1,4 +1,4 @@
-const APP_VERSION = '1.0.2';
+const APP_VERSION = '1.0.3';
 
 const AIRLINES = {
   CA: {
@@ -6,6 +6,8 @@ const AIRLINES = {
     english: 'Air China Limited',
     short: '中国国际航空',
     logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Air_China_wordmark.svg/500px-Air_China_wordmark.svg.png',
+    logoClass: 'air-china-logo',
+    demoCurrency: 'CNY',
     baggage: {
       cabin: '经济舱：1×5kg 手提行李，单件≤55×40×20cm',
       fares: [
@@ -19,7 +21,9 @@ const AIRLINES = {
     name: '白俄罗斯航空公司',
     english: 'Belavia Belarusian Airlines',
     short: '白俄罗斯航空',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Belavia_logo.svg/512px-Belavia_logo.svg.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Belavia_logo.svg/3840px-Belavia_logo.svg.png',
+    logoClass: 'belavia-logo',
+    demoCurrency: 'EUR',
     baggage: {
       cabin: '经济舱：1×10kg 手提行李，单件≤55×40×25cm',
       fares: [
@@ -28,7 +32,7 @@ const AIRLINES = {
         ['FLEX', '1×32kg 托运行李'],
         ['BUSINESS', '2×32kg 托运行李']
       ],
-      extra: '中国属于附加行李第 3 区。自 2026-06-01 起，额外行李按票价品牌、购买时间及线上/线下渠道计价；第 3 区最高可达 €100/件。每位旅客最多可加购 3 件。'
+      extra: '中国属于附加行李第 3 区。额外行李按票价品牌、购买时间及线上/线下渠道计价；实际收费以白俄罗斯航空出票页面显示的原始币种为准。'
     }
   }
 };
@@ -61,6 +65,14 @@ let currentDirection = 'to-minsk';
 let currentResults = [];
 let currentOutboundLegs = [];
 
+const fxState = {
+  EUR_CNY: 7.8,
+  BYN_CNY: null,
+  date: null,
+  source: '备用演示汇率',
+  live: false
+};
+
 const $ = id => document.getElementById(id);
 const startDate=$('startDate'), endDate=$('endDate'), returnStartDate=$('returnStartDate'), returnEndDate=$('returnEndDate');
 const returnRange=$('returnRange'), originOptions=$('originOptions'), results=$('results'), flightList=$('flightList'), calendarList=$('calendarList');
@@ -71,9 +83,72 @@ function addDays(dateOrIso, n){ const d=typeof dateOrIso==='string'?new Date(dat
 function formatDate(s){ const d=new Date(s+'T12:00:00'); return `${d.getMonth()+1}月${d.getDate()}日`; }
 function weekday(s){ return ['周日','周一','周二','周三','周四','周五','周六'][new Date(s+'T12:00:00').getDay()]; }
 function durationText(m){ return `${Math.floor(m/60)}小时${m%60?`${m%60}分`:''}`; }
-function money(v){ return `¥${Number(v).toLocaleString('zh-CN')}`; }
 function daysBetween(start,end){ const out=[]; let c=new Date(start+'T12:00:00'), stop=new Date(end+'T12:00:00'); while(c<=stop){ out.push(new Date(c)); c.setDate(c.getDate()+1); } return out; }
 function hashNumber(str){ let h=2166136261; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); } return Math.abs(h>>>0); }
+
+function currencySymbol(code){ return ({CNY:'¥',EUR:'€',BYN:'Br',USD:'$',RUB:'₽'})[code] || `${code} `; }
+function formatCurrency(amount, currency){
+  try { return new Intl.NumberFormat('zh-CN',{style:'currency',currency,maximumFractionDigits:currency==='CNY'?0:2}).format(amount); }
+  catch { return `${currencySymbol(currency)}${Number(amount).toLocaleString('zh-CN')}`; }
+}
+function cnyRate(currency){
+  if(currency==='CNY') return 1;
+  if(currency==='EUR') return fxState.EUR_CNY;
+  if(currency==='BYN') return fxState.BYN_CNY;
+  return null;
+}
+function quoteCny(quote){ const rate=cnyRate(quote.currency); return rate ? quote.amount*rate : Number.POSITIVE_INFINITY; }
+function sumQuotes(a,b){
+  if(a.currency===b.currency) return {amount:a.amount+b.amount,currency:a.currency,source:a.source};
+  const cny=quoteCny(a)+quoteCny(b);
+  return {amount:cny,currency:'CNY',source:'跨币种人民币参考合计'};
+}
+function priceHtml(quote, compact=false){
+  const native=formatCurrency(quote.amount,quote.currency);
+  if(quote.currency==='CNY') return `<span class="price-native">${native}</span>${compact?'':'<small class="price-source">人民币演示价</small>'}`;
+  const converted=quoteCny(quote);
+  const convertedHtml=Number.isFinite(converted) ? `<span class="price-converted">≈ ${formatCurrency(Math.round(converted),'CNY')}</span>` : `<span class="price-converted muted">人民币换算暂不可用</span>`;
+  if(compact) return `<span class="price-native">${native}</span>${convertedHtml}`;
+  const rate=cnyRate(quote.currency);
+  const rateText=rate ? `1 ${quote.currency} ≈ ${rate.toFixed(3)} CNY` : '等待汇率';
+  return `<span class="price-native">${native}</span>${convertedHtml}<small class="price-source">原始币种 · ${rateText}</small>`;
+}
+
+async function loadFxRates(){
+  const status=$('fxStatus');
+  try {
+    const [eurRes,cnyRes]=await Promise.all([
+      fetch('https://api.nbrb.by/exrates/rates/EUR?parammode=2',{cache:'no-store'}),
+      fetch('https://api.nbrb.by/exrates/rates/CNY?parammode=2',{cache:'no-store'})
+    ]);
+    if(!eurRes.ok || !cnyRes.ok) throw new Error('NBRB response error');
+    const eur=await eurRes.json(), cny=await cnyRes.json();
+    const bynPerEur=eur.Cur_OfficialRate/eur.Cur_Scale;
+    const bynPerCny=cny.Cur_OfficialRate/cny.Cur_Scale;
+    fxState.EUR_CNY=bynPerEur/bynPerCny;
+    fxState.BYN_CNY=1/bynPerCny;
+    fxState.date=(eur.Date||'').slice(0,10);
+    fxState.source='白俄罗斯国家银行 NBRB';
+    fxState.live=true;
+  } catch(err) {
+    try {
+      const r=await fetch('https://api.frankfurter.dev/v2/rate/EUR/CNY',{cache:'no-store'});
+      if(!r.ok) throw new Error('FX fallback response error');
+      const data=await r.json();
+      fxState.EUR_CNY=data.rate;
+      fxState.date=data.date;
+      fxState.source='Frankfurter / 央行参考汇率';
+      fxState.live=true;
+    } catch(fallbackErr) {
+      fxState.source='备用演示汇率（实时接口暂不可用）';
+      fxState.live=false;
+    }
+  }
+  if(status){
+    status.textContent=`汇率：${fxState.source}${fxState.date?' · '+fxState.date:''} · 1 EUR ≈ ${fxState.EUR_CNY.toFixed(3)} CNY${fxState.BYN_CNY?` · 1 BYN ≈ ${fxState.BYN_CNY.toFixed(3)} CNY`:''}`;
+  }
+  if(!results.classList.contains('hidden')) renderFlights();
+}
 
 const today=new Date();
 const d7=addDays(today,7), d20=addDays(today,20), d28=addDays(today,28), d42=addDays(today,42);
@@ -81,7 +156,6 @@ startDate.value=isoDate(d7); endDate.value=isoDate(d20); returnStartDate.value=i
 [startDate,endDate,returnStartDate,returnEndDate].forEach(el=>el.min=isoDate(today));
 
 function flowKey(direction){ return direction==='to-minsk'?'chinaToMinsk':'minskToChina'; }
-function reverseFlowKey(direction){ return direction==='to-minsk'?'minskToChina':'chinaToMinsk'; }
 
 function renderOriginOptions(){
   originOptions.innerHTML=Object.values(ROUTES).map(route=>{
@@ -101,16 +175,22 @@ function isOperating(flight,date){
 }
 
 function demoPrice(route,dateIso,direction){
-  const base={PEK:4300,XIY:4000,URC:3550,SYX:4200}[route.code];
   const seed=hashNumber(`${route.code}-${dateIso}-${direction}`);
-  return Math.round((base+(seed%1000)-360)/10)*10;
+  if(route.airline==='B2'){
+    const base={URC:430,SYX:520}[route.code] || 470;
+    const amount=Math.max(250,Math.round(base+(seed%120)-45));
+    return {amount,currency:'EUR',source:'白航源币种演示价'};
+  }
+  const base={PEK:4300,XIY:4000}[route.code] || 4200;
+  const amount=Math.round((base+(seed%1000)-360)/10)*10;
+  return {amount,currency:'CNY',source:'国航人民币演示价'};
 }
 
 function createLeg(route,date,direction){
   const dateIso=isoDate(date), flow=flowKey(direction), flight=route[flow], airline=AIRLINES[route.airline];
   const from = direction==='to-minsk' ? {city:route.city, code:route.code, airport:route.airport} : {city:'明斯克', code:'MSQ', airport:'明斯克国家机场'};
   const to = direction==='to-minsk' ? {city:'明斯克', code:'MSQ', airport:'明斯克国家机场'} : {city:route.city, code:route.code, airport:route.airport};
-  return { id:`${direction}-${route.code}-${dateIso}`, cityCode:route.code, date:dateIso, direction, route, flight, airline, from, to, price:demoPrice(route,dateIso,direction), duration:flight.duration };
+  return { id:`${direction}-${route.code}-${dateIso}`, cityCode:route.code, date:dateIso, direction, route, flight, airline, from, to, priceQuote:demoPrice(route,dateIso,direction), duration:flight.duration };
 }
 
 function buildLegs(direction,start,end,selectedCodes){
@@ -129,7 +209,7 @@ function buildRoundTrips(outStart,outEnd,backStart,backEnd,selectedCodes){
   outbound.forEach(out=>inbound.forEach(back=>{
     if(out.cityCode!==back.cityCode) return;
     if(back.date<=out.date) return;
-    combos.push({ id:`${out.id}__${back.id}`, outbound:out, inbound:back, date:out.date, price:out.price+back.price, duration:out.duration+back.duration, cityCode:out.cityCode });
+    combos.push({ id:`${out.id}__${back.id}`, outbound:out, inbound:back, date:out.date, priceQuote:sumQuotes(out.priceQuote,back.priceQuote), duration:out.duration+back.duration, cityCode:out.cityCode });
   }));
   currentOutboundLegs=outbound;
   return combos;
@@ -149,7 +229,7 @@ function legHtml(leg,label){
   return `<div class="leg-card">
     <div class="leg-topline"><span class="leg-label">${label}</span><span class="verified-pill">班期已按公开时刻表匹配</span></div>
     <div class="airline-full">
-      <div class="logo-wrap"><img src="${a.logo}" alt="${a.short} Logo" loading="lazy"></div>
+      <div class="logo-wrap ${a.logoClass||''}"><img src="${a.logo}" alt="${a.short} Logo" loading="lazy" referrerpolicy="no-referrer"></div>
       <div class="airline-name"><strong>${a.name}</strong><small>${a.english}</small></div>
       <div class="flight-number"><small>航班号</small><strong>${f.flightNumber}</strong></div>
     </div>
@@ -163,40 +243,41 @@ function legHtml(leg,label){
   </div>`;
 }
 
+function resultCny(item){ return quoteCny(item.priceQuote); }
 function sortedResults(){
   const d=[...currentResults];
-  if(sortSelect.value==='date') d.sort((a,b)=>a.date.localeCompare(b.date)||a.price-b.price);
-  else if(sortSelect.value==='duration') d.sort((a,b)=>a.duration-b.duration||a.price-b.price);
-  else d.sort((a,b)=>a.price-b.price||a.date.localeCompare(b.date));
+  if(sortSelect.value==='date') d.sort((a,b)=>a.date.localeCompare(b.date)||resultCny(a)-resultCny(b));
+  else if(sortSelect.value==='duration') d.sort((a,b)=>a.duration-b.duration||resultCny(a)-resultCny(b));
+  else d.sort((a,b)=>resultCny(a)-resultCny(b)||a.date.localeCompare(b.date));
   return d;
 }
 
 function renderWinner(list){
   if(!list.length){ winnerCard.innerHTML='<div class="empty light-empty">这个时间段没有匹配到可用的直飞方案。可以扩大日期范围或增加城市。</div>'; return; }
-  const best=[...list].sort((a,b)=>a.price-b.price)[0];
+  const best=[...list].sort((a,b)=>resultCny(a)-resultCny(b))[0];
   if(tripType==='roundtrip'){
-    winnerCard.innerHTML=`<div class="winner-grid"><div><span class="winner-badge">🏆 当前最低往返组合 · 演示票价</span><h3>${best.outbound.route.city} ⇄ 明斯克</h3><div class="winner-meta">去程 ${formatDate(best.outbound.date)} ${best.outbound.flight.flightNumber} · 返程 ${formatDate(best.inbound.date)} ${best.inbound.flight.flightNumber}</div></div><div class="winner-price"><strong>${money(best.price)}</strong><small>两段合计演示价 · v${APP_VERSION}</small></div></div>`;
+    winnerCard.innerHTML=`<div class="winner-grid"><div><span class="winner-badge">🏆 当前最低往返组合 · 演示票价</span><h3>${best.outbound.route.city} ⇄ 明斯克</h3><div class="winner-meta">去程 ${formatDate(best.outbound.date)} ${best.outbound.flight.flightNumber} · 返程 ${formatDate(best.inbound.date)} ${best.inbound.flight.flightNumber}</div></div><div class="winner-price">${priceHtml(best.priceQuote)}<small>两段合计 · 原始币种优先 · v${APP_VERSION}</small></div></div>`;
   } else {
-    winnerCard.innerHTML=`<div class="winner-grid"><div><span class="winner-badge">🏆 当前最低单程 · 演示票价</span><h3>${best.from.city} → ${best.to.city}</h3><div class="winner-meta">${formatDate(best.date)} ${weekday(best.date)} · ${best.flight.flightNumber} · ${best.airline.short} · ${durationText(best.duration)}</div></div><div class="winner-price"><strong>${money(best.price)}</strong><small>演示票价 · v${APP_VERSION}</small></div></div>`;
+    winnerCard.innerHTML=`<div class="winner-grid"><div><span class="winner-badge">🏆 当前最低单程 · 演示票价</span><h3>${best.from.city} → ${best.to.city}</h3><div class="winner-meta">${formatDate(best.date)} ${weekday(best.date)} · ${best.flight.flightNumber} · ${best.airline.short} · ${durationText(best.duration)}</div></div><div class="winner-price">${priceHtml(best.priceQuote)}<small>航空公司原始币种优先 · v${APP_VERSION}</small></div></div>`;
   }
 }
 
 function renderCalendar(){
   const list=tripType==='roundtrip'?currentOutboundLegs:currentResults;
   if(!list.length){ calendarList.innerHTML='<div class="empty">暂无日期</div>'; return; }
-  const byDate=Object.values(list.reduce((acc,leg)=>{ if(!acc[leg.date]||leg.price<acc[leg.date].price) acc[leg.date]=leg; return acc; },{})).sort((a,b)=>a.date.localeCompare(b.date));
-  const cheapest=Math.min(...byDate.map(x=>x.price));
-  calendarList.innerHTML=byDate.map(leg=>`<div class="calendar-row ${leg.price===cheapest?'best':''}"><div class="calendar-date"><strong>${formatDate(leg.date)}</strong><small>${weekday(leg.date)}</small></div><div class="calendar-route">${leg.from.city} → ${leg.to.city}<br>${leg.flight.flightNumber}</div><div class="calendar-price ${leg.price===cheapest?'best':''}">${money(leg.price)}<small>演示</small></div></div>`).join('');
+  const byDate=Object.values(list.reduce((acc,leg)=>{ if(!acc[leg.date]||quoteCny(leg.priceQuote)<quoteCny(acc[leg.date].priceQuote)) acc[leg.date]=leg; return acc; },{})).sort((a,b)=>a.date.localeCompare(b.date));
+  const cheapest=Math.min(...byDate.map(x=>quoteCny(x.priceQuote)));
+  calendarList.innerHTML=byDate.map(leg=>`<div class="calendar-row ${quoteCny(leg.priceQuote)===cheapest?'best':''}"><div class="calendar-date"><strong>${formatDate(leg.date)}</strong><small>${weekday(leg.date)}</small></div><div class="calendar-route">${leg.from.city} → ${leg.to.city}<br>${leg.flight.flightNumber}</div><div class="calendar-price ${quoteCny(leg.priceQuote)===cheapest?'best':''}">${priceHtml(leg.priceQuote,true)}</div></div>`).join('');
 }
 
 function renderFlights(){
   const list=sortedResults(); resultCount.textContent=`${list.length} 个${tripType==='roundtrip'?'往返组合':'航班'}`;
   if(!list.length){ flightList.innerHTML='<div class="empty">暂无结果</div>'; renderWinner(list); renderCalendar(); return; }
-  const cheapest=Math.min(...list.map(x=>x.price));
+  const cheapest=Math.min(...list.map(x=>resultCny(x)));
   if(tripType==='roundtrip'){
-    flightList.innerHTML=list.slice(0,160).map(combo=>`<article class="itinerary-card ${combo.price===cheapest?'cheapest':''}"><div class="itinerary-head"><div><span class="tag best">${combo.price===cheapest?'🏆 区间最低往返':'往返组合'}</span><strong>${combo.outbound.route.city} ⇄ 明斯克</strong><small>${formatDate(combo.outbound.date)} 去 · ${formatDate(combo.inbound.date)} 回</small></div><div class="price-block"><strong>${money(combo.price)}</strong><small>两段演示总价</small></div></div>${legHtml(combo.outbound,'去程')}${legHtml(combo.inbound,'返程')}</article>`).join('');
+    flightList.innerHTML=list.slice(0,160).map(combo=>`<article class="itinerary-card ${resultCny(combo)===cheapest?'cheapest':''}"><div class="itinerary-head"><div><span class="tag best">${resultCny(combo)===cheapest?'🏆 区间最低往返':'往返组合'}</span><strong>${combo.outbound.route.city} ⇄ 明斯克</strong><small>${formatDate(combo.outbound.date)} 去 · ${formatDate(combo.inbound.date)} 回</small></div><div class="price-block">${priceHtml(combo.priceQuote)}<small>两段演示总价 · 原币优先</small></div></div>${legHtml(combo.outbound,'去程')}${legHtml(combo.inbound,'返程')}</article>`).join('');
   } else {
-    flightList.innerHTML=list.map(leg=>`<article class="itinerary-card ${leg.price===cheapest?'cheapest':''}"><div class="itinerary-head"><div><span class="tag best">${leg.price===cheapest?'🏆 区间最低':'直飞航班'}</span><strong>${leg.from.city} → ${leg.to.city}</strong><small>${formatDate(leg.date)} · ${leg.flight.flightNumber}</small></div><div class="price-block"><strong>${money(leg.price)}</strong><small>演示票价</small></div></div>${legHtml(leg,'单程')}</article>`).join('');
+    flightList.innerHTML=list.map(leg=>`<article class="itinerary-card ${resultCny(leg)===cheapest?'cheapest':''}"><div class="itinerary-head"><div><span class="tag best">${resultCny(leg)===cheapest?'🏆 区间最低':'直飞航班'}</span><strong>${leg.from.city} → ${leg.to.city}</strong><small>${formatDate(leg.date)} · ${leg.flight.flightNumber}</small></div><div class="price-block">${priceHtml(leg.priceQuote)}<small>${leg.priceQuote.source}</small></div></div>${legHtml(leg,'单程')}</article>`).join('');
   }
   renderWinner(list); renderCalendar();
 }
@@ -242,3 +323,5 @@ $('searchButton').addEventListener('click',runSearch); sortSelect.addEventListen
 $('toggleAll').addEventListener('click',()=>{ const boxes=[...originOptions.querySelectorAll('input')], check=boxes.some(b=>!b.checked); boxes.forEach(b=>b.checked=check); $('toggleAll').textContent=check?'取消全选':'全选'; });
 startDate.addEventListener('change',()=>{ endDate.min=startDate.value; if(endDate.value<startDate.value) endDate.value=startDate.value; const minReturn=isoDate(addDays(startDate.value,1)); returnStartDate.min=minReturn; returnEndDate.min=minReturn; if(returnStartDate.value<=startDate.value) returnStartDate.value=minReturn; if(returnEndDate.value<returnStartDate.value) returnEndDate.value=returnStartDate.value; });
 returnStartDate.addEventListener('change',()=>{ returnEndDate.min=returnStartDate.value; if(returnEndDate.value<returnStartDate.value) returnEndDate.value=returnStartDate.value; });
+
+loadFxRates();
