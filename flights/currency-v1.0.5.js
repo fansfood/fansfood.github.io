@@ -2,6 +2,13 @@
   // v1.0.5: Belavia prices must preserve the source currency. For the current
   // Belarus-region booking flow, the source display is BYN (shown by Belavia as “Б”).
   AIRLINES.B2.demoCurrency = 'BYN';
+  AIRLINES.B2.baggage.cabin = '经济舱：1×10kg 手提行李；商务舱：2×10kg 手提行李';
+  AIRLINES.B2.baggage.fares = [
+    ['PROMO / LIGHT', '0 件免费托运行李'],
+    ['SMART', '1×23kg 托运行李'],
+    ['FLEX', '1×32kg 托运行李'],
+    ['BUSINESS', '2×32kg 托运 · 2×10kg 手提']
+  ];
 
   const originalFormatCurrency = formatCurrency;
   formatCurrency = function(amount, currency) {
