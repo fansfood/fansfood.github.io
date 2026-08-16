@@ -1,0 +1,88 @@
+.logo-wrap.air-china-logo{
+  width:96px;
+  height:48px;
+  padding:4px 6px;
+  background:#fff;
+}
+.logo-wrap.air-china-logo img.air-china-full-logo-img{
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+}
+
+.baggage-box.baggage-collapsible{
+  padding:0;
+  overflow:hidden;
+  transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.baggage-box.baggage-collapsible:hover{
+  border-color:#cbd9ea;
+}
+.baggage-box.baggage-collapsible.is-open{
+  padding-bottom:12px;
+  box-shadow:0 7px 20px rgba(36,78,130,.055);
+}
+.baggage-collapsible .baggage-title.baggage-toggle{
+  min-height:42px;
+  margin:0;
+  padding:10px 12px;
+  cursor:pointer;
+  user-select:none;
+  outline:none;
+  border-radius:11px;
+  transition:background .16s ease;
+}
+.baggage-collapsible .baggage-title.baggage-toggle:hover,
+.baggage-collapsible .baggage-title.baggage-toggle:focus-visible{
+  background:#f5f8fc;
+}
+.baggage-collapsible .baggage-title.baggage-toggle strong{
+  font-size:11px;
+}
+.baggage-chevron{
+  margin-left:auto;
+  color:#6c7f98;
+  font-size:15px;
+  line-height:1;
+  transform:rotate(0deg);
+  transition:transform .18s ease;
+}
+.baggage-collapsible.is-open .baggage-chevron{
+  transform:rotate(180deg);
+}
+.baggage-collapsible:not(.is-open)>.baggage-cabin,
+.baggage-collapsible:not(.is-open)>.fare-baggage,
+.baggage-collapsible:not(.is-open)>.extra-baggage{
+  display:none;
+}
+.baggage-collapsible.is-open>.baggage-cabin,
+.baggage-collapsible.is-open>.fare-baggage,
+.baggage-collapsible.is-open>.extra-baggage{
+  margin-left:12px;
+  margin-right:12px;
+}
+.baggage-collapsible.is-open>.baggage-cabin{
+  margin-top:1px;
+}
+
+@media(max-width:620px){
+  .logo-wrap.air-china-logo{
+    width:82px;
+    height:44px;
+  }
+  .airline-full:has(.air-china-logo){
+    grid-template-columns:82px 1fr;
+  }
+  .baggage-collapsible .baggage-title.baggage-toggle{
+    min-height:40px;
+    padding:9px 10px;
+  }
+  .baggage-collapsible.is-open>.baggage-cabin,
+  .baggage-collapsible.is-open>.fare-baggage,
+  .baggage-collapsible.is-open>.extra-baggage{
+    margin-left:10px;
+    margin-right:10px;
+  }
+}
