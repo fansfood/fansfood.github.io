@@ -18,10 +18,10 @@
 
   <header class="topbar">
     <a class="brand" href="#home" aria-label="食光首页">
-      <span class="brand-mark">🍴</span><span>食光</span><small>v3.1</small>
+      <span class="brand-mark">🍴</span><span>食光</span><small>v3.2</small>
     </a>
     <nav class="nav" id="nav">
-      <a href="#home">首页</a><a href="#tomorrow">明天吃什么</a><a href="#menu">本周菜单</a><a href="#recipes">食谱</a><a href="#shopping">采购</a><a href="#pantry">我的冰箱</a>
+      <a href="#home">首页</a><a href="#groups">我的群组</a><a href="#tomorrow">明天吃什么</a><a href="#menu">本周菜单</a><a href="#recipes">食谱</a><a href="#shopping">采购</a><a href="#pantry">我的冰箱</a>
     </nav>
     <div class="top-actions">
       <span class="cloud-pill" id="cloudPill">本机体验</span>
@@ -37,7 +37,7 @@
           <span class="eyebrow">今天也好好吃饭</span>
           <h1>今晚吃什么？</h1>
           <p>从食谱到菜单，再到采购与库存。登录后，手机和电脑会读取同一份云端数据。</p>
-          <div class="hero-actions"><a class="btn primary" href="#tomorrow">🍽 明天我想吃什么</a><button class="btn ghost" id="randomMealBtn">🎲 随机今日菜单</button><a class="btn ghost" href="#recipes">浏览食谱</a></div>
+          <div class="hero-actions"><a class="btn primary" href="#groups">👥 进入我的群组</a><a class="btn ghost" href="#tomorrow">🍽 明天我想吃什么</a><button class="btn ghost" id="randomMealBtn">🎲 随机今日菜单</button></div>
           <div class="sync-note"><span class="dot" id="syncDot"></span><span id="syncText">当前为本机体验模式</span></div>
         </div>
         <div class="hero-photo-wrap" aria-hidden="true"><img class="hero-photo" src="assets/images/hero-table.svg" alt="" /></div>
@@ -51,17 +51,25 @@
       </div>
     </section>
 
+    <section class="page" id="groups">
+      <div class="page-title">
+        <div><span class="eyebrow">SMALL TABLES</span><h1>我的群组</h1><p>不同的小饭桌互不打扰。身份、成员、投票、群组菜谱和采购都在这里管理。</p></div>
+      </div>
+      <div id="groupsPageContent"></div>
+    </section>
 
     <section class="page" id="tomorrow">
       <div class="tomorrow-hero card">
         <div>
           <span class="eyebrow">TOMORROW'S CHOICE</span>
           <h1>明天我想吃什么？</h1>
-          <p>从下面挑一道你最想吃的菜。每台设备每天默认只能选择一次，结果会匿名汇总给主人。</p>
+          <p>进入一个群组后，美食家选择明天最想吃的菜；本群大厨会看到成员投票汇总。</p>
           <div class="tomorrow-date-pill">📅 <span id="tomorrowDateLabel">明天</span></div>
         </div>
         <div class="tomorrow-emoji" aria-hidden="true">🍲</div>
       </div>
+
+      <div id="tomorrowGroupContext" class="group-context-bar"></div>
 
       <div class="section-head">
         <div><span class="eyebrow">PICK ONE</span><h2>选一道最想吃的</h2></div>
@@ -71,10 +79,10 @@
 
       <section class="admin-vote-panel card" id="adminVotePanel" hidden>
         <div class="admin-panel-head">
-          <div><span class="eyebrow">OWNER VIEW</span><h2>明日意向汇总</h2><p>只有管理员登录后可以看到这里。</p></div>
+          <div><span class="eyebrow">CHEF VIEW</span><h2>食客明日意向</h2><p>只有当前群组的大厨可以看到成员选择。</p></div>
           <div class="admin-panel-actions">
             <button class="btn ghost" id="refreshVotesBtn" type="button">刷新汇总</button>
-            <button class="btn primary" id="manageDishesBtn" type="button">＋ 管理菜品</button>
+            <button class="btn primary" id="manageDishesBtn" type="button">＋ 管理群组菜品</button>
           </div>
         </div>
         <div class="vote-overview">
@@ -133,13 +141,12 @@
     </form>
   </dialog>
 
-
   <dialog id="dishManagerDialog" class="account-dialog wide-dialog">
     <button class="dialog-close" id="dishManagerClose" aria-label="关闭">×</button>
     <div class="dish-manager">
       <span class="eyebrow">DISH MANAGER</span>
-      <h2>自定义“明天吃什么”菜品</h2>
-      <p>上传你自己的菜品照片，访客在投票页会直接看到。图片存入云端，不依赖你的电脑或手机。</p>
+      <h2>管理当前群组的投票菜品</h2>
+      <p>大厨可以上传自己的菜品照片。每个群组拥有独立菜品库，不会影响其他小饭桌。</p>
       <form id="dishForm" class="dish-form">
         <label>菜名<input id="dishName" required maxlength="80" placeholder="例如：糖醋排骨" /></label>
         <div class="form-two">
@@ -157,6 +164,7 @@
   <div class="toast" id="toast"></div>
   <script src="config.js"></script>
   <script type="module" src="app.js"></script>
+  <script type="module" src="groups.js"></script>
   <script type="module" src="tomorrow.js"></script>
   <script type="module" src="account-v2.js"></script>
 </body>
