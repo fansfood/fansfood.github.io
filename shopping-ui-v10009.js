@@ -54,7 +54,8 @@ function injectStyles(){if($('#shoppingCompactV10009'))return;const style=docume
 
 function getCategory(row){if(row.dataset.category)return row.dataset.category;const chip=$('.shopping-category-chip',row);if(chip){const t=chip.textContent.trim().replace(/^\S+\s*/,'');if(t)return t}return'其他'}
 
-function enhanceRow(row,force=false){const checkbox=$('[data-check]',row);if(!checkbox)return;const id=checkbox.dataset.check;if(!id)return;const nameCell=$('.item-name',row);const qty=$('.qty',row);if(!nameCell||!qty)return;
+function enhanceRow(row,force=false){if(row.dataset.v9Enhanced==='1'&&!force)return;const checkbox=$('[data-check]',row);if(!checkbox)return;const id=checkbox.dataset.check;if(!id)return;const nameCell=$('.item-name',row);const qty=$('.qty',row);if(!nameCell||!qty)return;
+ row.dataset.v9Enhanced='1';
  const category=getCategory(row);row.dataset.category=category;
  const oldChip=$('.shopping-category-chip',row);if(oldChip)oldChip.remove();
  let nameSpan=$('.shopping-food-name-v9',nameCell);if(!nameSpan){const text=nameCell.textContent.trim();nameCell.textContent='';nameSpan=document.createElement('span');nameSpan.className='shopping-food-name-v9';nameSpan.textContent=text;nameCell.appendChild(nameSpan)}
@@ -66,9 +67,9 @@ function enhanceRow(row,force=false){const checkbox=$('[data-check]',row);if(!ch
  const amountEl=$('.qty-amount-v9',qty),unitEl=$('.qty-unit-v9',qty);amountEl.onchange=()=>saveOverride(id,amountEl.value,unitEl.value,base);unitEl.onchange=()=>saveOverride(id,amountEl.value,unitEl.value,base);$('.shopping-qty-reset-v9',qty).onclick=e=>{e.preventDefault();resetOverride(id,row)};
 }
 
-function enhanceAll(){if(applying)return;applying=true;try{$$('#shoppingGroups .shopping-item').forEach(row=>enhanceRow(row))}finally{applying=false}}
+function enhanceAll(force=false){if(applying)return;applying=true;try{$$('#shoppingGroups .shopping-item').forEach(row=>enhanceRow(row,force))}finally{applying=false}}
 
-async function pullCloud(){if(!supabase)return;const{data:session}=await supabase.auth.getSession();const user=session.session?.user;if(!user)return;const{data,error}=await supabase.from('app_state').select('shopping_overrides').eq('user_id',user.id).maybeSingle();if(error)return;if(data?.shopping_overrides){writeOverrides({...readOverrides(),...data.shopping_overrides});setTimeout(enhanceAll,0)}}
+async function pullCloud(){if(!supabase)return;const{data:session}=await supabase.auth.getSession();const user=session.session?.user;if(!user)return;const{data,error}=await supabase.from('app_state').select('shopping_overrides').eq('user_id',user.id).maybeSingle();if(error)return;if(data?.shopping_overrides){writeOverrides({...readOverrides(),...data.shopping_overrides});setTimeout(()=>enhanceAll(true),0)}}
 
 function init(){injectStyles();const badge=$('.brand small');if(badge)badge.textContent='v1.0.009';const root=$('#shoppingGroups');if(root){enhanceAll();new MutationObserver(()=>{if(!applying)setTimeout(enhanceAll,0)}).observe(root,{childList:true,subtree:true})}window.addEventListener('hashchange',()=>{if(location.hash==='#shopping')setTimeout(enhanceAll,0)});if(supabase){supabase.auth.onAuthStateChange(()=>setTimeout(pullCloud,250));setTimeout(pullCloud,700)}}
 init();
