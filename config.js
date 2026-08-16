@@ -6,8 +6,8 @@ window.SHIGUANG_CONFIG = {
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
 
-// v1.0.011：主页使用独立的功能入口模块。
+// v1.0.012：身份欢迎区、主页入口重排与“近七天菜谱”。
 const homeLauncherModule = document.createElement('script');
 homeLauncherModule.type = 'module';
-homeLauncherModule.src = './home-dashboard-v10011.js';
+homeLauncherModule.src = './home-dashboard-v10012.js';
 document.head.appendChild(homeLauncherModule);
