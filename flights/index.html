@@ -4,12 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b57d0" />
-  <title>白俄留学生机票比价 · v1.0.06</title>
+  <title>白俄留学生机票比价 · v1.0.07</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./currency.css" />
   <link rel="stylesheet" href="./ui-v1.0.4.css" />
   <link rel="stylesheet" href="./currency-v1.0.5.css" />
   <link rel="stylesheet" href="./compact-v1.0.06.css" />
+  <link rel="stylesheet" href="./compact-v1.0.07.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -18,7 +19,7 @@
         <span class="brand-mark">✈</span>
         <span><strong>白俄留学生机票比价</strong><small>China ⇄ Belarus · Direct flights</small></span>
       </a>
-      <span class="version">v1.0.06</span>
+      <span class="version">v1.0.07</span>
     </header>
 
     <main>
@@ -26,7 +27,7 @@
         <div class="hero-copy">
           <span class="eyebrow">专供白俄罗斯留学生</span>
           <h1>在一段时间里，<br />找到真正合适的直飞。</h1>
-          <p>先用紧凑列表比较日期、航班号、人民币参考总价和票态；需要时再点击展开完整航班、票价、税费和行李信息。</p>
+          <p>先看路线、日期、航班号和人民币价格；需要时再点击展开起降时间、航空公司、票价档、税费和行李信息。</p>
         </div>
 
         <div class="search-card" aria-label="机票搜索">
@@ -69,9 +70,9 @@
           <button id="searchButton" class="primary-button" type="button">
             <span id="searchButtonText">搜索时间段内的直飞</span><span aria-hidden="true">→</span>
           </button>
-          <div class="currency-rule"><span>💱</span><span><strong>价格显示规则：</strong>人民币作为主比较价格；白航原始 BYN 等币种保留在第二行。白航官网结果价按含税总价理解；国航列表价税费未核实时会明确标注，不伪造含税总价。</span></div>
+          <div class="currency-rule"><span>💱</span><span><strong>价格显示：</strong>人民币作为主比较价格；白航原始 BYN 保留在第二行。国航列表价若未含税，会用红色“未含税”标注，并给出税费参考估算。</span></div>
           <div id="fxStatus" class="fx-status">正在获取参考汇率…</div>
-          <p class="demo-note"><strong>v1.0.06：</strong>搜索结果改成紧凑单行，点击后原地展开详情；2026-08-31 B2752 已根据白航官网结果核验为仅 BUSINESS 可售，价格 2 857.23 BYN（含税费）。其他日期若未接入实时库存，会明确显示“票态待实时核验”。国航税费结构已加入，但国际税费实际金额仍须由国航系统实时计算。</p>
+          <p class="demo-note"><strong>v1.0.07：</strong>结果摘要进一步精简，完整显示“西安 → 明斯克”等路线；移除“票态待实时核验”等摘要提示。国航未含税票面价暂按约 20% 估算税费，仅供横向比价，国际税费、机场费用与燃油附加最终以国航订单系统计算为准。2026-08-31 B2752 仍按已核验结果显示仅 BUSINESS、2 857.23 BYN。</p>
         </div>
       </section>
 
@@ -87,18 +88,19 @@
             <div id="calendarList" class="calendar-list"></div>
           </section>
           <section class="panel flights-panel">
-            <div class="panel-title"><div><span class="eyebrow">快速比价</span><h3 id="listTitle">点击任意一行展开详情</h3></div><span id="resultCount" class="count-pill"></span></div>
+            <div class="panel-title"><div><span class="eyebrow">快速比价</span><h3 id="listTitle">航班横向比较</h3></div><span id="resultCount" class="count-pill"></span></div>
             <div id="flightList" class="flight-list"></div>
           </section>
         </div>
       </section>
     </main>
 
-    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.06 · 紧凑比价 / 原地展开</span></footer>
+    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.07 · 极简摘要 / 原地展开</span></footer>
   </div>
   <script src="./app.js"></script>
   <script src="./ui-v1.0.4.js"></script>
   <script src="./currency-v1.0.5.js"></script>
   <script src="./compact-v1.0.06.js"></script>
+  <script src="./compact-v1.0.07.js"></script>
 </body>
 </html>
