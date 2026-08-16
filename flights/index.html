@@ -4,16 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b57d0" />
-  <title>白俄留学生机票比价 · v1.0.11</title>
-  <link rel="stylesheet" href="./styles.css?v=1.0.11" />
-  <link rel="stylesheet" href="./currency.css?v=1.0.11" />
-  <link rel="stylesheet" href="./ui-v1.0.4.css?v=1.0.11" />
-  <link rel="stylesheet" href="./currency-v1.0.5.css?v=1.0.11" />
-  <link rel="stylesheet" href="./compact-v1.0.06.css?v=1.0.11" />
-  <link rel="stylesheet" href="./compact-v1.0.07.css?v=1.0.11" />
-  <link rel="stylesheet" href="./live-v1.0.09.css?v=1.0.11" />
-  <link rel="stylesheet" href="./loading-v1.0.10.css?v=1.0.11" />
-  <link rel="stylesheet" href="./backend-v1.0.11.css?v=1.0.11" />
+  <title>白俄留学生机票比价 · v1.0.12</title>
+  <link rel="stylesheet" href="./styles.css?v=1.0.12" />
+  <link rel="stylesheet" href="./currency.css?v=1.0.12" />
+  <link rel="stylesheet" href="./ui-v1.0.4.css?v=1.0.12" />
+  <link rel="stylesheet" href="./currency-v1.0.5.css?v=1.0.12" />
+  <link rel="stylesheet" href="./compact-v1.0.06.css?v=1.0.12" />
+  <link rel="stylesheet" href="./compact-v1.0.07.css?v=1.0.12" />
+  <link rel="stylesheet" href="./live-v1.0.09.css?v=1.0.12" />
+  <link rel="stylesheet" href="./loading-v1.0.10.css?v=1.0.12" />
+  <link rel="stylesheet" href="./free-v1.0.12.css?v=1.0.12" />
 </head>
 <body>
   <div class="app-shell">
@@ -22,7 +22,7 @@
         <span class="brand-mark">✈</span>
         <span><strong>白俄留学生机票比价</strong><small>China ⇄ Belarus · Student fare compare</small></span>
       </a>
-      <span class="version">v1.0.11</span>
+      <span class="version">v1.0.12</span>
     </header>
 
     <main>
@@ -30,7 +30,7 @@
         <div class="hero-copy">
           <span class="eyebrow">专供白俄罗斯留学生</span>
           <h1>在一段时间里，<br />找到真正合适的航班。</h1>
-          <p>点击搜索后由服务端查询可售票价，再显示结果；北京同时纳入 CA721 直飞和 CA813 北京经西安飞明斯克。</p>
+          <p>点击搜索后查询免费价格数据源，再显示结果；北京同时纳入 CA721 直飞和 CA813 北京经西安飞明斯克。</p>
         </div>
 
         <div class="search-card" aria-label="机票搜索">
@@ -73,21 +73,21 @@
           <button id="searchButton" class="primary-button" type="button">
             <span id="searchButtonText">搜索时间段内的航班</span><span aria-hidden="true">→</span>
           </button>
-          <div class="currency-rule"><span>💱</span><span><strong>价格显示：</strong>人民币作为主比较价格；实时供应商原币种保留在详情中。国航实时结果按含税总价参与排序。</span></div>
+          <div class="currency-rule"><span>💱</span><span><strong>价格显示：</strong>人民币作为主比较价格；白航已核验价格保留 BYN 原币种。免费数据源提供近期价格参考，不再使用任何随机演示票价。</span></div>
           <div id="fxStatus" class="fx-status">正在获取参考汇率…</div>
-          <p class="demo-note"><strong>v1.0.11：</strong>实时查询后端已经部署到 Supabase Edge Functions。国航查询流程已接入 Duffel 接口结构，并支持经济舱无票后继续检查公务舱；服务端还需配置 Duffel Live Access Token 后即可返回真实可售价格。白航实时数据源继续接入中。</p>
+          <p class="demo-note"><strong>v1.0.12：</strong>已完全移除 Duffel 付费依赖，后端切换为免费 Travelpayouts / Aviasales Data API + 已核验价格缓存。免费 Data API 返回的是最近约 48 小时内用户搜索到的价格，不等同于航空公司当前秒级库存；购买前仍需以航空公司出票页为准。</p>
         </div>
       </section>
 
       <section id="results" class="results hidden" aria-live="polite">
         <div class="results-heading">
-          <div><span class="eyebrow">搜索结果</span><h2 id="resultTitle">时间段航班比价</h2></div>
+          <div><span class="eyebrow">搜索结果</span><h2 id="resultTitle">时间段航班价格参考</h2></div>
           <div class="sort-control"><label for="sortSelect">排序</label><select id="sortSelect"><option value="price">人民币价格最低</option><option value="date">去程最早</option><option value="duration">总时长最短</option></select></div>
         </div>
         <article id="winnerCard" class="winner-card"></article>
         <div class="content-grid">
           <section class="panel calendar-panel">
-            <div class="panel-title"><div><span class="eyebrow">日期视角</span><h3 id="calendarTitle">去程价格日历</h3></div><span class="legend"><i></i> 最低价</span></div>
+            <div class="panel-title"><div><span class="eyebrow">日期视角</span><h3 id="calendarTitle">去程价格日历</h3></div><span class="legend"><i></i> 最低参考价</span></div>
             <div id="calendarList" class="calendar-list"></div>
           </section>
           <section class="panel flights-panel">
@@ -98,14 +98,14 @@
       </section>
     </main>
 
-    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.11 · 实时后端已上线</span></footer>
+    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.12 · 免费价格数据源</span></footer>
   </div>
-  <script src="./app.js?v=1.0.11"></script>
-  <script src="./ui-v1.0.4.js?v=1.0.11"></script>
-  <script src="./currency-v1.0.5.js?v=1.0.11"></script>
-  <script src="./compact-v1.0.06.js?v=1.0.11"></script>
-  <script src="./compact-v1.0.08.js?v=1.0.11"></script>
-  <script src="./live-v1.0.09.js?v=1.0.11"></script>
-  <script src="./backend-v1.0.11.js?v=1.0.11"></script>
+  <script src="./app.js?v=1.0.12"></script>
+  <script src="./ui-v1.0.4.js?v=1.0.12"></script>
+  <script src="./currency-v1.0.5.js?v=1.0.12"></script>
+  <script src="./compact-v1.0.06.js?v=1.0.12"></script>
+  <script src="./compact-v1.0.08.js?v=1.0.12"></script>
+  <script src="./live-v1.0.09.js?v=1.0.12"></script>
+  <script src="./free-v1.0.12.js?v=1.0.12"></script>
 </body>
 </html>
