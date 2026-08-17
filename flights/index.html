@@ -7,20 +7,20 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>白俄留学生机票比价 · v1.0.14</title>
-  <link rel="stylesheet" href="./app-v1.0.13.css?v=1.0.14" />
-  <link rel="stylesheet" href="./hotfix-v1.0.14.css?v=1.0.14" />
+  <title>白俄留学生机票比价 · v1.0.15</title>
+  <link rel="stylesheet" href="./app-v1.0.13.css?v=1.0.15" />
+  <link rel="stylesheet" href="./hotfix-v1.0.14.css?v=1.0.15" />
 </head>
 <body>
   <div class="shell">
     <header class="topbar">
       <div class="brand"><span class="brand-icon" aria-hidden="true">✈</span><span><strong>白俄留学生机票比价</strong><small>China ⇄ Belarus · Student Flight Compare</small></span></div>
-      <span class="version">v1.0.14</span>
+      <span class="version">v1.0.15</span>
     </header>
 
     <main>
       <section class="hero">
-        <div><span class="eyebrow">专供白俄罗斯留学生</span><h1>在一段时间里，<br />找到真正合适的航班。</h1><p>白俄罗斯航空优先现场查询官方购票系统中的当前价格与可售方案；北京同时纳入 CA721 直飞和 CA813 北京经西安飞明斯克。</p></div>
+        <div><span class="eyebrow">专供白俄罗斯留学生</span><h1>在一段时间里，<br />找到真正合适的航班。</h1><p>白俄罗斯航空现已切换为官网 GraphQL 当前搜索链路；北京同时纳入 CA721 直飞和 CA813 北京经西安飞明斯克。</p></div>
 
         <div class="search-card" aria-label="航班搜索">
           <div class="segmented" role="tablist" aria-label="行程类型"><button class="active" data-trip="oneway" type="button">单程</button><button data-trip="roundtrip" type="button">往返</button></div>
@@ -32,7 +32,7 @@
           <div class="city-block"><div class="field-head"><span>比较哪些中国城市？</span><button id="toggleAll" class="text-btn" type="button">取消全选</button></div><div id="cityGrid" class="city-grid"></div></div>
           <button id="searchButton" class="search-btn" type="button"><span id="searchButtonText">搜索时间段内的航班</span><span aria-hidden="true">→</span></button>
 
-          <div class="source-note"><strong>查询原则：</strong>白航优先查询官网当前价格与仓位；如果官网临时查询失败，历史人工核验价只能作为“上次核验参考”，绝不标成当前有票。国航不使用随机演示价。</div>
+          <div class="source-note"><strong>查询原则：</strong>白航通过官网 RunSearch → SearchResults 实时查询当前可售票价、舱位、税费与剩余座位；历史人工截图不再作为当前价格。国航不使用随机演示价。</div>
           <div id="sourceStatus" class="source-note">等待查询。</div>
         </div>
       </section>
@@ -46,9 +46,9 @@
       </section>
     </main>
 
-    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.14 · Logo 恢复 / 当前价优先 / 参考价回退</span></footer>
+    <footer><span>白俄留学生机票比价</span><span>版本 v1.0.15 · Belavia GraphQL 当前价 / Logo 保留</span></footer>
   </div>
-  <script src="./app-v1.0.13.js?v=1.0.14" defer></script>
-  <script src="./hotfix-v1.0.14.js?v=1.0.14" defer></script>
+  <script src="./app-v1.0.13.js?v=1.0.15" defer></script>
+  <script src="./hotfix-v1.0.14.js?v=1.0.15" defer></script>
 </body>
 </html>
