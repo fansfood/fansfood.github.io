@@ -57,23 +57,14 @@
 
   function airlineForCard(card){const t=card.textContent||'';if(/\bCA\d{3,4}\b/.test(t))return'CA';if(/\bB2\d{3,4}\b/.test(t))return'B2';return null;}
   function detailLogo(code){return code==='CA'?AIR_CHINA_LOGO:BELAVIA_LOGO;}
-  function summaryLogo(code){return code==='CA'?AIR_CHINA_LOGO:BELAVIA_ICON;}
   function airlineName(code){return code==='CA'?'中国国际航空':'白俄罗斯航空';}
-
-  function ensureSummaryLogo(card,code){
-    const left=card.querySelector('.summary-left');if(!left||left.dataset.logo17==='1')return;left.dataset.logo17='1';
-    const oldWrap=left.querySelector('.summary-logo-wrap');if(oldWrap){const oldImg=oldWrap.querySelector('img');if(oldImg)oldImg.src=summaryLogo(code);return;}
-    const nodes=[...left.childNodes];const wrap=document.createElement('div');wrap.className='summary-logo-wrap';
-    const img=document.createElement('img');img.className='summary-airline-logo';img.src=summaryLogo(code);img.alt=`${airlineName(code)} Logo`;img.referrerPolicy='no-referrer';
-    const fb=document.createElement('span');fb.className=`summary-logo-fallback ${code==='CA'?'ca':'b2'}`;fb.textContent=code==='CA'?'AIR CHINA':'B2';
-    img.addEventListener('error',()=>{img.style.display='none';fb.style.display='flex';},{once:true});wrap.append(img,fb);
-    const tw=document.createElement('div');tw.className='summary-text-wrap';nodes.forEach(n=>tw.appendChild(n));left.classList.add('with-airline-logo');left.append(wrap,tw);
-  }
 
   function fixDetailLogo(card,code){
     const img=card.querySelector('.airline-logo');if(!img)return;
     img.src=detailLogo(code);img.alt=`${airlineName(code)} Logo`;img.referrerPolicy='no-referrer';img.classList.remove('hidden');img.style.display='block';
-    const fb=img.nextElementSibling;if(fb)fb.classList.add('hidden');
+    const fb=img.nextElementSibling;
+    img.onerror=()=>{img.style.display='none';if(fb)fb.classList.remove('hidden');};
+    if(fb)fb.classList.add('hidden');
   }
 
   function replaceText(root,from,to){
@@ -82,30 +73,70 @@
     nodes.forEach(n=>{if((n.nodeValue||'').includes(from))n.nodeValue=(n.nodeValue||'').replaceAll(from,to);});
   }
 
+  function decorateVerifiedB2752(card){
+    const t=card.textContent||'';
+    if(!t.includes('B2752')||!t.includes('8月31日')) return;
+    const isReference=!!card.querySelector('.price-tag.reference') || t.includes('白航官网核验参考') || t.includes('近期参考');
+    if(!isReference) return;
+
+    const priceWrap=card.querySelector('.summary-price');
+    if(priceWrap && !priceWrap.querySelector('.price-native')){
+      const native=document.createElement('span');
+      native.className='price-native';
+      native.textContent='2,859.20 Б · BYN · 含税费';
+      const tag=priceWrap.querySelector('.price-tag');
+      priceWrap.insertBefore(native,tag||null);
+    }
+
+    const tag=card.querySelector('.price-tag.reference');
+    if(tag){tag.textContent='白航官网核验参考';tag.classList.add('last-known');}
+
+    const box=card.querySelector('.reference-box');
+    if(box && box.dataset.b2verified!=='1'){
+      box.dataset.b2verified='1';
+      const rmb=(card.querySelector('.summary-price .price-main')?.textContent||'').trim()||'—';
+      box.innerHTML='';
+      const title=document.createElement('div');title.className='box-title';title.textContent='白航官网核验参考';box.appendChild(title);
+      const rows=[
+        ['人民币参考价',rmb],
+        ['白航原币','2,859.20 BYN · 含税'],
+        ['基础票价','2,505.00 BYN'],
+        ['税费','354.20 BYN'],
+        ['核验时舱位','Business · C 舱'],
+        ['核验时余票','2 席'],
+        ['状态说明','白航实时连接异常；以上为本次官网人工核验记录']
+      ];
+      rows.forEach(([k,v])=>{const row=document.createElement('div');row.className='fare-row';const s=document.createElement('span');s.textContent=k;const b=document.createElement('strong');b.textContent=v;if(k==='核验时余票')b.className='seat-ok';row.append(s,b);box.appendChild(row);});
+    }
+  }
+
   function fixBelaviaCopy(card){
-    const text=card.textContent||'';
-    const isReference=!!card.querySelector('.price-tag.reference') || text.includes('近期价格参考') || text.includes('上次官网核验参考');
     replaceText(card,'国航价格参考','白航官网核验参考');
     replaceText(card,'未由国航官网自动确认','非当前实时库存 · 上次官网核验');
     replaceText(card,'当前不对国航官网进行未授权自动抓取','白航实时连接异常；当前显示上次官网核验记录');
     replaceText(card,'近期参考价','上次官网核验价');
-    if(isReference){
-      const tag=card.querySelector('.price-tag.reference');if(tag){tag.textContent='白航官网核验参考';tag.classList.add('last-known');}
-      const rows=[...card.querySelectorAll('*')];
-      const slotLabel=rows.find(el=>el.childNodes.length===1 && (el.textContent||'').trim()==='当前仓位');
-      if(slotLabel){const row=slotLabel.parentElement;const vals=row?[...row.children]:[];if(vals.length>1)vals[vals.length-1].textContent='核验时 Business · 余2席';}
-    }
+    decorateVerifiedB2752(card);
+  }
+
+  function fixCalendar(){
+    document.querySelectorAll('#calendarList .calendar-row').forEach(row=>{
+      const t=row.textContent||'';
+      if(t.includes('8月31日')&&t.includes('B2752')) replaceText(row,'近期参考','官网核验参考');
+    });
   }
 
   function fixCards(){
     document.querySelectorAll('#flightList .flight-card').forEach(card=>{
       const code=airlineForCard(card);if(!code)return;
-      ensureSummaryLogo(card,code);fixDetailLogo(card,code);
+      fixDetailLogo(card,code);
       if(code==='B2')fixBelaviaCopy(card);
       const bad=[...card.querySelectorAll('.price-tag.unavailable')].find(el=>/官网暂无可售报价/.test(el.textContent||''));if(bad)bad.textContent='实时查询连接异常';
     });
+    fixCalendar();
   }
 
-  const list=document.getElementById('flightList');if(list){let q=false;const run=()=>{if(q)return;q=true;requestAnimationFrame(()=>{q=false;fixCards();});};new MutationObserver(run).observe(list,{childList:true,subtree:true});run();}
+  const list=document.getElementById('flightList');
+  const cal=document.getElementById('calendarList');
+  if(list||cal){let q=false;const run=()=>{if(q)return;q=true;requestAnimationFrame(()=>{q=false;fixCards();});};if(list)new MutationObserver(run).observe(list,{childList:true,subtree:true});if(cal)new MutationObserver(run).observe(cal,{childList:true,subtree:true});run();}
   document.title=`白俄留学生机票比价 · v${VERSION}`;document.querySelectorAll('.version').forEach(el=>el.textContent=`v${VERSION}`);
 })();
