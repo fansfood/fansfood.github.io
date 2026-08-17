@@ -1,9 +1,0 @@
-{
-  "private": true,
-  "scripts": {
-    "deploy:belavia": "wrangler deploy"
-  },
-  "devDependencies": {
-    "wrangler": "^4.102.0"
-  }
-}
