@@ -1,38 +1,38 @@
-// 食光云端配置
-// 仅保留浏览器可公开使用的 Supabase Project URL 与 Publishable key。
-// 不要把 service_role / secret key 放到网页里。
+// 食光 / Eating Time 云端配置
+// 浏览器端仅保留公开可用的 Supabase Project URL 与 Publishable key。
+// 禁止在前端写入 service_role / secret key。
 window.SHIGUANG_CONFIG = {
   SUPABASE_URL: "https://wcjcbbnvaejwynnrhfld.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
 
-// v1.0.017：同一设备/浏览器自动恢复登录，不依赖 IP。
-const homeLauncherModule = document.createElement('script');
-homeLauncherModule.type = 'module';
-homeLauncherModule.src = './home-dashboard-v10012.js';
-document.head.appendChild(homeLauncherModule);
+function loadStyle(href, id) {
+  if (id && document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  if (id) link.id = id;
+  document.head.appendChild(link);
+}
+function loadModule(src, id) {
+  if (id && document.getElementById(id)) return;
+  const script = document.createElement('script');
+  script.type = 'module';
+  script.src = src;
+  if (id) script.id = id;
+  document.head.appendChild(script);
+}
 
-const foodBuddyModule = document.createElement('script');
-foodBuddyModule.type = 'module';
-foodBuddyModule.src = './food-buddy-v10013.js';
-document.head.appendChild(foodBuddyModule);
+// v1.1.009 · Warm Dining 视觉系统。
+loadStyle('./warm-dining-v11009.css', 'warmDiningV11009CSS');
 
-const foodBuddyImagesModule = document.createElement('script');
-foodBuddyImagesModule.type = 'module';
-foodBuddyImagesModule.src = './food-buddy-images-v10015.js';
-document.head.appendChild(foodBuddyImagesModule);
+// 业务增强模块：保持原数据库、权限与 API 逻辑，不因 UI 大改而重写。
+loadModule('./food-buddy-v10013.js', 'foodBuddyModule');
+loadModule('./food-buddy-images-v10015.js', 'foodBuddyImagesModule');
+loadModule('./shopping-dates.js', 'shoppingDatesModule');
+loadModule('./shopping-ui-v10009.js', 'shoppingUICompactModule');
+loadModule('./shopping-bulk-v10016.js', 'shoppingBulkModule');
+loadModule('./auth-persistence-v10017.js', 'authPersistenceModule');
 
-const shoppingBulkModule = document.createElement('script');
-shoppingBulkModule.type = 'module';
-shoppingBulkModule.src = './shopping-bulk-v10016.js';
-document.head.appendChild(shoppingBulkModule);
-
-const authPersistenceModule = document.createElement('script');
-authPersistenceModule.type = 'module';
-authPersistenceModule.src = './auth-persistence-v10017.js';
-document.head.appendChild(authPersistenceModule);
-
-const appVersionModule = document.createElement('script');
-appVersionModule.type = 'module';
-appVersionModule.src = './version-v10017.js';
-document.head.appendChild(appVersionModule);
+// 最后加载新的 App Shell / Design System，统一接管桌面与移动端视觉。
+loadModule('./warm-dining-v11009.js', 'warmDiningV11009Module');
