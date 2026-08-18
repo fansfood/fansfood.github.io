@@ -39,6 +39,17 @@ function normalizeVisualIcons(){
   $$('#buddies .buddy-meal-item>span:first-child').forEach((label,i)=>{if(label.dataset.wdClean)return;label.dataset.wdClean='1';const text=label.textContent.replace(/^[^\p{L}\p{N}]+/u,'').trim();label.classList.add('wd-clean-meal-label');label.innerHTML=`${svg(iconNames[i%4])}<span>${text}</span>`;});
 }
 
+function guardAccountChrome(){
+  const btn=$('#accountBtn');if(!btn)return;
+  const sideName=$('#wdSideName')?.textContent?.trim()||'';
+  if(sideName&&sideName!=='未登录'){
+    const label=initials(sideName);
+    if(!btn.querySelector('.wd-avatar')||btn.querySelector('.wd-avatar')?.textContent!==label)btn.innerHTML=`<span class="wd-avatar" style="width:100%;height:100%">${label}</span>`;
+  }else if(['✓','👤'].includes(btn.textContent.trim())){
+    btn.innerHTML=svg('user');
+  }
+}
+
 async function enrichGroupCards(){
   if(!supabase)return;const cards=$$('.group-switch-card[data-group-id]');if(!cards.length)return;
   const pending=cards.filter(c=>!c.dataset.wdRich);if(!pending.length)return;
@@ -70,7 +81,7 @@ async function correctTomorrowHomeMeta(){
 }
 
 async function run(){
-  if(busy)return;busy=true;try{ensureDynamicRoute();normalizeVisualIcons();addCurrentGroupWarmth();await enrichGroupCards();if(location.hash==='#home')await correctTomorrowHomeMeta();}finally{busy=false;}
+  if(busy)return;busy=true;try{ensureDynamicRoute();normalizeVisualIcons();guardAccountChrome();addCurrentGroupWarmth();await enrichGroupCards();if(location.hash==='#home')await correctTomorrowHomeMeta();}finally{busy=false;}
 }
 function schedule(delay=80){clearTimeout(timer);timer=setTimeout(run,delay)}
 function init(){
