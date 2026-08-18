@@ -26,13 +26,12 @@ function loadModule(src, id) {
 // v1.1.009 · Warm Dining 视觉系统。
 loadStyle('./warm-dining-v11009.css', 'warmDiningV11009CSS');
 loadStyle('./shopping-bulk-v11009.css', 'shoppingBulkV11009CSS');
+loadStyle('./warm-dining-fixes-v11009.css', 'warmDiningFixesV11009CSS');
 
 // 业务增强模块：保持原数据库、权限与 API 逻辑，不因 UI 大改而重写。
 loadModule('./food-buddy-v10013.js', 'foodBuddyModule');
 loadModule('./food-buddy-images-v10015.js', 'foodBuddyImagesModule');
-loadModule('./shopping-dates.js', 'shoppingDatesModule');
-loadModule('./shopping-ui-v10009.js', 'shoppingUICompactModule');
-loadModule('./shopping-bulk-v11009.js', 'shoppingBulkV11009Module');
+loadModule('./shopping-loader-v11009.js', 'shoppingLoaderV11009Module');
 loadModule('./auth-persistence-v10017.js', 'authPersistenceModule');
 
 // 最后加载新的 App Shell / Design System，统一接管桌面与移动端视觉。
