@@ -50,6 +50,7 @@ loadModule('./food-buddy-v10013.js', 'foodBuddyModule');
 loadModule('./food-buddy-images-v10015.js', 'foodBuddyImagesModule');
 loadModule('./shopping-loader-v11009.js', 'shoppingLoaderV11009Module');
 loadModule('./auth-persistence-v10017.js', 'authPersistenceModule');
+loadModule('./recipe-favorites-v11009.js', 'recipeFavoritesV11009Module');
 
 // 最后加载新的 App Shell / Design System 和真实数据细节增强。
 loadModule('./warm-dining-v11009.js', 'warmDiningV11009Module');
