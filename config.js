@@ -22,14 +22,6 @@ if (!localStorage.getItem('shiguang-v2-state')) {
   }));
 }
 
-function loadStyle(href, id) {
-  if (id && document.getElementById(id)) return;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = href;
-  if (id) link.id = id;
-  document.head.appendChild(link);
-}
 function loadModule(src, id) {
   if (id && document.getElementById(id)) return;
   const script = document.createElement('script');
@@ -38,12 +30,6 @@ function loadModule(src, id) {
   if (id) script.id = id;
   document.head.appendChild(script);
 }
-
-// v1.1.009 · Warm Dining 视觉系统。
-loadStyle('./warm-dining-v11009.css', 'warmDiningV11009CSS');
-loadStyle('./shopping-bulk-v11009.css', 'shoppingBulkV11009CSS');
-loadStyle('./warm-dining-fixes-v11009.css', 'warmDiningFixesV11009CSS');
-loadStyle('./warm-dining-polish-v11009.css', 'warmDiningPolishV11009CSS');
 
 // 业务增强模块：保持原数据库、权限与 API 逻辑，不因 UI 大改而重写。
 loadModule('./food-buddy-v10013.js', 'foodBuddyModule');
