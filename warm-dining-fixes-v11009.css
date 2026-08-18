@@ -1,0 +1,21 @@
+/* v1.1.009 final responsive QA fixes */
+@media (min-width:769px) and (max-width:1024px){
+  :root{--wd-sidebar:204px}
+  .warm-dining .wd-sidebar{display:flex}
+  .warm-dining .topbar{left:var(--wd-sidebar);padding:0 22px}
+  .warm-dining .topbar>.brand{display:none}
+  .warm-dining main{margin-left:var(--wd-sidebar);padding-top:calc(var(--wd-header) + 22px)}
+  .warm-dining .wd-header-search{width:min(280px,32vw)}
+}
+@media (max-width:900px) and (min-width:769px){
+  .warm-dining .wd-header-search{display:none}
+  .warm-dining #recipes .recipe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .warm-dining #pantry .pantry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:768px){
+  :root{--wd-sidebar:0px}
+  .warm-dining .wd-sidebar{display:none}
+  .warm-dining .topbar{left:0}
+  .warm-dining .topbar>.brand{display:flex}
+  .warm-dining main{margin-left:0}
+}
