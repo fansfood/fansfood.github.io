@@ -1,4 +1,4 @@
-const APP_VERSION = '1.0.014';
+const APP_VERSION = '1.0.015';
 
 function applyVersion() {
   const badge = document.querySelector('.brand small');
