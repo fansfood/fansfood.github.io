@@ -6,6 +6,22 @@ window.SHIGUANG_CONFIG = {
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
 
+// v1.1.009 起：新设备第一次打开时不再注入 Demo 菜单/库存/收藏。
+// 已经存在的本机状态和云端状态完全保留，由 app.js 正常读取并同步。
+if (!localStorage.getItem('shiguang-v2-state')) {
+  const emptyPlan = {};
+  ['周一','周二','周三','周四','周五','周六','周日'].forEach(day => {
+    emptyPlan[day] = { 早餐:null, 午餐:null, 晚餐:null };
+  });
+  localStorage.setItem('shiguang-v2-state', JSON.stringify({
+    plan: emptyPlan,
+    pantry: [],
+    checked: {},
+    manualShopping: [],
+    favorites: []
+  }));
+}
+
 function loadStyle(href, id) {
   if (id && document.getElementById(id)) return;
   const link = document.createElement('link');
