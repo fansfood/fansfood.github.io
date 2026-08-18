@@ -1,0 +1,22 @@
+/* Warm Dining v1.1.009 · data-driven polish */
+.warm-dining .wd-group-card-extra{grid-column:2/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:5px}
+.warm-dining .wd-group-card-avatars{display:flex;align-items:center}
+.warm-dining .wd-group-card-avatars span{width:22px;height:22px;margin-left:-5px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;background:#FFF0DF;color:#B9611B;font-size:7px;font-weight:900}
+.warm-dining .wd-group-card-avatars span:first-child{margin-left:0}
+.warm-dining .wd-group-card-extra small{font-size:9px;color:var(--wd-subtle)}
+.warm-dining .identity-avatar.wd-line-identity,.warm-dining .group-empty-icon.wd-line-empty{font-size:0;color:var(--wd-orange)}
+.warm-dining .identity-avatar.wd-line-identity svg{width:26px;height:26px;stroke:currentColor}
+.warm-dining .group-empty-icon.wd-line-empty{width:58px;height:58px;margin:0 auto;display:grid;place-items:center;border-radius:18px;background:var(--wd-orange-soft)}
+.warm-dining .group-empty-icon.wd-line-empty svg{width:27px;height:27px;stroke:currentColor}
+.warm-dining .wd-live-pill{display:inline-flex;align-items:center;gap:6px;margin-bottom:7px;padding:6px 9px;border-radius:999px;background:#FFF0DF;color:#B76019;font-size:9px;font-weight:900;letter-spacing:.3px}
+.warm-dining .wd-live-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--wd-orange)}
+.warm-dining #tomorrowGroupContext .group-context-message>span{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:var(--wd-orange-soft);font-size:0;color:var(--wd-orange);flex:none}
+.warm-dining #tomorrowGroupContext .group-context-message>span svg{width:19px;height:19px;stroke:currentColor}
+.warm-dining #buddies .buddy-meal-row label.wd-clean-meal-label{display:flex;align-items:center;gap:7px}
+.warm-dining #buddies .buddy-meal-row label.wd-clean-meal-label svg{width:16px;height:16px;stroke:#C96A1D;flex:none}
+.warm-dining #buddies .buddy-meal-item>span.wd-clean-meal-label{display:flex;align-items:center;gap:5px}
+.warm-dining #buddies .buddy-meal-item>span.wd-clean-meal-label svg{width:14px;height:14px;stroke:#C96A1D;flex:none}
+@media(max-width:768px){
+  .warm-dining .wd-group-card-extra{margin-top:3px}
+  .warm-dining .wd-group-card-avatars span{width:20px;height:20px}
+}
