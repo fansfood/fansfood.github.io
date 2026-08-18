@@ -6,7 +6,7 @@ window.SHIGUANG_CONFIG = {
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
 
-// v1.0.015：饭搭子支持每餐私密照片，并重新适配手机端打卡布局。
+// v1.0.016：采购页默认精简为 3 项演示，并增加按采购日批量管理。
 const homeLauncherModule = document.createElement('script');
 homeLauncherModule.type = 'module';
 homeLauncherModule.src = './home-dashboard-v10012.js';
@@ -17,12 +17,17 @@ foodBuddyModule.type = 'module';
 foodBuddyModule.src = './food-buddy-v10013.js';
 document.head.appendChild(foodBuddyModule);
 
-const appVersionModule = document.createElement('script');
-appVersionModule.type = 'module';
-appVersionModule.src = './version-v10014.js';
-document.head.appendChild(appVersionModule);
-
 const foodBuddyImagesModule = document.createElement('script');
 foodBuddyImagesModule.type = 'module';
 foodBuddyImagesModule.src = './food-buddy-images-v10015.js';
 document.head.appendChild(foodBuddyImagesModule);
+
+const shoppingBulkModule = document.createElement('script');
+shoppingBulkModule.type = 'module';
+shoppingBulkModule.src = './shopping-bulk-v10016.js';
+document.head.appendChild(shoppingBulkModule);
+
+const appVersionModule = document.createElement('script');
+appVersionModule.type = 'module';
+appVersionModule.src = './version-v10016.js';
+document.head.appendChild(appVersionModule);
