@@ -6,7 +6,7 @@ window.SHIGUANG_CONFIG = {
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
 
-// v1.0.013：身份欢迎区、近七天菜谱，以及独立的“饭搭子”好友打卡模块。
+// v1.0.014：饭搭子创建权限热修复；保留 v1.0.013 的饭搭子功能。
 const homeLauncherModule = document.createElement('script');
 homeLauncherModule.type = 'module';
 homeLauncherModule.src = './home-dashboard-v10012.js';
@@ -16,3 +16,8 @@ const foodBuddyModule = document.createElement('script');
 foodBuddyModule.type = 'module';
 foodBuddyModule.src = './food-buddy-v10013.js';
 document.head.appendChild(foodBuddyModule);
+
+const appVersionModule = document.createElement('script');
+appVersionModule.type = 'module';
+appVersionModule.src = './version-v10014.js';
+document.head.appendChild(appVersionModule);
