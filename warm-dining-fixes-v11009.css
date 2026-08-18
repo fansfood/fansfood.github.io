@@ -18,4 +18,6 @@
   .warm-dining .topbar{left:0}
   .warm-dining .topbar>.brand{display:flex}
   .warm-dining main{margin-left:0}
+  /* 手机首屏只保留“群组 + 明天吃什么”两张核心卡；菜谱通过快速入口和最近菜谱进入。 */
+  .warm-dining .wd-core-card.recipes{display:none}
 }
