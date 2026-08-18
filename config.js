@@ -27,6 +27,7 @@ function loadModule(src, id) {
 loadStyle('./warm-dining-v11009.css', 'warmDiningV11009CSS');
 loadStyle('./shopping-bulk-v11009.css', 'shoppingBulkV11009CSS');
 loadStyle('./warm-dining-fixes-v11009.css', 'warmDiningFixesV11009CSS');
+loadStyle('./warm-dining-polish-v11009.css', 'warmDiningPolishV11009CSS');
 
 // 业务增强模块：保持原数据库、权限与 API 逻辑，不因 UI 大改而重写。
 loadModule('./food-buddy-v10013.js', 'foodBuddyModule');
@@ -34,5 +35,6 @@ loadModule('./food-buddy-images-v10015.js', 'foodBuddyImagesModule');
 loadModule('./shopping-loader-v11009.js', 'shoppingLoaderV11009Module');
 loadModule('./auth-persistence-v10017.js', 'authPersistenceModule');
 
-// 最后加载新的 App Shell / Design System，统一接管桌面与移动端视觉。
+// 最后加载新的 App Shell / Design System 和真实数据细节增强。
 loadModule('./warm-dining-v11009.js', 'warmDiningV11009Module');
+loadModule('./warm-dining-polish-v11009.js', 'warmDiningPolishV11009Module');
