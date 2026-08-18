@@ -1,0 +1,6 @@
+.warm-dining .shopping-bulk-manage-v11009,.warm-dining .shopping-bulk-delete-v11009{min-height:34px;padding:7px 11px;font-size:11px;border-radius:11px}
+.warm-dining .shopping-bulk-tools-v11009{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.warm-dining .shopping-bulk-selectall-v11009{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--wd-line);border-radius:10px;background:#FFF8EF;color:#795A40;font-size:11px;font-weight:800;cursor:pointer}
+.warm-dining .shopping-bulk-selectall-v11009 input,.warm-dining .shopping-delete-select-v11009{width:16px;height:16px;margin:0;accent-color:var(--wd-orange)}
+.warm-dining .shopping-delete-select-v11009{justify-self:end}
+@media(max-width:700px){.warm-dining .shopping-bulk-tools-v11009{width:100%}.warm-dining .shopping-bulk-delete-v11009{flex:1}.warm-dining .shopping-date-head-actions{align-items:center}}
