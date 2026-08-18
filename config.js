@@ -6,7 +6,7 @@ window.SHIGUANG_CONFIG = {
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
 
-// v1.0.014：饭搭子创建权限热修复；保留 v1.0.013 的饭搭子功能。
+// v1.0.015：饭搭子支持每餐私密照片，并重新适配手机端打卡布局。
 const homeLauncherModule = document.createElement('script');
 homeLauncherModule.type = 'module';
 homeLauncherModule.src = './home-dashboard-v10012.js';
@@ -21,3 +21,8 @@ const appVersionModule = document.createElement('script');
 appVersionModule.type = 'module';
 appVersionModule.src = './version-v10014.js';
 document.head.appendChild(appVersionModule);
+
+const foodBuddyImagesModule = document.createElement('script');
+foodBuddyImagesModule.type = 'module';
+foodBuddyImagesModule.src = './food-buddy-images-v10015.js';
+document.head.appendChild(foodBuddyImagesModule);
