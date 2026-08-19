@@ -9,7 +9,6 @@ const supabase = window.Shiguang?.supabase || (cfg.SUPABASE_URL && cfg.SUPABASE_
 window.Shiguang = Object.assign(window.Shiguang || {}, { VERSION, supabase });
 
 const $ = (s,r=document)=>r.querySelector(s);
-const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
 let profile = null;
 let user = null;
 let domTimer = null;
@@ -22,9 +21,15 @@ function initials(value='食光'){
   return (text.slice(0,2)||'食光').toUpperCase();
 }
 function applyVersion(){
-  const top = $('.brand small') || $('.app-version-static');
-  if(top){top.className='app-version-static';top.textContent=`v${VERSION}`;}
-  const side = $('[id^="wdSideVersion"]');
+  const legacy=$('.brand small');
+  if(legacy){
+    const fixed=document.createElement('span');
+    fixed.className='app-version-static';
+    fixed.textContent=`v${VERSION}`;
+    legacy.replaceWith(fixed);
+  }
+  const top=$('.app-version-static');if(top&&top.textContent!==`v${VERSION}`)top.textContent=`v${VERSION}`;
+  const side=$('[id^="wdSideVersion"]');
   if(side){side.id='wdSideVersionV11013';side.textContent=`v${VERSION}`;}
 }
 function applyPlannerLabels(){
