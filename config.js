@@ -4,9 +4,9 @@ window.SHIGUANG_CONFIG = {
   SUPABASE_URL: "https://wcjcbbnvaejwynnrhfld.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
-window.SHIGUANG_VERSION = '1.1.014';
+window.SHIGUANG_VERSION = '1.1.015';
 
-// 在 app.js 注册路由之前同步准备“饭搭子”页面，避免动态模块加载顺序导致 #buddies 无法打开。
+// 在 app.js 注册路由之前同步准备“饭搭子”页面，保证所有 hash 路由都有真实页面容器。
 (function ensureStableRoutes(){
   const main = document.querySelector('main');
   const nav = document.getElementById('nav');
@@ -25,7 +25,7 @@ window.SHIGUANG_VERSION = '1.1.014';
     nav.querySelector('a[href="#groups"]')?.insertAdjacentElement('afterend', a);
   }
   const badge = document.querySelector('.brand small');
-  if (badge) badge.textContent = 'v1.1.014';
+  if (badge) badge.textContent = 'v1.1.015';
 })();
 
 // 新设备不注入 Demo 菜单/库存/收藏；已有本机与云端状态原样保留。
@@ -58,11 +58,15 @@ function loadModule(src, id) {
   document.head.appendChild(script);
 }
 
-// 稳定 Runtime：只管理共享会话、昵称、版本与轻动效；不再监听/重写整个 DOM。
+// 最高优先级：极小、独立的故障隔离路由器。
+// UI 壳或业务模块即使出现异常，侧边栏仍然可以切换页面。
+loadModule('./stable-router-v11015.js', 'stableRouterV11015Module');
+
+// 稳定 Runtime：只管理共享会话、昵称、版本与轻动效；不监听/重写整个 DOM。
 loadStyle('./app-v11013.css', 'appV11013CSS');
 loadModule('./app-runtime-v11014.js', 'appRuntimeV11014Module');
 
-// Warm Dining 单一 UI 壳：替代旧 warm-dining + polish 两套同时改 DOM 的结构。
+// Warm Dining 单一 UI 壳，只负责外观与首页，不接管页面路由。
 loadModule('./warm-dining-shell-v11014.js', 'warmDiningShellV11014Module');
 
 // 基础业务增强。
