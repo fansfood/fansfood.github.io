@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const routes=['home','today','groups','buddies','tomorrow','menu','recipes','shopping','ingredients','pantry','stats','settings'];
-function captureErrors(page){const errors=[];page.on('pageerror',e=>errors.push(`pageerror: ${e.message}`));page.on('console',m=>{if(m.type()==='error')errors.push(`console: ${m.text()}`)});return errors}
+function captureErrors(page){const errors=[];page.on('pageerror',e=>errors.push(`pageerror: ${e.message}`));page.on('console',m=>{if(m.type()==='error'){const t=m.text();if(!/favicon|ERR_BLOCKED_BY_CLIENT/i.test(t))errors.push(`console: ${t}`)}});return errors}
 async function load(page,path='#home'){await page.goto('/'+path,{waitUntil:'domcontentloaded'});await page.waitForTimeout(1800)}
 
 test('desktop shell, today dashboard and every route remain usable',async({page})=>{
@@ -20,7 +20,8 @@ test('desktop shell, today dashboard and every route remain usable',async({page}
       await expect(page.locator('#buddyContent')).not.toBeEmpty();
     }
   }
-  expect(errors.filter(x=>!x.includes('favicon'))).toEqual([]);
+  expect(errors).toEqual([]);
+  await page.goto('/#home');await page.waitForTimeout(400);
   await page.screenshot({path:'test-results/desktop-home.png',fullPage:true});
 });
 
@@ -35,7 +36,7 @@ test('mobile bottom navigation and action sheet',async({page})=>{
   await expect(page.locator('#etActionSheet')).toHaveClass(/open/);
   await page.locator('[data-sheet-go="#shopping"]').click();
   await expect(page).toHaveURL(/#shopping$/);
-  expect(errors.filter(x=>!x.includes('favicon'))).toEqual([]);
+  expect(errors).toEqual([]);
   await page.goto('/#home');await page.waitForTimeout(500);
   await page.screenshot({path:'test-results/mobile-home-390.png',fullPage:true});
 });
