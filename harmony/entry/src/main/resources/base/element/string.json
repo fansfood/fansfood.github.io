@@ -1,0 +1,7 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "食光 Eating Time 鸿蒙版" },
+    { "name": "EntryAbility_desc", "value": "食光主入口" },
+    { "name": "EntryAbility_label", "value": "食光" }
+  ]
+}
