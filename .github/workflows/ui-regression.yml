@@ -45,31 +45,31 @@ jobs:
             exit 0
           fi
           mkdir -p ci
-          cat > ci/ui-regression-v1.1.000.txt <<EOF
+          cat > ci/ui-regression-v1.1.001.txt <<EOF
           status=passed
           tested_sha=$GITHUB_SHA
           tested_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          checks=today_plan_3_meals,today_inventory_link,desktop_routes,mobile_bottom_nav,buddy_route,overflow_375_390_430_768_1024_1280_1440_1920,console_errors
+          checks=today_plan_3_meals,today_inventory_link,home_buddy_entry,mobile_buddy_entry,desktop_routes,mobile_bottom_nav,buddy_route,overflow_375_390_430_768_1024_1280_1440_1920,console_errors
           EOF
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ci/ui-regression-v1.1.000.txt
-          git commit -m 'ci: record v1.1.000 UI regression pass [skip ci]'
+          git add ci/ui-regression-v1.1.001.txt
+          git commit -m 'ci: record v1.1.001 UI regression pass [skip ci]'
           git push origin HEAD:main
       - name: Signal UI regression success
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TITLE='UI_REGRESSION_OK v1.1.000'
+          TITLE='UI_REGRESSION_OK v1.1.001'
           EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
-          BODY="Chromium UI regression passed for $GITHUB_SHA: today plan, pantry/purchase linkage UI, desktop routes, mobile bottom navigation, buddy route, console errors, and overflow checks at 375/390/430/768/1024/1280/1440/1920."
+          BODY="Chromium UI regression passed for $GITHUB_SHA: today plan, pantry/purchase linkage UI, home/mobile food buddy entry, desktop routes, mobile bottom navigation, buddy route, console errors, and overflow checks at 375/390/430/768/1024/1280/1440/1920."
           if [ -n "$EXISTING" ]; then gh issue comment "$EXISTING" --body "$BODY"; else gh issue create --title "$TITLE" --body "$BODY"; fi
       - name: Signal UI regression failure
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TITLE='UI_REGRESSION_FAIL v1.1.000'
+          TITLE='UI_REGRESSION_FAIL v1.1.001'
           EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
           BODY="Chromium UI regression failed for $GITHUB_SHA. Inspect the workflow artifact 'eating-time-ui-regression' for screenshots and the Playwright report."
           if [ -n "$EXISTING" ]; then gh issue comment "$EXISTING" --body "$BODY"; else gh issue create --title "$TITLE" --body "$BODY"; fi
