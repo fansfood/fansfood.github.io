@@ -18,39 +18,49 @@ permissions:
 
 jobs:
   build-ios-simulator:
-    runs-on: macos-latest
-    timeout-minutes: 30
+    runs-on: macos-26
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Show Xcode environment
+        run: |
+          xcodebuild -version
+          sw_vers
       - name: Install JavaScript dependencies
         run: npm install
-      - name: Generate Capacitor iOS project
+      - name: Generate Capacitor 8 iOS project with SwiftPM
         run: |
           rm -rf ios
-          npx cap add ios
+          npx cap add ios --packagemanager SPM
           npx cap sync ios
       - name: Generate Eating Time iOS assets
+        continue-on-error: true
         run: npx @capacitor/assets generate --ios --iconBackgroundColor '#FFF9F2' --splashBackgroundColor '#FFF9F2'
-      - name: Verify iOS app identity and remote production URL
+      - name: Verify iOS app identity and project
         run: |
           grep -F 'io.github.fansfood.eatingtime' capacitor.config.json
           grep -F 'https://fansfood.github.io' capacitor.config.json
-          test -d ios/App/App.xcworkspace
+          test -d ios/App/App.xcodeproj
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -showBuildSettings >/tmp/eating-time-ios-settings.txt
+          grep -E 'PRODUCT_BUNDLE_IDENTIFIER|PRODUCT_NAME' /tmp/eating-time-ios-settings.txt | head -n 20
       - name: Build unsigned iOS Simulator app
         run: |
+          set -o pipefail
+          mkdir -p build
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Debug \
-            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build/ios \
+            -skipPackagePluginValidation \
             MARKETING_VERSION=1.1.1 \
             CURRENT_PROJECT_VERSION=11001 \
             CODE_SIGNING_ALLOWED=NO \
-            build
+            build 2>&1 | tee build/ios-build.log
       - name: Package simulator app
         run: |
           APP_PATH=$(find build/ios/Build/Products -type d -name 'App.app' | head -n 1)
@@ -60,7 +70,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Eating-Time-iOS-v1.1.001-Simulator
-          path: Eating-Time-iOS-v1.1.001-Simulator.zip
+          path: |
+            Eating-Time-iOS-v1.1.001-Simulator.zip
+            build/ios-build.log
           retention-days: 30
       - name: Signal iOS simulator build success
         env:
@@ -68,7 +80,7 @@ jobs:
         run: |
           TITLE='IOS_SIMULATOR_BUILD_OK v1.1.001'
           EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
-          BODY="iOS Simulator build succeeded for $GITHUB_SHA. Bundle ID: io.github.fansfood.eatingtime. The artifact is unsigned and intended for Simulator validation; physical-device IPA distribution still requires Apple signing/provisioning."
+          BODY="iOS Simulator build succeeded for $GITHUB_SHA on macOS 26 / Xcode 26 using Capacitor 8 + SwiftPM. Bundle ID: io.github.fansfood.eatingtime. The artifact is unsigned and intended for Simulator validation; physical-device IPA distribution still requires Apple signing/provisioning."
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --body "$BODY"
           else
@@ -81,7 +93,12 @@ jobs:
         run: |
           TITLE='IOS_SIMULATOR_BUILD_FAIL v1.1.001'
           EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
-          BODY="iOS Simulator build failed for $GITHUB_SHA. Inspect the Build Eating Time iOS App workflow logs."
+          if [ -f build/ios-build.log ]; then
+            TAIL=$(tail -n 45 build/ios-build.log | sed 's/`/\`/g')
+          else
+            TAIL='Build log was not created; failure happened before xcodebuild.'
+          fi
+          BODY=$(printf 'iOS Simulator build failed for %s.\n\n```text\n%s\n```' "$GITHUB_SHA" "$TAIL")
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --body "$BODY"
           else
