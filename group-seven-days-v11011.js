@@ -1,9 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const cfg=window.SHIGUANG_CONFIG||{};
-const supabase=cfg.SUPABASE_URL&&cfg.SUPABASE_PUBLISHABLE_KEY
+const supabase=window.Shiguang?.supabase || (cfg.SUPABASE_URL&&cfg.SUPABASE_PUBLISHABLE_KEY
   ? createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}})
-  : null;
+  : null);
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -32,19 +32,6 @@ function days7(){
 function canEdit(){return membership?.member_role==='chef'}
 function publicImage(path,url){if(url)return url;if(path&&supabase)return supabase.storage.from('dish-images').getPublicUrl(path).data.publicUrl;return ''}
 
-function relabelPersonalSevenDays(){
-  const nav=$('#nav a[href="#menu"] span');if(nav)nav.textContent='我的七天';
-  const page=$('#menu');
-  if(page){
-    const title=$('.page-title h1',page);if(title)title.textContent='我的七天';
-    const eye=$('.page-title .eyebrow',page);if(eye)eye.textContent='MY 7 DAYS';
-    const p=$('.page-title p',page);if(p)p.textContent='这里只安排你自己的未来七天。早餐、午餐、晚餐都可以按自己的节奏来。';
-  }
-  $$('.wd-section-title h2').forEach(h=>{if(h.textContent.trim()==='近七天菜谱')h.textContent='我的七天';});
-  $$('.wd-section-title p').forEach(p=>{if(p.textContent.includes('接下来七天怎么吃'))p.textContent='从今天开始，看看你自己的未来七天怎么吃。';});
-  $$('a[href="#menu"]').forEach(a=>{if(a.textContent.includes('查看完整安排'))a.textContent='查看我的七天 →';});
-}
-
 function ensureGroupTab(){
   const panel=$('#activeGroupPanel');const tabs=panel?.querySelector('.wd-group-tabs');const grid=panel?.querySelector('.group-content-grid');
   if(!panel||!tabs||!grid)return false;
@@ -65,7 +52,6 @@ function ensureGroupTab(){
   }
   return true;
 }
-
 async function fetchData(){
   currentGroupId=activeGroup();if(!supabase||!currentGroupId)return false;
   const {data:s}=await supabase.auth.getSession();currentUser=s.session?.user||null;if(!currentUser)return false;
@@ -79,7 +65,6 @@ async function fetchData(){
   const valid=days7().map(d=>d.date);if(!selectedDate||!valid.includes(selectedDate))selectedDate=valid[0];
   return true;
 }
-
 function dayButtonHtml(d){const count=items.filter(x=>x.meal_date===d.date).length;return `<button class="gm-day-btn ${selectedDate===d.date?'active':''} ${count?'has-meal':''}" type="button" data-gm-day="${d.date}"><b>${d.relative}</b><span>${d.md} · ${d.weekday}</span><em>${count?`${count} 道共同安排`:'暂无安排'}</em></button>`}
 function itemHtml(item){const img=publicImage(item.image_path,item.image_url);return `<article class="gm-item ${img?'':'no-image'}">${img?`<img src="${esc(img)}" alt="${esc(item.name)}">`:''}<div><h4>${esc(item.name)}</h4>${item.description?`<p>${esc(item.description)}</p>`:''}</div>${canEdit()?`<button class="gm-delete" type="button" data-gm-delete="${item.id}">删除</button>`:''}</article>`}
 function slotHtml(slot,date){
@@ -119,22 +104,24 @@ async function saveMeal(e){
   const {error}=await supabase.from('group_meal_items').insert(payload);submit.disabled=false;submit.textContent='加入小饭桌七天菜单';if(error){toast(error.message||'保存失败');return;}selectedDate=date;toast('已加入小饭桌七天菜单');await loadAndRender(true);
 }
 async function deleteMeal(id){if(!confirm('删除这道共同用餐安排吗？不会影响任何人的“我的七天”。'))return;const {error}=await supabase.from('group_meal_items').delete().eq('id',id).eq('group_id',currentGroupId);if(error){toast(error.message||'删除失败');return;}toast('已删除共同用餐安排');await loadAndRender(true);}
-async function loadAndRender(force=false){if(busy&&!force)return;if(!ensureGroupTab())return;busy=true;try{const ok=await fetchData();const root=$('#groupSevenDayPanel');if(!ok){if(root)root.innerHTML='<div class="gm-empty"><b>暂时无法读取小饭桌菜单</b><span>请确认已经登录并加入这个群组。</span></div>';return;}render();}finally{busy=false;}}
-
+async function loadAndRender(force=false){
+  if(busy&&!force)return;if(!ensureGroupTab())return;busy=true;
+  try{const ok=await fetchData();const root=$('#groupSevenDayPanel');if(!ok){if(root)root.innerHTML='<div class="gm-empty"><b>暂时无法读取小饭桌菜单</b><span>请确认已经登录并加入这个群组。</span></div>';return;}render();}
+  finally{busy=false;}
+}
 function syncTabVisibility(){
-  const panel=$('#activeGroupPanel');if(!panel)return;const tab=panel.dataset.wdTab;
-  if(tab!=='groupmenu')return;
+  const panel=$('#activeGroupPanel');if(!panel||panel.dataset.wdTab!=='groupmenu')return;
   const btn=$('[data-wd-tab="groupmenu"]',panel);$$('[data-wd-tab]',panel).forEach(x=>x.classList.toggle('active',x===btn));
 }
 function run(){
-  relabelPersonalSevenDays();
   if(ensureGroupTab()){syncTabVisibility();if($('#activeGroupPanel')?.dataset.wdTab==='groupmenu')loadAndRender();}
 }
 function schedule(delay=80){clearTimeout(timer);timer=setTimeout(run,delay)}
 function init(){
   schedule(600);schedule(1500);
-  new MutationObserver(()=>{if(!busy)schedule(100)}).observe(document.body,{childList:true,subtree:true});
-  window.addEventListener('hashchange',()=>schedule(100));
+  const groupRoot=$('#groupsPageContent');
+  if(groupRoot)new MutationObserver(()=>{if(!busy)schedule(100)}).observe(groupRoot,{childList:true,subtree:true});
+  window.addEventListener('hashchange',()=>{if(location.hash==='#groups')schedule(100)});
   window.addEventListener('fansfood-group-changed',()=>{selectedDate='';schedule(160)});
   window.addEventListener('fansfood-account-changed',()=>schedule(160));
 }
