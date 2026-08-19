@@ -4,9 +4,25 @@ on:
   push:
     branches: [main]
     paths:
+      - 'index.html'
+      - 'config.js'
+      - 'manifest.webmanifest'
+      - 'ui-v11000.js'
+      - 'ui-v11000.css'
+      - 'app.js'
+      - 'account-v2.js'
+      - 'groups.js'
+      - 'tomorrow.js'
+      - 'food-buddy-*.js'
+      - 'food-buddy-*.css'
+      - 'group-*.js'
+      - 'group-*.css'
+      - 'shopping-*.js'
+      - 'shopping-*.css'
+      - 'purchase-to-pantry-v11000.js'
+      - 'assets/**'
       - 'capacitor.config.json'
       - 'www/**'
-      - 'assets/logo.svg'
       - 'package.json'
       - '.github/workflows/android-apk.yml'
 permissions:
@@ -62,7 +78,8 @@ jobs:
             食光 Eating Time v1.1.000 Android 测试安装包。
 
             - 使用正式 https://fansfood.github.io 作为应用内容源
-            - 保留现有 Supabase 登录、群组、饭搭子、投票、采购、冰箱与云端数据
+            - 首页升级为“今日饮食生活管理中心”
+            - 保留 Supabase 登录、群组、饭搭子、投票、采购、冰箱与云端数据
             - 使用食光暖橙餐盘时钟图标
             - Debug APK，可直接在 Android 设备侧载测试
           prerelease: true
