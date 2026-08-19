@@ -228,7 +228,6 @@ function noteTickerHtml() {
 function activeHtml() {
   return `${toolbarHtml()}${editorHtml()}<div class="buddy-section-head"><div><span class="eyebrow">TODAY TOGETHER</span><h2>今天大家吃了什么</h2></div><span class="meal-meta">${state.members.length} 位饭搭子</span></div>${noteTickerHtml()}<div class="buddy-people-grid">${state.members.map(personHtml).join('')}</div>`;
 }
-
 function ensureLightbox() {
   let dialog = $('#buddyPhotoDialogV11012');
   if (dialog) return dialog;
@@ -247,18 +246,19 @@ function openLightbox(url) {
   if (!dialog.open) dialog.showModal();
 }
 function bindSetup(root=document) {
-  $('#buddyCreateForm', root)?.addEventListener('submit', createSpace);
-  $('#buddyJoinForm', root)?.addEventListener('submit', joinSpace);
+  const create = $('#buddyCreateForm', root); if (create) create.onsubmit = createSpace;
+  const join = $('#buddyJoinForm', root); if (join) join.onsubmit = joinSpace;
 }
 function bindActive() {
-  $('#buddySpaceSelect')?.addEventListener('change', async e => { setActiveSpaceId(e.target.value); await refresh(); });
+  const select = $('#buddySpaceSelect'); if (select) select.onchange = async e => { setActiveSpaceId(e.target.value); await refresh(); };
   const toggleSetup = () => { const el=$('#buddySetupInline'); if (el) { el.hidden=!el.hidden; if (!el.hidden) bindSetup(el); } };
-  $('#buddyNewBtn')?.addEventListener('click', toggleSetup);
-  $('#buddyJoinBtn')?.addEventListener('click', toggleSetup);
-  $('#buddyDeleteSpace')?.addEventListener('click', deleteSpace);
-  $('#buddyLeaveSpace')?.addEventListener('click', leaveSpace);
-  $('#buddyCheckinForm')?.addEventListener('submit', saveCheckin);
-  $('#buddyContent')?.addEventListener('click', async event => {
+  const newBtn = $('#buddyNewBtn'); if (newBtn) newBtn.onclick = toggleSetup;
+  const joinBtn = $('#buddyJoinBtn'); if (joinBtn) joinBtn.onclick = toggleSetup;
+  const delBtn = $('#buddyDeleteSpace'); if (delBtn) delBtn.onclick = deleteSpace;
+  const leaveBtn = $('#buddyLeaveSpace'); if (leaveBtn) leaveBtn.onclick = leaveSpace;
+  const form = $('#buddyCheckinForm'); if (form) form.onsubmit = saveCheckin;
+  const content = $('#buddyContent');
+  if (content) content.onclick = async event => {
     const add = event.target.closest('[data-buddy-add-food]');
     if (add) {
       const list = add.closest('[data-meal-key]')?.querySelector('[data-buddy-food-list]');
@@ -293,9 +293,9 @@ function bindActive() {
     const open = event.target.closest('[data-buddy-open-photo]');
     if (open) { openLightbox(open.dataset.buddyOpenPhoto); return; }
     const react = event.target.closest('[data-buddy-react]');
-    if (react) { await toggleReaction(react.dataset.buddyReact, react.dataset.emoji); }
-  });
-  $$('#buddyContent [data-buddy-photo]').forEach(input => input.addEventListener('change', event => {
+    if (react) await toggleReaction(react.dataset.buddyReact, react.dataset.emoji);
+  };
+  $$('#buddyContent [data-buddy-photo]').forEach(input => input.onchange = event => {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast('请选择图片文件'); event.target.value=''; return; }
@@ -312,7 +312,7 @@ function bindActive() {
     preview.querySelector('button[data-buddy-open-photo]')?.remove();
     preview.insertAdjacentHTML('afterbegin', `<button type="button" data-buddy-open-photo="${esc(url)}"><img src="${esc(url)}" alt="餐食预览"></button>`);
     preview.querySelector('[data-buddy-remove-photo]').hidden = false;
-  }));
+  };
 }
 async function render() {
   ensurePage();
