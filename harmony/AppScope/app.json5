@@ -4,7 +4,7 @@
     "vendor": "fansfood",
     "versionCode": 11001,
     "versionName": "1.1.001",
-    "icon": "$media:app_icon",
+    "icon": "$media:layered_image",
     "label": "$string:app_name"
   }
 }
