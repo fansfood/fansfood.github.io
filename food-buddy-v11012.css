@@ -1,0 +1,83 @@
+/* 食光 · 饭搭子模块 v1.1.012 */
+#buddies .buddy-shell{display:grid;gap:18px}
+#buddies .buddy-home-strip{grid-column:1/-1}
+#buddies .buddy-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px;box-shadow:none}
+#buddies .buddy-toolbar-left,#buddies .buddy-toolbar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#buddies .buddy-space-select{min-width:180px;border:1px solid var(--wd-line,var(--line));border-radius:12px;padding:10px 12px;background:#fff;color:var(--wd-ink,var(--ink))}
+#buddies .buddy-code{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#FFF4E8;color:var(--wd-muted,var(--muted));font-size:11px}
+#buddies .buddy-code b{color:var(--wd-ink,var(--ink));letter-spacing:1px}
+#buddies .buddy-member-count{font-size:11px;color:var(--wd-muted,var(--muted))}
+#buddies .buddy-setup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#buddies .buddy-setup-card{padding:22px}
+#buddies .buddy-setup-card h3{margin:7px 0}
+#buddies .buddy-inline-form{display:flex;gap:8px;margin-top:14px}
+#buddies .buddy-inline-form input{flex:1;min-width:0;border:1px solid var(--wd-line,var(--line));border-radius:12px;padding:11px 12px;background:#FFFCF8}
+#buddies .buddy-checkin{padding:20px;box-shadow:none}
+#buddies .buddy-checkin-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:15px}
+#buddies .buddy-checkin-head h2{margin:4px 0 3px}
+#buddies .buddy-date-pill{padding:7px 10px;border-radius:999px;background:#FFF4E8;color:#B76420;font-size:11px;font-weight:800}
+#buddies .buddy-meal-editor{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#buddies .buddy-meal-module{display:flex;flex-direction:column;gap:10px;padding:13px;border:1px solid var(--wd-line,var(--line));border-radius:18px;background:#FFFCF8}
+#buddies .buddy-meal-module-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#buddies .buddy-meal-module-head>div{display:flex;align-items:center;gap:7px}
+#buddies .buddy-meal-dot{display:grid;place-items:center;width:25px;height:25px;border-radius:9px;background:#FFF0DF;color:#D86D13;font-size:10px}
+#buddies .buddy-photo-button{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:6px 9px;border:1px solid #F2D7BC;border-radius:999px;background:#fff;color:#B96624;font-size:10px;font-weight:800;cursor:pointer}
+#buddies .buddy-photo-button input{display:none}
+#buddies .buddy-meal-photo{display:none;position:relative;border-radius:13px;overflow:hidden;background:#F8F2EA}
+#buddies .buddy-meal-photo.has-photo{display:block;min-height:105px}
+#buddies .buddy-meal-photo>button[data-buddy-open-photo]{display:block;width:100%;height:100%;min-height:105px;padding:0;border:0;background:transparent;cursor:pointer}
+#buddies .buddy-meal-photo img{display:block;width:100%;height:130px;object-fit:cover}
+#buddies .buddy-photo-remove{position:absolute;right:8px;bottom:8px;z-index:2;border:0;border-radius:999px;padding:6px 9px;background:rgba(255,255,255,.92);color:#A9554E;font-size:10px;font-weight:800;cursor:pointer}
+#buddies .buddy-food-editor-list{display:grid;gap:7px}
+#buddies .buddy-food-editor-row{display:grid;grid-template-columns:minmax(0,1fr) 116px 32px;gap:6px;align-items:center}
+#buddies .buddy-food-editor-row input{width:100%;min-width:0;border:1px solid var(--wd-line,var(--line));border-radius:10px;background:#fff;padding:9px 10px;color:var(--wd-ink,var(--ink))}
+#buddies .buddy-food-editor-row [data-buddy-amount]{text-align:right}
+#buddies .buddy-food-remove{width:32px;height:32px;border:0;border-radius:10px;background:#F5F0EA;color:#9C7660;font-size:18px;cursor:pointer}
+#buddies .buddy-food-remove:hover{background:#FFF0EE;color:#E65A52}
+#buddies .buddy-add-food{align-self:flex-start;border:0;background:transparent;color:#D86D13;padding:2px 0;font-size:11px;font-weight:800;cursor:pointer}
+#buddies .buddy-fitness-row{display:grid;grid-template-columns:auto 1fr 130px 92px;gap:8px;align-items:center;margin-top:12px;padding:12px;border:1px dashed var(--wd-line,var(--line));border-radius:14px}
+#buddies .buddy-fitness-row label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800}
+#buddies .buddy-fitness-row select,#buddies .buddy-fitness-row input{min-width:0;border:1px solid var(--wd-line,var(--line));border-radius:10px;padding:9px;background:#fff}
+#buddies .buddy-note{width:100%;margin-top:10px;border:1px solid var(--wd-line,var(--line));border-radius:12px;padding:11px;background:#FFFCF8;resize:vertical;color:var(--wd-ink,var(--ink))}
+#buddies .buddy-save-row{display:flex;justify-content:flex-end;margin-top:12px}
+#buddies .buddy-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:4px}
+#buddies .buddy-section-head h2{margin:4px 0 0}
+#buddies .buddy-note-ticker{width:100%;overflow-x:auto;scrollbar-width:none;padding:2px 0 3px}
+#buddies .buddy-note-ticker::-webkit-scrollbar{display:none}
+#buddies .buddy-note-track{display:flex;gap:9px;width:max-content;min-width:100%}
+#buddies .buddy-note-chip{display:grid;grid-template-columns:30px auto minmax(160px,1fr);align-items:center;gap:8px;min-width:min(440px,74vw);max-width:620px;padding:10px 13px;border:1px solid #F1DFCD;border-radius:14px;background:linear-gradient(90deg,#FFF6EC,#fff);box-shadow:0 4px 16px rgba(71,54,35,.035)}
+#buddies .buddy-note-chip>span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#FFEAD3;color:#B75E18;font-size:10px;font-weight:900}
+#buddies .buddy-note-chip>b{font-size:11px;white-space:nowrap}
+#buddies .buddy-note-chip>p{margin:0;color:var(--wd-muted,var(--muted));font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#buddies .buddy-people-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#buddies .buddy-person{padding:16px;box-shadow:none}
+#buddies .buddy-person.me{border-color:#F2C99F;background:linear-gradient(180deg,#fff,#FFFCF8)}
+#buddies .buddy-person-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+#buddies .buddy-person-name{display:flex;align-items:center;gap:9px}
+#buddies .buddy-avatar{display:grid;place-items:center;width:39px;height:39px;border-radius:50%;background:#FFF0DF;color:#B85F19;font-size:10px;font-weight:900}
+#buddies .buddy-person-name h3{margin:0}
+#buddies .buddy-person-name small{color:var(--wd-muted,var(--muted))}
+#buddies .buddy-status-pill{font-size:10px;padding:5px 8px;border-radius:999px;background:#F3F1ED;color:var(--wd-muted,var(--muted))}
+#buddies .buddy-meal-list{display:grid;gap:7px;margin-top:13px}
+#buddies .buddy-meal-item{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 9px;border-radius:12px;background:#FFF9F3}
+#buddies .buddy-meal-label{display:flex;align-items:center;gap:5px;color:var(--wd-muted,var(--muted));font-size:11px}
+#buddies .buddy-meal-label>span{font-size:8px;color:#D97522}
+#buddies .buddy-food-chips{display:flex;gap:5px;flex-wrap:wrap;min-width:0}
+#buddies .buddy-food-chip{display:inline-flex;align-items:center;min-height:26px;padding:4px 8px;border-radius:999px;background:#fff;border:1px solid #F1E5D8;color:var(--wd-ink,var(--ink));font-size:11px;font-weight:700}
+#buddies .buddy-food-empty{color:#A9A198;font-size:11px}
+#buddies .buddy-feed-photo{width:52px;height:38px;padding:0;border:0;border-radius:9px;overflow:hidden;background:#F4EDE5;cursor:pointer}
+#buddies .buddy-feed-photo img{width:100%;height:100%;display:block;object-fit:cover}
+#buddies .buddy-fitness-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px;padding:9px 10px;border-radius:11px;background:#F7F4EF;font-size:11px}
+#buddies .buddy-fitness-summary span{color:var(--wd-muted,var(--muted));text-align:right}
+#buddies .buddy-reactions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+#buddies .buddy-react{border:1px solid var(--wd-line,var(--line));background:#fff;border-radius:999px;padding:6px 9px;font-size:12px;cursor:pointer}
+#buddies .buddy-react.mine{background:#FFF0DF;border-color:#F3C99F}
+#buddies .buddy-empty{padding:30px;text-align:center;color:var(--wd-muted,var(--muted))}
+#buddies .buddy-empty h3{color:var(--wd-ink,var(--ink))}
+#buddyPhotoDialogV11012{width:min(92vw,780px);max-width:780px;padding:0;border:0;border-radius:22px;background:#111;box-shadow:0 30px 90px rgba(0,0,0,.32);overflow:hidden}
+#buddyPhotoDialogV11012::backdrop{background:rgba(18,22,17,.72);backdrop-filter:blur(4px)}
+#buddyPhotoDialogV11012 img{display:block;width:100%;max-height:82vh;object-fit:contain;background:#111}
+#buddyPhotoDialogV11012 .buddy-photo-dialog-close{position:absolute;top:10px;right:10px;z-index:2;width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.92);font-size:22px;cursor:pointer}
+@media(max-width:900px){#buddies .buddy-meal-editor,#buddies .buddy-people-grid{grid-template-columns:1fr}}
+@media(max-width:768px){#buddies .buddy-toolbar{align-items:flex-start;padding:12px}#buddies .buddy-toolbar-left,#buddies .buddy-toolbar-actions{width:100%}#buddies .buddy-space-select{width:100%;min-height:44px}#buddies .buddy-toolbar-actions{display:grid;grid-template-columns:1fr 1fr}#buddies .buddy-toolbar-actions .btn{width:100%}#buddies .buddy-checkin{padding:14px;border-radius:20px}#buddies .buddy-meal-editor{gap:10px}#buddies .buddy-meal-module{padding:11px}#buddies .buddy-food-editor-row{grid-template-columns:minmax(0,1fr) 100px 34px}#buddies .buddy-food-editor-row input{min-height:44px;font-size:16px}#buddies .buddy-meal-photo.has-photo,#buddies .buddy-meal-photo>button[data-buddy-open-photo]{min-height:150px}#buddies .buddy-meal-photo img{height:170px}#buddies .buddy-fitness-row{grid-template-columns:1fr 1fr}#buddies .buddy-fitness-row label{grid-column:1/-1;min-height:42px}#buddies .buddy-fitness-row select,#buddies .buddy-fitness-row input{min-height:44px;font-size:15px}#buddies .buddy-note{font-size:16px;min-height:76px}#buddies .buddy-save-row .btn{width:100%;min-height:46px}#buddies .buddy-note-chip{min-width:82vw;grid-template-columns:30px 1fr}#buddies .buddy-note-chip>p{grid-column:1/-1;white-space:normal;overflow:visible}}
+@media(max-width:480px){#buddies .buddy-checkin-head{flex-direction:column;align-items:flex-start}#buddies .buddy-food-editor-row{grid-template-columns:minmax(0,1fr) 86px 32px;gap:5px}#buddies .buddy-food-editor-row input{padding:9px 8px}#buddies .buddy-fitness-row{grid-template-columns:1fr}#buddies .buddy-fitness-row label{grid-column:auto}#buddies .buddy-fitness-row select,#buddies .buddy-fitness-row input{width:100%}#buddies .buddy-fitness-row .meal-meta{display:none}#buddies .buddy-meal-item{grid-template-columns:54px minmax(0,1fr) auto;padding:8px}#buddies .buddy-feed-photo{width:48px;height:38px}#buddies .buddy-person{padding:13px}#buddies .buddy-note-track{gap:7px}}
