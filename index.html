@@ -3,14 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#5f7455" />
-  <meta name="description" content="食光：菜单、食谱、冰箱库存与采购清单的一体化饮食管理网页。" />
-  <title>食光 · 家庭饮食管理</title>
+  <meta name="theme-color" content="#FF8A24" />
+  <meta name="description" content="食光 Eating Time：家庭、情侣、朋友一起决定吃什么、记录吃过什么的轻量美食生活 App。" />
+  <title>食光 · Eating Time</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/images/app-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="groups.css" />
   <link rel="stylesheet" href="home.css" />
+  <link rel="stylesheet" href="warm-dining-v11009.css" />
+  <link rel="stylesheet" href="warm-dining-fixes-v11009.css" />
+  <link rel="stylesheet" href="warm-dining-polish-v11009.css" />
+  <link rel="stylesheet" href="shopping-bulk-v11009.css" />
 </head>
 <body>
   <div class="connection-banner" id="connectionBanner" hidden>
@@ -20,10 +24,10 @@
 
   <header class="topbar">
     <a class="brand" href="#home" aria-label="食光首页">
-      <span class="brand-mark">🍴</span><span>食光</span><small>v1.0.005</small>
+      <span class="brand-mark">🍴</span><span>食光</span><small>v1.1.011</small>
     </a>
     <nav class="nav" id="nav">
-      <a href="#home">首页</a><a href="#groups">我的群组</a><a href="#tomorrow">明天吃什么</a><a href="#menu">本周菜单</a><a href="#recipes">食谱</a><a href="#shopping">采购</a><a href="#pantry">我的冰箱</a>
+      <a href="#home">首页</a><a href="#groups">我的群组</a><a href="#tomorrow">明天吃什么</a><a href="#menu">我的七天</a><a href="#recipes">食谱</a><a href="#shopping">采购</a><a href="#pantry">我的冰箱</a>
     </nav>
     <div class="top-actions">
       <span class="cloud-pill" id="cloudPill">本机体验</span>
@@ -44,7 +48,7 @@
         </div>
         <div class="hero-photo-wrap" aria-hidden="true"><img class="hero-photo" src="assets/images/hero-table.svg" alt="" /></div>
       </div>
-      <div class="section-head"><div><span class="eyebrow">TODAY</span><h2>今日菜单</h2></div><a href="#menu" class="text-link">查看本周 →</a></div>
+      <div class="section-head"><div><span class="eyebrow">TODAY</span><h2>今日菜单</h2></div><a href="#menu" class="text-link">查看我的七天 →</a></div>
       <div class="today-grid" id="todayMeals"></div>
       <div class="dashboard-grid">
         <article class="card stat-card"><span class="stat-icon">🧾</span><div><b id="shoppingCount">0</b><span>项待采购</span></div></article>
@@ -55,7 +59,7 @@
 
     <section class="page" id="groups">
       <div class="page-title">
-        <div><span class="eyebrow">SMALL TABLES</span><h1>我的群组</h1><p>不同的小饭桌互不打扰。身份、成员、投票、群组菜谱和采购都在这里管理。</p></div>
+        <div><span class="eyebrow">SMALL TABLES</span><h1>我的群组</h1><p>不同的小饭桌互不打扰。身份、成员、投票、群组菜谱、共同七天菜单、采购和 AA 账本都在这里管理。</p></div>
       </div>
       <div id="groupsPageContent"></div>
     </section>
@@ -97,7 +101,7 @@
     </section>
 
     <section class="page" id="menu">
-      <div class="page-title"><div><span class="eyebrow">WEEKLY PLAN</span><h1>本周菜单</h1><p>安排早餐、午餐和晚餐。采购清单会按菜单自动汇总并扣除库存。</p></div><button class="btn primary" id="generateShoppingBtn">生成采购清单</button></div>
+      <div class="page-title"><div><span class="eyebrow">MY 7 DAYS</span><h1>我的七天</h1><p>这里只安排你自己的未来七天。早餐、午餐、晚餐都可以按自己的节奏来，群组共同用餐在对应小饭桌里单独安排。</p></div><button class="btn primary" id="generateShoppingBtn">生成采购清单</button></div>
       <div class="week-tabs" id="weekTabs"></div><div class="meal-plan-grid" id="mealPlanGrid"></div>
     </section>
 
