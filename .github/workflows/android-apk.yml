@@ -9,6 +9,8 @@ on:
       - 'manifest.webmanifest'
       - 'ui-v11000.js'
       - 'ui-v11000.css'
+      - 'buddy-entry-v11001.js'
+      - 'buddy-entry-v11001.css'
       - 'app.js'
       - 'account-v2.js'
       - 'groups.js'
@@ -61,35 +63,36 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Eating-Time-v1.1.000.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Eating-Time-v1.1.001.apk
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Eating-Time-v1.1.000-Android
-          path: Eating-Time-v1.1.000.apk
+          name: Eating-Time-v1.1.001-Android
+          path: Eating-Time-v1.1.001.apk
           retention-days: 30
       - name: Publish APK prerelease
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: eating-time-v1.1.000-android
+          tag_name: eating-time-v1.1.001-android
           target_commitish: main
-          name: 食光 Eating Time v1.1.000 Android
+          name: 食光 Eating Time v1.1.001 Android
           body: |
-            食光 Eating Time v1.1.000 Android 测试安装包。
+            食光 Eating Time v1.1.001 Android 测试安装包。
 
             - 使用正式 https://fansfood.github.io 作为应用内容源
-            - 首页升级为“今日饮食生活管理中心”
+            - 首页恢复“饭搭子”快捷入口
+            - 手机快捷菜单恢复“打开饭搭子”入口
             - 保留 Supabase 登录、群组、饭搭子、投票、采购、冰箱与云端数据
             - 使用食光暖橙餐盘时钟图标
             - Debug APK，可直接在 Android 设备侧载测试
           prerelease: true
-          files: Eating-Time-v1.1.000.apk
+          files: Eating-Time-v1.1.001.apk
       - name: Signal APK ready
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TITLE='APK_READY v1.1.000'
-          URL='https://github.com/fansfood/fansfood.github.io/releases/download/eating-time-v1.1.000-android/Eating-Time-v1.1.000.apk'
+          TITLE='APK_READY v1.1.001'
+          URL='https://github.com/fansfood/fansfood.github.io/releases/download/eating-time-v1.1.001-android/Eating-Time-v1.1.001.apk'
           EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --body "APK build succeeded: $URL"
