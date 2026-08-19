@@ -1,0 +1,33 @@
+name: Eating Time UI Regression
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  ui-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - name: Start local site
+        run: |
+          python3 -m http.server 4173 >/tmp/eating-time-http.log 2>&1 &
+          echo $! > /tmp/eating-time-http.pid
+          sleep 2
+      - name: Run responsive UI regression
+        run: npm run test:ui
+      - name: Upload UI screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eating-time-ui-regression
+          path: |
+            test-results
+            playwright-report
+          if-no-files-found: ignore
