@@ -1,9 +1,9 @@
-// 食光 / Eating Time · v1.1.000
+// 食光 / Eating Time · v1.1.001
 window.SHIGUANG_CONFIG = {
   SUPABASE_URL: "https://wcjcbbnvaejwynnrhfld.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
-window.SHIGUANG_VERSION = '1.1.000';
+window.SHIGUANG_VERSION = '1.1.001';
 
 // 最小路由保险：只负责 page.active，不重绘业务页面。
 (function ensureStableRoutes(){
@@ -36,7 +36,7 @@ window.SHIGUANG_VERSION = '1.1.000';
   window.addEventListener('hashchange',showRoute);
   window.addEventListener('DOMContentLoaded',showRoute,{once:true});
   window.SHIGUANG_SHOW_ROUTE=showRoute;
-  const badge=document.querySelector('.brand small'); if(badge)badge.textContent='v1.1.000';
+  const badge=document.querySelector('.brand small'); if(badge)badge.textContent='v1.1.001';
 })();
 
 // 新设备保持真实 Empty State，不注入演示菜单/库存/收藏。
@@ -71,6 +71,10 @@ loadStyle('./group-seven-days-v11011.css','groupSevenDaysV11011CSS');
 loadModule('./group-seven-days-v11011.js','groupSevenDaysV11011Module');
 loadModule('./personal-planner-v11013.js','personalPlannerV11013Module');
 
-// v1.1.000 唯一主 View Layer：Today-centric Warm Dining。
+// v1.1.000 主 View Layer：Today-centric Warm Dining。
 loadStyle('./ui-v11000.css','uiV11000CSS');
 loadModule('./ui-v11000.js','uiV11000Module');
+
+// v1.1.001：恢复饭搭子在首页与手机端的直接入口，不改变底部导航五项结构。
+loadStyle('./buddy-entry-v11001.css','buddyEntryV11001CSS');
+loadModule('./buddy-entry-v11001.js','buddyEntryV11001Module');
