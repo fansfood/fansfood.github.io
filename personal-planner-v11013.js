@@ -97,13 +97,7 @@ function removeLegacyMeal(day,slot){
   const dayBtn=findDayButton(day);if(!dayBtn)return;dayBtn.click();
   setTimeout(()=>{const remove=$$('#mealPlanGrid .remove').find(b=>b.dataset.slot===slot);remove?.click();},20);
 }
-function polishDayView(){
-  const page=$('#menu');if(!page)return;const nav=$('#nav a[href="#menu"] span');if(nav)nav.textContent='我的七天';
-  const title=$('.page-title h1',page);if(title)title.textContent='我的七天计划';
-  const eye=$('.page-title .eyebrow',page);if(eye)eye.textContent='MY 7-DAY PLAN';
-  const p=$('.page-title p',page);if(p)p.textContent='计划未来七天吃什么。按天安排生活，或按早餐、午餐、晚餐集中整理。';
-}
-function run(){if(!ensurePlanner())return;polishDayView();applyMode();if(mode()==='meal')renderMealView();}
+function run(){if(!ensurePlanner())return;applyMode();if(mode()==='meal')renderMealView();}
 function schedule(delay=80){clearTimeout(renderTimer);renderTimer=setTimeout(run,delay)}
 function init(){
   schedule(700);schedule(1600);loadCustomRecipes();
