@@ -1,0 +1,9 @@
+{
+  "name": "entry",
+  "version": "1.1.001",
+  "description": "食光 HarmonyOS 入口模块",
+  "main": "",
+  "author": "fansfood",
+  "license": "",
+  "dependencies": {}
+}
