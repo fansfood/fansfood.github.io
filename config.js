@@ -60,6 +60,10 @@ loadModule('./recipe-favorites-v11009.js','recipeFavoritesV11009Module');
 loadModule('./recipe-actions-v11014.js','recipeActionsV11014Module');
 loadStyle('./food-buddy-v11012.css','foodBuddyV11012CSS');
 loadModule('./food-buddy-v11016.js','foodBuddyV11016Module');
+
+// 群组内部 Tabs 是业务组件，不再依赖旧 Warm Dining Shell。
+loadStyle('./group-tabs-v11000.css','groupTabsV11000CSS');
+loadModule('./group-tabs-v11000.js','groupTabsV11000Module');
 loadStyle('./group-ledger-v11010.css','groupLedgerV11010CSS');
 loadModule('./group-ledger-v11010.js','groupLedgerV11010Module');
 loadModule('./group-ledger-bridge-v11010.js','groupLedgerBridgeV11010Module');
