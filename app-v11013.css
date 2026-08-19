@@ -1,0 +1,127 @@
+/* 食光 v1.1.013 · Personal planner + shared micro motion */
+
+/* ---- 全站轻动效 ---- */
+.sg-motion-ready .card,
+.sg-motion-ready .wd-core-card,
+.sg-motion-ready .wd-quick-action,
+.sg-motion-ready .recipe-card,
+.sg-motion-ready .group-switch-card{
+  transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease,border-color .2s ease,background-color .2s ease;
+}
+.sg-motion-ready .card:hover,
+.sg-motion-ready .wd-core-card:hover,
+.sg-motion-ready .recipe-card:hover,
+.sg-motion-ready .group-switch-card:hover{transform:translateY(-2px)}
+.sg-motion-ready button,
+.sg-motion-ready .btn,
+.sg-motion-ready a{transition:transform .16s cubic-bezier(.2,.8,.2,1),opacity .16s ease,background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
+.sg-motion-ready .sg-tap{animation:sgTap .18s cubic-bezier(.2,.8,.2,1)}
+.sg-motion-ready .sg-page-enter{animation:sgPageEnter .24s cubic-bezier(.2,.8,.2,1)}
+.sg-motion-ready dialog[open]{animation:sgDialogIn .2s cubic-bezier(.2,.8,.2,1)}
+.sg-motion-ready dialog[open]::backdrop{animation:sgBackdropIn .2s ease}
+@keyframes sgTap{0%{transform:scale(1)}50%{transform:scale(.975)}100%{transform:scale(1)}}
+@keyframes sgPageEnter{from{opacity:.45;transform:translateY(7px)}to{opacity:1;transform:none}}
+@keyframes sgDialogIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes sgBackdropIn{from{opacity:0}to{opacity:1}}
+
+/* ---- 我的七天计划 ---- */
+#menu[data-personal-planner="1"] .page-title{margin-bottom:18px}
+.sg-planner-toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:13px 15px;margin:0 0 14px;border:1px solid var(--wd-line,#EEE7DE);
+  border-radius:18px;background:rgba(255,255,255,.78);box-shadow:0 6px 20px rgba(71,54,35,.035);
+}
+.sg-planner-toolbar>div:first-child{display:flex;align-items:center;gap:11px}
+.sg-planner-label{font-size:11px;font-weight:800;color:var(--wd-muted,#7F786F);white-space:nowrap}
+.sg-view-switch{
+  position:relative;display:grid;grid-template-columns:1fr 1fr;width:152px;padding:4px;
+  border-radius:13px;background:#F5EFE8;isolation:isolate;
+}
+.sg-view-switch .sg-switch-thumb{
+  position:absolute;z-index:-1;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);
+  border-radius:10px;background:#fff;box-shadow:0 3px 12px rgba(71,54,35,.07);
+  transition:transform .22s cubic-bezier(.2,.8,.2,1);
+}
+.sg-view-switch[data-mode="meal"] .sg-switch-thumb{transform:translateX(100%)}
+.sg-view-switch button{position:relative;z-index:1;border:0;background:transparent;padding:8px 10px;border-radius:10px;color:var(--wd-muted,#7F786F);font-size:12px;font-weight:800;cursor:pointer}
+.sg-view-switch button.active{color:#C76519}
+.sg-planner-hint{display:flex;align-items:center;gap:8px;color:var(--wd-muted,#7F786F);font-size:11px;text-align:right}
+.sg-planner-hint b{color:var(--wd-ink,#26231F)}
+
+#menu[data-planner-mode="meal"] #weekTabs,
+#menu[data-planner-mode="meal"] #mealPlanGrid{display:none}
+#menu[data-planner-mode="day"] #sgMealView{display:none}
+#menu.sg-view-change #weekTabs,
+#menu.sg-view-change #mealPlanGrid,
+#menu.sg-view-change #sgMealView{animation:sgPlannerSwap .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes sgPlannerSwap{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.sg-meal-view{display:grid;gap:12px}
+.sg-mobile-meal-tabs{display:none}
+.sg-meal-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+.sg-meal-column{
+  min-width:0;border:1px solid var(--wd-line,#EEE7DE);border-radius:20px;background:#fff;
+  box-shadow:0 8px 26px rgba(71,54,35,.045);overflow:hidden;
+}
+.sg-meal-column-head{display:flex;align-items:center;gap:11px;padding:16px 16px 13px;background:linear-gradient(180deg,#FFF9F1,#FFFDFB);border-bottom:1px solid var(--wd-line,#EEE7DE)}
+.sg-meal-column-head>span{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#FFF0DF;color:#DB741C;font-size:16px}
+.sg-meal-column-head h3{margin:0;font-size:17px}
+.sg-meal-column-head p{margin:3px 0 0;color:var(--wd-muted,#7F786F);font-size:10px}
+.sg-plan-rows{display:grid}
+.sg-plan-row{display:grid;grid-template-columns:58px 46px minmax(0,1fr) auto;align-items:center;gap:9px;min-height:76px;padding:10px 12px;border-bottom:1px solid #F2ECE5}
+.sg-plan-row:last-child{border-bottom:0}
+.sg-plan-row:hover{background:#FFFCF8}
+.sg-plan-row.empty{grid-template-columns:58px minmax(0,1fr) auto;min-height:70px}
+.sg-plan-date b{display:block;font-size:11px;color:var(--wd-ink,#26231F)}
+.sg-plan-date span{display:block;margin-top:3px;font-size:9px;color:var(--wd-subtle,#AAA39A)}
+.sg-plan-image{width:46px;height:46px;border-radius:11px;object-fit:cover;background:#F7F2EC}
+.sg-plan-copy{min-width:0}
+.sg-plan-copy b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.sg-plan-copy span{display:block;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--wd-muted,#7F786F);font-size:9px}
+.sg-plan-actions{display:flex;gap:4px}
+.sg-plan-actions button,.sg-plan-add{border:0;border-radius:9px;background:#FFF4E8;color:#C76519;padding:7px 8px;font-size:10px;font-weight:800;white-space:nowrap;cursor:pointer}
+.sg-plan-actions button.danger{background:#FFF4F1;color:#C95B50}
+.sg-plan-empty-copy span{display:block;font-size:11px;font-weight:800;color:var(--wd-muted,#7F786F)}
+.sg-plan-empty-copy small{display:block;margin-top:3px;color:var(--wd-subtle,#AAA39A);font-size:9px}
+.sg-plan-add{background:#FFF0DF;color:#D86B12}
+
+/* 让按天视图也更像“计划”而不是静态菜谱陈列 */
+#menu[data-planner-mode="day"] #weekTabs{margin-bottom:13px}
+#menu[data-planner-mode="day"] .meal-plan-grid{gap:12px}
+#menu[data-planner-mode="day"] .plan-card,
+#menu[data-planner-mode="day"] .empty-plan{box-shadow:0 8px 28px rgba(71,54,35,.045)}
+
+@media(max-width:900px){
+  .sg-planner-hint span{display:none}
+  .sg-meal-columns{grid-template-columns:1fr}
+  .sg-mobile-meal-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:4px;border-radius:14px;background:#F5EFE8;position:sticky;top:78px;z-index:8}
+  .sg-mobile-meal-tabs button{border:0;background:transparent;border-radius:10px;padding:10px 7px;color:var(--wd-muted,#7F786F);font-size:12px;font-weight:800}
+  .sg-mobile-meal-tabs button.active{background:#fff;color:#D76E17;box-shadow:0 3px 12px rgba(71,54,35,.06)}
+  .sg-meal-columns .sg-meal-column{display:none}
+  .sg-meal-columns[data-mobile-slot="早餐"] [data-slot-section="早餐"],
+  .sg-meal-columns[data-mobile-slot="午餐"] [data-slot-section="午餐"],
+  .sg-meal-columns[data-mobile-slot="晚餐"] [data-slot-section="晚餐"]{display:block;animation:sgPlannerSwap .2s cubic-bezier(.2,.8,.2,1)}
+}
+@media(max-width:620px){
+  .sg-planner-toolbar{align-items:stretch;flex-direction:column;padding:11px 12px}
+  .sg-planner-toolbar>div:first-child{justify-content:space-between}
+  .sg-planner-hint{justify-content:flex-start;text-align:left;padding:0 2px}
+  .sg-view-switch{width:164px}
+  .sg-plan-row{grid-template-columns:52px 44px minmax(0,1fr);gap:8px;padding:10px}
+  .sg-plan-row.empty{grid-template-columns:52px minmax(0,1fr) auto}
+  .sg-plan-actions{grid-column:2/-1;justify-content:flex-end;margin-top:-3px}
+  .sg-plan-image{width:44px;height:44px}
+  .sg-mobile-meal-tabs{top:68px}
+}
+@media(max-width:430px){
+  .sg-plan-row{grid-template-columns:48px 42px minmax(0,1fr)}
+  .sg-plan-row.empty{grid-template-columns:48px minmax(0,1fr) auto}
+  .sg-plan-empty-copy small{display:none}
+  .sg-plan-actions button{padding:7px 10px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .sg-motion-ready *,
+  .sg-motion-ready *::before,
+  .sg-motion-ready *::after{scroll-behavior:auto;animation-duration:.001ms;animation-iteration-count:1;transition-duration:.001ms}
+}
