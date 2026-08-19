@@ -1,0 +1,9 @@
+{
+  "name":"eating-time",
+  "private":true,
+  "version":"1.1.0",
+  "description":"食光 Eating Time",
+  "scripts":{"test:ui":"playwright test"},
+  "devDependencies":{"@playwright/test":"latest"},
+  "dependencies":{"@capacitor/android":"latest","@capacitor/cli":"latest","@capacitor/core":"latest"}
+}
