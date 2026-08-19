@@ -1,0 +1,90 @@
+/* 食光 · 小饭桌 AA 账本 · v1.1.010 */
+.warm-dining #groupLedgerPanel{display:none;margin-top:12px}
+.warm-dining #activeGroupPanel[data-wd-tab="ledger"] .group-content-grid,
+.warm-dining #activeGroupPanel[data-wd-tab="ledger"] .wd-group-vote-link{display:none}
+.warm-dining #activeGroupPanel[data-wd-tab="ledger"] #groupLedgerPanel{display:block}
+
+.warm-dining .aa-shell{display:grid;gap:14px}
+.warm-dining .aa-hero{padding:22px;background:linear-gradient(135deg,#FFF1DE 0%,#FFF9F1 58%,#fff 100%);overflow:hidden;position:relative}
+.warm-dining .aa-hero::after{content:"";position:absolute;right:-30px;top:-52px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(255,181,107,.23),rgba(255,181,107,0) 68%);pointer-events:none}
+.warm-dining .aa-hero-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;position:relative;z-index:1}
+.warm-dining .aa-hero h3{margin:5px 0 5px;font-size:25px;letter-spacing:-.4px}
+.warm-dining .aa-hero p{margin:0;color:var(--wd-muted);font-size:12px;line-height:1.7}
+.warm-dining .aa-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+.warm-dining .aa-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:18px;position:relative;z-index:1}
+.warm-dining .aa-summary-card{padding:14px 15px;border:1px solid rgba(238,231,222,.9);border-radius:16px;background:rgba(255,255,255,.78)}
+.warm-dining .aa-summary-card span{display:block;color:var(--wd-muted);font-size:10px;margin-bottom:5px}
+.warm-dining .aa-summary-card b{font-size:20px;letter-spacing:-.25px}
+
+.warm-dining .aa-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:14px;align-items:start}
+.warm-dining .aa-card{padding:20px;box-shadow:none}
+.warm-dining .aa-card-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:14px}
+.warm-dining .aa-card-head h3{margin:4px 0 0;font-size:20px}
+.warm-dining .aa-card-head>span{font-size:11px;color:var(--wd-muted)}
+.warm-dining .aa-currency-block{display:grid;gap:10px;padding:14px 0;border-top:1px solid var(--wd-line)}
+.warm-dining .aa-currency-block:first-child{border-top:0;padding-top:0}
+.warm-dining .aa-currency-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.warm-dining .aa-currency-title b{font-size:14px}
+.warm-dining .aa-currency-title span{font-size:10px;color:var(--wd-muted);padding:5px 8px;border-radius:999px;background:#FFF6EB}
+.warm-dining .aa-member-balances{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:7px}
+.warm-dining .aa-balance-chip{padding:10px 11px;border-radius:13px;background:#FFFCF8;border:1px solid var(--wd-line);display:grid;gap:2px}
+.warm-dining .aa-balance-chip span{font-size:10px;color:var(--wd-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.warm-dining .aa-balance-chip b{font-size:13px}
+.warm-dining .aa-balance-chip.receive b{color:#4D8655}.warm-dining .aa-balance-chip.pay b{color:#D36A19}.warm-dining .aa-balance-chip.even b{color:var(--wd-muted)}
+.warm-dining .aa-transfer-list{display:grid;gap:7px}
+.warm-dining .aa-transfer-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:9px;align-items:center;padding:11px 12px;border-radius:14px;background:#FFF7ED;border:1px solid #FFE2C7}
+.warm-dining .aa-transfer-main{min-width:0;display:flex;align-items:center;gap:7px;font-size:12px}
+.warm-dining .aa-transfer-main b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.warm-dining .aa-transfer-arrow{color:#C66B23;font-weight:900}
+.warm-dining .aa-transfer-amount{font-size:13px;font-weight:900;white-space:nowrap;color:#9F5116}
+.warm-dining .aa-settle-btn{min-height:32px;padding:6px 9px;border:0;border-radius:10px;background:#fff;color:#A85C22;font-size:10px;font-weight:900;box-shadow:0 3px 10px rgba(99,57,24,.06)}
+.warm-dining .aa-all-clear{padding:20px;text-align:center;border:1px dashed #DDE8D7;border-radius:16px;background:#F6FAF3;color:#55764D}
+.warm-dining .aa-all-clear b{display:block;font-size:16px;margin-bottom:3px}.warm-dining .aa-all-clear span{font-size:11px}
+
+.warm-dining .aa-form{display:grid;gap:11px}
+.warm-dining .aa-form-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.warm-dining .aa-field{display:grid;gap:5px;min-width:0}
+.warm-dining .aa-field>span,.warm-dining .aa-participant-label{font-size:10px;font-weight:800;color:var(--wd-muted)}
+.warm-dining .aa-field input,.warm-dining .aa-field select,.warm-dining .aa-field textarea{width:100%;min-height:42px;padding:10px 11px;border:1px solid var(--wd-line);border-radius:12px;background:#FFFCF8;color:var(--wd-ink);box-sizing:border-box}
+.warm-dining .aa-field textarea{min-height:68px;resize:vertical}
+.warm-dining .aa-money-input{display:grid;grid-template-columns:1fr 84px;gap:7px}
+.warm-dining .aa-participants{display:flex;flex-wrap:wrap;gap:7px}
+.warm-dining .aa-person-check{position:relative;cursor:pointer}
+.warm-dining .aa-person-check input{position:absolute;opacity:0;pointer-events:none}
+.warm-dining .aa-person-check span{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:7px 10px;border:1px solid var(--wd-line);border-radius:999px;background:#fff;color:var(--wd-muted);font-size:11px;font-weight:800}
+.warm-dining .aa-person-check span::before{content:"";width:16px;height:16px;border-radius:50%;background:#FFF0DF;border:1px solid #FFD2AA}
+.warm-dining .aa-person-check input:checked+span{border-color:#FFB36B;background:#FFF2E3;color:#B85E18}
+.warm-dining .aa-person-check input:checked+span::before{background:var(--wd-orange);box-shadow:inset 0 0 0 4px #fff}
+.warm-dining .aa-split-preview{padding:10px 12px;border-radius:12px;background:#F7F3EE;color:var(--wd-muted);font-size:11px;line-height:1.6}
+.warm-dining .aa-form-actions{display:flex;gap:8px;justify-content:flex-end}
+
+.warm-dining .aa-history{display:grid;gap:8px}
+.warm-dining .aa-history-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--wd-line)}
+.warm-dining .aa-history-row:first-child{border-top:0}
+.warm-dining .aa-history-icon{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:#FFF2E4;color:#D66E19;font-size:16px;font-weight:900}
+.warm-dining .aa-history-row.settlement .aa-history-icon{background:#EEF5E9;color:#5B8250}
+.warm-dining .aa-history-main{min-width:0;display:grid;gap:3px}
+.warm-dining .aa-history-main b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.warm-dining .aa-history-main span{font-size:10px;color:var(--wd-muted);line-height:1.5}
+.warm-dining .aa-history-side{text-align:right;display:grid;gap:4px;justify-items:end}
+.warm-dining .aa-history-side b{font-size:13px;white-space:nowrap}
+.warm-dining .aa-delete{border:0;background:transparent;color:#B28E75;font-size:10px;padding:2px 0}
+.warm-dining .aa-delete:hover{color:var(--wd-danger)}
+.warm-dining .aa-empty{padding:24px;text-align:center;border-radius:16px;background:#FFFCF8;color:var(--wd-muted);font-size:11px}
+.warm-dining .aa-loading{padding:28px;text-align:center;color:var(--wd-muted);font-size:12px}
+
+.warm-dining .aa-mobile-add{display:none}
+@media(max-width:980px){.warm-dining .aa-grid{grid-template-columns:1fr}.warm-dining .aa-summary-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){
+  .warm-dining .aa-hero{padding:17px}.warm-dining .aa-hero-head{display:block}.warm-dining .aa-hero-actions{margin-top:12px}
+  .warm-dining .aa-summary-grid{grid-template-columns:1fr 1fr}.warm-dining .aa-summary-card:last-child{grid-column:1/-1}
+  .warm-dining .aa-card{padding:16px}.warm-dining .aa-form-row{grid-template-columns:1fr}
+  .warm-dining .aa-transfer-row{grid-template-columns:minmax(0,1fr) auto}.warm-dining .aa-settle-btn{grid-column:1/-1;width:100%;min-height:38px}
+  .warm-dining .aa-history-row{grid-template-columns:38px minmax(0,1fr) auto}.warm-dining .aa-history-icon{width:36px;height:36px;border-radius:11px}
+}
+@media(max-width:520px){
+  .warm-dining .aa-summary-card b{font-size:18px}.warm-dining .aa-member-balances{grid-template-columns:1fr 1fr}
+  .warm-dining .aa-money-input{grid-template-columns:1fr 80px}
+  .warm-dining .aa-form-card{display:none}.warm-dining .aa-form-card.open{display:block}.warm-dining .aa-mobile-add{display:inline-flex}
+  .warm-dining .aa-history-side b{font-size:12px}.warm-dining .aa-history-main span{font-size:9.5px}
+}
