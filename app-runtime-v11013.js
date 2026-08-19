@@ -14,6 +14,11 @@ let user = null;
 let domTimer = null;
 let observer = null;
 
+function setText(el,text){
+  if(!el)return;
+  if(el.childNodes.length===1&&el.firstChild?.nodeType===Node.TEXT_NODE){if(el.firstChild.nodeValue!==text)el.firstChild.nodeValue=text;return;}
+  if(el.textContent!==text)el.replaceChildren(document.createTextNode(text));
+}
 function roleLabel(role){return role==='chef'?'大厨':role==='foodie'?'美食鉴赏家':'食光朋友';}
 function shownName(){return profile?.display_name?.trim() || profile?.username || '食光朋友';}
 function initials(value='食光'){
@@ -28,38 +33,31 @@ function applyVersion(){
     fixed.textContent=`v${VERSION}`;
     legacy.replaceWith(fixed);
   }
-  const top=$('.app-version-static');if(top&&top.textContent!==`v${VERSION}`)top.textContent=`v${VERSION}`;
+  setText($('.app-version-static'),`v${VERSION}`);
   const side=$('[id^="wdSideVersion"]');
-  if(side){side.id='wdSideVersionV11013';side.textContent=`v${VERSION}`;}
+  if(side){side.id='wdSideVersionV11013';setText(side,`v${VERSION}`);}
 }
 function applyPlannerLabels(){
-  const nav=$('#nav a[href="#menu"] span');if(nav)nav.textContent='我的七天';
+  setText($('#nav a[href="#menu"] span'),'我的七天');
   const page=$('#menu');if(!page)return;
-  const title=$('.page-title h1',page);if(title)title.textContent='我的七天计划';
-  const eye=$('.page-title .eyebrow',page);if(eye)eye.textContent='MY 7-DAY PLAN';
-  const p=$('.page-title p',page);if(p)p.textContent='计划未来七天吃什么。可以按天安排，也可以按早餐、午餐、晚餐集中查看。';
+  setText($('.page-title h1',page),'我的七天计划');
+  setText($('.page-title .eyebrow',page),'MY 7-DAY PLAN');
+  setText($('.page-title p',page),'计划未来七天吃什么。可以按天安排，也可以按早餐、午餐、晚餐集中查看。');
 }
 function applyProfile(){
   if(!user)return;
   const name=shownName();
   const role=roleLabel(profile?.food_role);
   const sideName=$('#wdSideName'),sideRole=$('#wdSideRole'),sideAvatar=$('#wdSideAvatar');
-  if(sideName)sideName.textContent=name;
-  if(sideRole)sideRole.textContent=profile?.username?`${role} · @${profile.username}`:role;
-  if(sideAvatar)sideAvatar.textContent=initials(name);
+  setText(sideName,name);
+  setText(sideRole,profile?.username?`${role} · @${profile.username}`:role);
+  setText(sideAvatar,initials(name));
   const account=$('#accountBtn');
-  if(account)account.innerHTML=`<span class="wd-avatar" style="width:100%;height:100%">${initials(name)}</span>`;
+  if(account){const avatar=$('.wd-avatar',account);if(avatar)setText(avatar,initials(name));else account.innerHTML=`<span class="wd-avatar" style="width:100%;height:100%">${initials(name)}</span>`;}
   const greeting=$('.wd-home-greeting');
-  if(greeting){
-    const h=$('h1',greeting),p=$('p',greeting);
-    if(h)h.textContent=`嗨，欢迎回来，${name}`;
-    if(p)p.textContent=`${role} · 今天想先从哪一项开始？`;
-  }
+  if(greeting){setText($('h1',greeting),`嗨，欢迎回来，${name}`);setText($('p',greeting),`${role} · 今天想先从哪一项开始？`);}
 }
-function applyLoggedOut(){
-  const sideName=$('#wdSideName'),sideRole=$('#wdSideRole');
-  if(sideName)sideName.textContent='未登录';if(sideRole)sideRole.textContent='点击头像登录';
-}
+function applyLoggedOut(){setText($('#wdSideName'),'未登录');setText($('#wdSideRole'),'点击头像登录');}
 function animateActivePage(){
   const page=$('.page.active');if(!page)return;
   page.classList.remove('sg-page-enter');
@@ -67,15 +65,12 @@ function animateActivePage(){
   page.classList.add('sg-page-enter');
   setTimeout(()=>page.classList.remove('sg-page-enter'),280);
 }
-function applyDOM(){
-  applyVersion();applyPlannerLabels();
-  if(user)applyProfile();else applyLoggedOut();
-}
+function applyDOM(){applyVersion();applyPlannerLabels();if(user)applyProfile();else applyLoggedOut();}
 function scheduleDOM(delay=40){clearTimeout(domTimer);domTimer=setTimeout(applyDOM,delay);}
 async function refreshProfile(){
   if(!supabase){user=null;profile=null;applyDOM();return;}
   const {data}=await supabase.auth.getSession();user=data.session?.user||null;
-  if(!user){profile=null;window.Shiguang.profile=null;applyDOM();return;}
+  if(!user){profile=null;window.Shiguang.profile=null;window.Shiguang.user=null;applyDOM();return;}
   const {data:p}=await supabase.from('user_accounts').select('username,display_name,food_role').eq('user_id',user.id).maybeSingle();
   profile=p||null;window.Shiguang.profile=profile;window.Shiguang.user=user;applyDOM();
   window.dispatchEvent(new CustomEvent('shiguang-profile-ready',{detail:{user,profile}}));
