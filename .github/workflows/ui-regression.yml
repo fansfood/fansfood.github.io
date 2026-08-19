@@ -3,6 +3,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+permissions:
+  issues: write
+  contents: read
 jobs:
   ui-regression:
     runs-on: ubuntu-latest
@@ -30,3 +33,11 @@ jobs:
             test-results
             playwright-report
           if-no-files-found: ignore
+      - name: Signal UI regression success
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE='UI_REGRESSION_OK v1.1.000'
+          EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          BODY="Chromium UI regression passed on $(date -u +'%Y-%m-%d %H:%M UTC'): desktop routes, mobile bottom navigation, buddy route, and overflow checks at 375/390/430/768/1024/1280/1440/1920."
+          if [ -n "$EXISTING" ]; then gh issue comment "$EXISTING" --body "$BODY"; else gh issue create --title "$TITLE" --body "$BODY"; fi
