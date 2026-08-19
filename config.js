@@ -8,6 +8,7 @@ window.SHIGUANG_VERSION = '1.1.015';
 
 // 在 app.js 注册路由之前同步准备“饭搭子”页面，保证所有 hash 路由都有真实页面容器。
 (function ensureStableRoutes(){
+  const ROUTES = new Set(['home','groups','buddies','tomorrow','menu','recipes','shopping','pantry']);
   const main = document.querySelector('main');
   const nav = document.getElementById('nav');
   if (main && !document.getElementById('buddies')) {
@@ -24,6 +25,28 @@ window.SHIGUANG_VERSION = '1.1.015';
     a.textContent = '饭搭子';
     nav.querySelector('a[href="#groups"]')?.insertAdjacentElement('afterend', a);
   }
+  const showRoute = () => {
+    const raw = (location.hash || '#home').slice(1);
+    const id = ROUTES.has(raw) ? raw : 'home';
+    const page = document.getElementById(id) || document.getElementById('home');
+    if (!page) return;
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p === page));
+    document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${id}`));
+    document.querySelectorAll('[data-wd-bottom]').forEach(a => a.classList.toggle('active', a.dataset.wdBottom === `#${id}`));
+    document.getElementById('nav')?.classList.remove('open');
+  };
+  // 捕获阶段处理导航，后续业务脚本即使报错也不能阻断基础切页。
+  document.addEventListener('click', event => {
+    const link = event.target.closest?.('#nav a[href^="#"], .wd-mobile-bottom a[href^="#"]');
+    if (!link) return;
+    const hash = link.getAttribute('href');
+    if (!hash || !ROUTES.has(hash.slice(1))) return;
+    event.preventDefault();
+    if (location.hash === hash) showRoute(); else location.hash = hash;
+  }, true);
+  window.addEventListener('hashchange', showRoute);
+  window.addEventListener('DOMContentLoaded', showRoute, { once:true });
+  window.SHIGUANG_SHOW_ROUTE = showRoute;
   const badge = document.querySelector('.brand small');
   if (badge) badge.textContent = 'v1.1.015';
 })();
@@ -58,15 +81,11 @@ function loadModule(src, id) {
   document.head.appendChild(script);
 }
 
-// 最高优先级：极小、独立的故障隔离路由器。
-// UI 壳或业务模块即使出现异常，侧边栏仍然可以切换页面。
-loadModule('./stable-router-v11015.js', 'stableRouterV11015Module');
-
 // 稳定 Runtime：只管理共享会话、昵称、版本与轻动效；不监听/重写整个 DOM。
 loadStyle('./app-v11013.css', 'appV11013CSS');
 loadModule('./app-runtime-v11014.js', 'appRuntimeV11014Module');
 
-// Warm Dining 单一 UI 壳，只负责外观与首页，不接管页面路由。
+// Warm Dining 单一 UI 壳，只负责外观与首页；基础切页由上面的同步路由保险负责。
 loadModule('./warm-dining-shell-v11014.js', 'warmDiningShellV11014Module');
 
 // 基础业务增强。
