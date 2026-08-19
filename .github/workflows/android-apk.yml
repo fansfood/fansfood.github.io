@@ -6,6 +6,7 @@ on:
     paths:
       - 'capacitor.config.json'
       - 'www/**'
+      - 'assets/logo.svg'
       - 'package.json'
       - '.github/workflows/android-apk.yml'
 permissions:
@@ -34,6 +35,8 @@ jobs:
           rm -rf android
           npx cap add android
           npx cap sync android
+      - name: Generate Eating Time Android assets
+        run: npx @capacitor/assets generate --android --iconBackgroundColor '#FFF9F2' --iconBackgroundColorDark '#FFF9F2' --splashBackgroundColor '#FFF9F2' --splashBackgroundColorDark '#FFF9F2'
       - name: Verify Android package and app label
         run: |
           grep -R 'io.github.fansfood.eatingtime' android/app/build.gradle android/app/src/main/AndroidManifest.xml || true
@@ -60,6 +63,7 @@ jobs:
 
             - 使用正式 https://fansfood.github.io 作为应用内容源
             - 保留现有 Supabase 登录、群组、饭搭子、投票、采购、冰箱与云端数据
+            - 使用食光暖橙餐盘时钟图标
             - Debug APK，可直接在 Android 设备侧载测试
           prerelease: true
           files: Eating-Time-v1.1.000.apk
