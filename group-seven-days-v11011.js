@@ -82,8 +82,16 @@ async function fetchData(){
 
 function dayButtonHtml(d){const count=items.filter(x=>x.meal_date===d.date).length;return `<button class="gm-day-btn ${selectedDate===d.date?'active':''} ${count?'has-meal':''}" type="button" data-gm-day="${d.date}"><b>${d.relative}</b><span>${d.md} · ${d.weekday}</span><em>${count?`${count} 道共同安排`:'暂无安排'}</em></button>`}
 function itemHtml(item){const img=publicImage(item.image_path,item.image_url);return `<article class="gm-item ${img?'':'no-image'}">${img?`<img src="${esc(img)}" alt="${esc(item.name)}">`:''}<div><h4>${esc(item.name)}</h4>${item.description?`<p>${esc(item.description)}</p>`:''}</div>${canEdit()?`<button class="gm-delete" type="button" data-gm-delete="${item.id}">删除</button>`:''}</article>`}
-function slotHtml(slot,date){const meta=SLOT_META[slot];const list=items.filter(x=>x.meal_date===date&&x.meal_slot===slot);return `<section class="gm-slot"><div class="gm-slot-head"><div class="gm-slot-title"><span class="gm-slot-icon">${svg(meta.icon)}</span><b>${meta.label}</b></div><span>${list.length?`${list.length} 道`:'没有共同安排'}</span></div>${list.length?`<div class="gm-items">${list.map(itemHtml).join('')}</div>`:`<div class="gm-slot-empty">${canEdit()?'需要一起吃时再添加，不必把每一顿都排满。':'这顿大家各自安排。'}</div>`}</section>`}
-function selectedDayHtml(){const meta=days7().find(d=>d.date===selectedDate)||days7()[0];const count=items.filter(x=>x.meal_date===meta.date).length;return `<section class="card gm-day-card"><div class="gm-day-card-head"><div><h3>${meta.relative} · ${meta.md}</h3><p>${count?`这一天有 ${count} 道共同用餐安排。`:'这一天还没有约好一起吃饭。'}</p></div>${canEdit()?'<button class="btn primary" type="button" id="gmAddMeal">＋ 安排一起吃</button>':''}</div><div class="gm-meal-list">${slotHtml('breakfast',meta.date)}${slotHtml('lunch',meta.date)}${slotHtml('dinner',meta.date)}</div></section>`}
+function slotHtml(slot,date){
+  const meta=SLOT_META[slot];const list=items.filter(x=>x.meal_date===date&&x.meal_slot===slot);if(!list.length)return '';
+  return `<section class="gm-slot"><div class="gm-slot-head"><div class="gm-slot-title"><span class="gm-slot-icon">${svg(meta.icon)}</span><b>${meta.label}</b></div><span>${list.length} 道</span></div><div class="gm-items">${list.map(itemHtml).join('')}</div></section>`;
+}
+function selectedDayHtml(){
+  const meta=days7().find(d=>d.date===selectedDate)||days7()[0];const dayItems=items.filter(x=>x.meal_date===meta.date);const count=dayItems.length;
+  const slots=['breakfast','lunch','dinner'].filter(slot=>dayItems.some(x=>x.meal_slot===slot));
+  const body=count?`<div class="gm-meal-list">${slots.map(slot=>slotHtml(slot,meta.date)).join('')}</div>`:`<div class="gm-empty"><b>这天大家各自安排</b><span>没有约好一起吃的饭，就不占用小饭桌菜单。需要时再添加一顿共同用餐。</span></div>`;
+  return `<section class="card gm-day-card"><div class="gm-day-card-head"><div><h3>${meta.relative} · ${meta.md}</h3><p>${count?`这一天有 ${count} 道共同用餐安排。`:'这一天没有共同用餐安排。'}</p></div>${canEdit()?'<button class="btn primary" type="button" id="gmAddMeal">＋ 安排一起吃</button>':''}</div>${body}</section>`;
+}
 function formHtml(){
   if(!canEdit())return '';
   const dayOptions=days7().map(d=>`<option value="${d.date}" ${d.date===selectedDate?'selected':''}>${d.relative} · ${d.md}</option>`).join('');
