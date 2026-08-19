@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="食光 Eating Time">
+  <rect width="128" height="128" rx="30" fill="#FFF9F2"/>
+  <circle cx="58" cy="64" r="43" fill="#FFF9F2" stroke="#FF7A16" stroke-width="8"/>
+  <circle cx="58" cy="64" r="31" fill="#FFFFFF" stroke="#FFD1A7" stroke-width="4"/>
+  <path d="M58 34v8M58 86v8M28 64h8M80 64h8" stroke="#FFA34D" stroke-width="5" stroke-linecap="round"/>
+  <path d="M58 64V46M58 64l16 10" fill="none" stroke="#FF7A16" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="58" cy="64" r="4.5" fill="#FF7A16"/>
+  <path d="M102 34 87 96M114 37 99 99" fill="none" stroke="#FF7A16" stroke-width="6" stroke-linecap="round"/>
+</svg>
