@@ -18,6 +18,9 @@ jobs:
           set -e
           files=(
             harmony/AppScope/app.json5
+            harmony/AppScope/resources/base/media/layered_image.json
+            harmony/AppScope/resources/base/media/icon_background.png
+            harmony/AppScope/resources/base/media/icon_foreground.png
             harmony/build-profile.json5
             harmony/hvigorfile.ts
             harmony/hvigor/hvigor-config.json5
@@ -28,7 +31,10 @@ jobs:
             harmony/entry/src/main/module.json5
             harmony/entry/src/main/ets/entryability/EntryAbility.ets
             harmony/entry/src/main/ets/pages/Index.ets
+            harmony/entry/src/main/resources/base/element/string.json
+            harmony/entry/src/main/resources/base/element/color.json
             harmony/entry/src/main/resources/base/profile/main_pages.json
+            harmony/README.md
           )
           for file in "${files[@]}"; do test -s "$file" || { echo "Missing $file"; exit 1; }; done
       - name: Verify Eating Time web shell safety settings
@@ -37,8 +43,10 @@ jobs:
           grep -F 'https://fansfood.github.io/#home' harmony/entry/src/main/ets/pages/Index.ets
           grep -F '.domStorageAccess(true)' harmony/entry/src/main/ets/pages/Index.ets
           grep -F '.javaScriptAccess(true)' harmony/entry/src/main/ets/pages/Index.ets
+          grep -F '.imageAccess(true)' harmony/entry/src/main/ets/pages/Index.ets
           grep -F '.onlineImageAccess(true)' harmony/entry/src/main/ets/pages/Index.ets
           grep -F 'ohos.permission.INTERNET' harmony/entry/src/main/module.json5
           grep -F 'io.github.fansfood.eatingtime' harmony/AppScope/app.json5
+          grep -F '$media:layered_image' harmony/AppScope/app.json5
       - name: Note signing/build boundary
         run: echo 'Project structure verified. Installable HAP compilation/signing requires a HarmonyOS SDK + developer signing environment.'
