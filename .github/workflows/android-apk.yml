@@ -8,6 +8,8 @@ on:
       - 'www/**'
       - 'package.json'
       - '.github/workflows/android-apk.yml'
+permissions:
+  contents: write
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -32,19 +34,13 @@ jobs:
           rm -rf android
           npx cap add android
           npx cap sync android
-      - name: Apply Eating Time app label
+      - name: Verify Android package and app label
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('android/app/src/main/res/values/strings.xml')
-          s=p.read_text()
-          s=s.replace('<string name="app_name">食光</string>','<string name="app_name">食光</string>')
-          s=s.replace('<string name="title_activity_main">食光</string>','<string name="title_activity_main">食光</string>')
-          p.write_text(s)
-          PY
+          grep -R 'io.github.fansfood.eatingtime' android/app/build.gradle android/app/src/main/AndroidManifest.xml || true
+          cat android/app/src/main/res/values/strings.xml
       - name: Build installable debug APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
       - name: Rename APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk Eating-Time-v1.1.000.apk
       - name: Upload APK artifact
@@ -53,3 +49,17 @@ jobs:
           name: Eating-Time-v1.1.000-Android
           path: Eating-Time-v1.1.000.apk
           retention-days: 30
+      - name: Publish APK prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: eating-time-v1.1.000-android
+          target_commitish: main
+          name: 食光 Eating Time v1.1.000 Android
+          body: |
+            食光 Eating Time v1.1.000 Android 测试安装包。
+
+            - 使用正式 https://fansfood.github.io 作为应用内容源
+            - 保留现有 Supabase 登录、群组、饭搭子、投票、采购、冰箱与云端数据
+            - Debug APK，可直接在 Android 设备侧载测试
+          prerelease: true
+          files: Eating-Time-v1.1.000.apk
