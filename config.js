@@ -69,6 +69,7 @@ loadModule('./warm-dining-shell-v11014.js', 'warmDiningShellV11014Module');
 loadModule('./shopping-loader-v11009.js', 'shoppingLoaderV11009Module');
 loadModule('./auth-persistence-v10017.js', 'authPersistenceModule');
 loadModule('./recipe-favorites-v11009.js', 'recipeFavoritesV11009Module');
+loadModule('./recipe-actions-v11014.js', 'recipeActionsV11014Module');
 
 // 饭搭子：多人多食物、照片、健身、留言、互动。
 loadStyle('./food-buddy-v11012.css', 'foodBuddyV11012CSS');
