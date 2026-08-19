@@ -14,7 +14,7 @@ struct Index {
         .javaScriptAccess(true)
         .imageAccess(true)
         .onlineImageAccess(true)
-        .fileAccess(false)
+        .fileAccess(true)
         .zoomAccess(false)
         .width('100%')
         .height('100%')
