@@ -55,5 +55,9 @@ loadModule('./group-ledger-bridge-v11010.js', 'groupLedgerBridgeV11010Module');
 loadModule('./warm-dining-v11009.js', 'warmDiningV11009Module');
 loadModule('./warm-dining-polish-v11009.js', 'warmDiningPolishV11009Module');
 
+// v1.1.011 · 外部“我的七天” + 小饭桌内部独立七天菜单。
+loadStyle('./group-seven-days-v11011.css', 'groupSevenDaysV11011CSS');
+loadModule('./group-seven-days-v11011.js', 'groupSevenDaysV11011Module');
+
 // 最后守护本次对外版本号。
-loadModule('./version-v11010.js', 'versionV11010Module');
+loadModule('./version-v11011.js', 'versionV11011Module');
