@@ -54,6 +54,7 @@ loadModule('./app-runtime-v11014.js','appRuntimeV11014Module');
 
 // 已有业务增强：只保留业务，不再让旧 Warm Dining JS 接管布局。
 loadModule('./shopping-loader-v11009.js','shoppingLoaderV11009Module');
+loadModule('./purchase-to-pantry-v11000.js','purchaseToPantryV11000Module');
 loadModule('./auth-persistence-v10017.js','authPersistenceModule');
 loadModule('./recipe-favorites-v11009.js','recipeFavoritesV11009Module');
 loadModule('./recipe-actions-v11014.js','recipeActionsV11014Module');
