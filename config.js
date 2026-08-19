@@ -4,7 +4,7 @@ window.SHIGUANG_CONFIG = {
   SUPABASE_URL: "https://wcjcbbnvaejwynnrhfld.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
-window.SHIGUANG_VERSION = '1.1.015';
+window.SHIGUANG_VERSION = '1.1.016';
 
 // 在 app.js 注册路由之前同步准备“饭搭子”页面，保证所有 hash 路由都有真实页面容器。
 (function ensureStableRoutes(){
@@ -48,7 +48,7 @@ window.SHIGUANG_VERSION = '1.1.015';
   window.addEventListener('DOMContentLoaded', showRoute, { once:true });
   window.SHIGUANG_SHOW_ROUTE = showRoute;
   const badge = document.querySelector('.brand small');
-  if (badge) badge.textContent = 'v1.1.015';
+  if (badge) badge.textContent = 'v1.1.016';
 })();
 
 // 新设备不注入 Demo 菜单/库存/收藏；已有本机与云端状态原样保留。
@@ -94,9 +94,9 @@ loadModule('./auth-persistence-v10017.js', 'authPersistenceModule');
 loadModule('./recipe-favorites-v11009.js', 'recipeFavoritesV11009Module');
 loadModule('./recipe-actions-v11014.js', 'recipeActionsV11014Module');
 
-// 饭搭子：多人多食物、照片、健身、留言、互动。
+// 饭搭子：v1.1.016 直接复用全站共享 Supabase 会话，不再额外创建客户端。
 loadStyle('./food-buddy-v11012.css', 'foodBuddyV11012CSS');
-loadModule('./food-buddy-v11012.js', 'foodBuddyV11012Module');
+loadModule('./food-buddy-v11016.js', 'foodBuddyV11016Module');
 
 // 小饭桌 AA 账本。
 loadStyle('./group-ledger-v11010.css', 'groupLedgerV11010CSS');
