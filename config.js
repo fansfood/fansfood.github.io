@@ -5,9 +5,10 @@ window.SHIGUANG_CONFIG = {
   SUPABASE_URL: "https://wcjcbbnvaejwynnrhfld.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3"
 };
+window.SHIGUANG_VERSION = '1.1.013';
 
-// v1.1.009 起：新设备第一次打开时不再注入 Demo 菜单/库存/收藏。
-// 已经存在的本机状态和云端状态完全保留，由 app.js 正常读取并同步。
+// 新设备第一次打开不再注入 Demo 菜单/库存/收藏。
+// 已有本机状态和云端状态完全保留，由 app.js 正常读取并同步。
 if (!localStorage.getItem('shiguang-v2-state')) {
   const emptyPlan = {};
   ['周一','周二','周三','周四','周五','周六','周日'].forEach(day => {
@@ -39,16 +40,16 @@ function loadModule(src, id) {
   document.head.appendChild(script);
 }
 
-// 业务增强模块：保持原数据库、权限与 API 逻辑，不因 UI 大改而重写。
+// 基础业务增强。
 loadModule('./shopping-loader-v11009.js', 'shoppingLoaderV11009Module');
 loadModule('./auth-persistence-v10017.js', 'authPersistenceModule');
 loadModule('./recipe-favorites-v11009.js', 'recipeFavoritesV11009Module');
 
-// v1.1.012 · 饭搭子合并为单一模块：多人多食物、照片、健身、留言、互动。
+// 饭搭子：单一业务模块。
 loadStyle('./food-buddy-v11012.css', 'foodBuddyV11012CSS');
 loadModule('./food-buddy-v11012.js', 'foodBuddyV11012Module');
 
-// v1.1.010 · 小饭桌 AA 账本。
+// 小饭桌 AA 账本。
 loadStyle('./group-ledger-v11010.css', 'groupLedgerV11010CSS');
 loadModule('./group-ledger-v11010.js', 'groupLedgerV11010Module');
 loadModule('./group-ledger-bridge-v11010.js', 'groupLedgerBridgeV11010Module');
@@ -57,9 +58,11 @@ loadModule('./group-ledger-bridge-v11010.js', 'groupLedgerBridgeV11010Module');
 loadModule('./warm-dining-v11009.js', 'warmDiningV11009Module');
 loadModule('./warm-dining-polish-v11009.js', 'warmDiningPolishV11009Module');
 
-// v1.1.011 · 外部“我的七天” + 小饭桌内部独立七天菜单。
+// 小饭桌内部独立七天菜单。
 loadStyle('./group-seven-days-v11011.css', 'groupSevenDaysV11011CSS');
 loadModule('./group-seven-days-v11011.js', 'groupSevenDaysV11011Module');
 
-// 最后守护本次对外版本号。
-loadModule('./version-v11012.js', 'versionV11012Module');
+// v1.1.013 · 统一昵称/版本/微动效 + 个人七天双视图计划器。
+loadStyle('./app-v11013.css', 'appV11013CSS');
+loadModule('./app-runtime-v11013.js', 'appRuntimeV11013Module');
+loadModule('./personal-planner-v11013.js', 'personalPlannerV11013Module');
