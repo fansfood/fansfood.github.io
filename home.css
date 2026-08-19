@@ -1,14 +1,9 @@
-@import url('./warm-dining-v11009.css');
-@import url('./shopping-bulk-v11009.css');
-@import url('./warm-dining-fixes-v11009.css');
-@import url('./warm-dining-polish-v11009.css');
-
-/* 食光 · 首页交互兼容层。视觉由 Warm Dining 主题统一接管。 */
+/* 食光 · 首页交互兼容层。主视觉由 ui-v11000.css 统一接管。 */
 .brand small{visibility:hidden}
-.warm-dining .brand small{visibility:visible}
+.et-v11000 .brand small{visibility:visible}
 .home-entry-card{position:relative;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
 .home-entry-card:hover{transform:translateY(-3px)}
-.home-entry-card:focus-visible{outline:3px solid rgba(255,138,36,.18);outline-offset:3px}
+.home-entry-card:focus-visible{outline:3px solid rgba(255,122,22,.18);outline-offset:3px}
 .home-entry-card:active{transform:translateY(-1px)}
 .meal-card.home-entry-card .content{padding-bottom:15px}
 .home-card-action{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--accent);font-size:12px;font-weight:800}
