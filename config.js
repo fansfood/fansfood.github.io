@@ -49,6 +49,7 @@ loadModule('./recipe-favorites-v11009.js', 'recipeFavoritesV11009Module');
 // v1.1.010 · 小饭桌 AA 账本。
 loadStyle('./group-ledger-v11010.css', 'groupLedgerV11010CSS');
 loadModule('./group-ledger-v11010.js', 'groupLedgerV11010Module');
+loadModule('./group-ledger-bridge-v11010.js', 'groupLedgerBridgeV11010Module');
 
 // Warm Dining App Shell / Design System。
 loadModule('./warm-dining-v11009.js', 'warmDiningV11009Module');
