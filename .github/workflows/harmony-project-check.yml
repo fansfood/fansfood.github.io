@@ -8,6 +8,10 @@ on:
       - '.github/workflows/harmony-project-check.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   harmony-project-check:
     runs-on: ubuntu-latest
@@ -53,3 +57,15 @@ jobs:
           grep -F '$media:start_icon' harmony/entry/src/main/module.json5
       - name: Note signing/build boundary
         run: echo 'Project structure verified. Installable HAP compilation/signing requires a HarmonyOS SDK + developer signing environment.'
+      - name: Signal HarmonyOS project readiness
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE='HARMONY_PROJECT_OK v1.1.001'
+          BODY="HarmonyOS project structure verified for $GITHUB_SHA: Stage model files, ArkWeb online shell, DOM Storage, JavaScript, image/file access, INTERNET permission and branded layered icon resources are present. This is a project-structure check, not a signed HAP build."
+          EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
