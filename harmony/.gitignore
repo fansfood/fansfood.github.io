@@ -1,0 +1,12 @@
+.hvigor/
+oh_modules/
+build/
+entry/build/
+local.properties
+*.p12
+*.cer
+*.pem
+*.key
+*.p7b
+*.p7c
+*.profile
