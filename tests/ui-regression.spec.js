@@ -15,6 +15,8 @@ test('desktop shell, today dashboard and every route remain usable',async({page}
   await expect(page.locator('#etHomeDashboard')).toContainText('近七天菜谱');
   await expect(page.locator('#etHomeDashboard')).toContainText('采购提醒');
   await expect(page.locator('#etHomeDashboard')).toContainText('我的冰箱');
+  await expect(page.locator('#etBuddyQuickEntry')).toBeVisible();
+  await expect(page.locator('#etBuddyQuickEntry')).toContainText('饭搭子');
 
   for(const id of routes){
     const link=page.locator(`[data-et-route="${id}"]`);
@@ -37,21 +39,26 @@ test('desktop shell, today dashboard and every route remain usable',async({page}
   await page.screenshot({path:'test-results/desktop-home.png',fullPage:true});
 });
 
-test('mobile bottom navigation, today hierarchy and action sheet',async({page})=>{
+test('mobile bottom navigation, food buddy entry and action sheet',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   const errors=captureErrors(page);await load(page,'#home');
   await expect(page.locator('.et-mobile-bottom')).toBeVisible();
   await expect(page.locator('#etHomeDashboard .et-today-card')).toBeVisible();
   await expect(page.locator('#etHomeDashboard .et-meal-grid .et-meal')).toHaveCount(3);
+  await expect(page.locator('#etBuddyQuickEntry')).toBeVisible();
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
   await page.locator('#etMobilePlus').click();
   await expect(page.locator('#etActionSheet')).toHaveClass(/open/);
   await expect(page.locator('#etActionSheet')).toContainText('添加今日计划');
+  await expect(page.locator('#etActionSheet')).toContainText('打开饭搭子');
   await expect(page.locator('#etActionSheet')).toContainText('添加采购');
   await expect(page.locator('#etActionSheet')).toContainText('添加冰箱食材');
-  await page.locator('[data-sheet-go="#shopping"]').click();
-  await expect(page).toHaveURL(/#shopping$/);
+  await page.locator('[data-sheet-go="#buddies"]').click();
+  await expect(page).toHaveURL(/#buddies$/);
+  await expect(page.locator('#buddies.page.active')).toBeVisible();
+  await page.waitForTimeout(800);
+  await expect(page.locator('#buddyContent')).not.toBeEmpty();
   expect(errors).toEqual([]);
   await page.goto('/#home');await page.waitForTimeout(500);
   await page.screenshot({path:'test-results/mobile-home-390.png',fullPage:true});
