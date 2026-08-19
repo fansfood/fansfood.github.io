@@ -1,0 +1,10 @@
+{
+  "app": {
+    "bundleName": "io.github.fansfood.eatingtime",
+    "vendor": "fansfood",
+    "versionCode": 11001,
+    "versionName": "1.1.001",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name"
+  }
+}
