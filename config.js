@@ -40,11 +40,13 @@ function loadModule(src, id) {
 }
 
 // 业务增强模块：保持原数据库、权限与 API 逻辑，不因 UI 大改而重写。
-loadModule('./food-buddy-v10013.js', 'foodBuddyModule');
-loadModule('./food-buddy-images-v10015.js', 'foodBuddyImagesModule');
 loadModule('./shopping-loader-v11009.js', 'shoppingLoaderV11009Module');
 loadModule('./auth-persistence-v10017.js', 'authPersistenceModule');
 loadModule('./recipe-favorites-v11009.js', 'recipeFavoritesV11009Module');
+
+// v1.1.012 · 饭搭子合并为单一模块：多人多食物、照片、健身、留言、互动。
+loadStyle('./food-buddy-v11012.css', 'foodBuddyV11012CSS');
+loadModule('./food-buddy-v11012.js', 'foodBuddyV11012Module');
 
 // v1.1.010 · 小饭桌 AA 账本。
 loadStyle('./group-ledger-v11010.css', 'groupLedgerV11010CSS');
@@ -60,4 +62,4 @@ loadStyle('./group-seven-days-v11011.css', 'groupSevenDaysV11011CSS');
 loadModule('./group-seven-days-v11011.js', 'groupSevenDaysV11011Module');
 
 // 最后守护本次对外版本号。
-loadModule('./version-v11011.js', 'versionV11011Module');
+loadModule('./version-v11012.js', 'versionV11012Module');
