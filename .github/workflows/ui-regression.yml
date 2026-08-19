@@ -2,10 +2,12 @@ name: Eating Time UI Regression
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'ci/**'
   workflow_dispatch:
 permissions:
   issues: write
-  contents: read
+  contents: write
 jobs:
   ui-regression:
     runs-on: ubuntu-latest
@@ -33,11 +35,32 @@ jobs:
             test-results
             playwright-report
           if-no-files-found: ignore
+      - name: Record verified current-head UI status
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          REMOTE_SHA=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$REMOTE_SHA" != "$GITHUB_SHA" ]; then
+            echo "A newer commit exists; do not publish a stale green signal."
+            exit 0
+          fi
+          mkdir -p ci
+          cat > ci/ui-regression-v1.1.000.txt <<EOF
+          status=passed
+          tested_sha=$GITHUB_SHA
+          tested_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          checks=desktop_routes,mobile_bottom_nav,buddy_route,overflow_375_390_430_768_1024_1280_1440_1920,console_errors
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ci/ui-regression-v1.1.000.txt
+          git commit -m 'ci: record v1.1.000 UI regression pass [skip ci]'
+          git push origin HEAD:main
       - name: Signal UI regression success
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TITLE='UI_REGRESSION_OK v1.1.000'
           EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
-          BODY="Chromium UI regression passed on $(date -u +'%Y-%m-%d %H:%M UTC'): desktop routes, mobile bottom navigation, buddy route, and overflow checks at 375/390/430/768/1024/1280/1440/1920."
+          BODY="Chromium UI regression passed for $GITHUB_SHA: desktop routes, mobile bottom navigation, buddy route, and overflow checks at 375/390/430/768/1024/1280/1440/1920."
           if [ -n "$EXISTING" ]; then gh issue comment "$EXISTING" --body "$BODY"; else gh issue create --title "$TITLE" --body "$BODY"; fi
