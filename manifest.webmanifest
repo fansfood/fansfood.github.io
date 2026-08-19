@@ -1,11 +1,11 @@
 {
   "name":"食光 · Eating Time",
   "short_name":"食光",
-  "description":"家庭、情侣、朋友一起决定吃什么、记录吃过什么的轻量美食生活 App。",
+  "description":"每日饮食生活管理中心：今天吃什么、还缺什么、要不要采购，以及和朋友一起决定明天吃什么。",
   "start_url":"./#home",
   "scope":"./",
   "display":"standalone",
-  "background_color":"#FFF9F1",
-  "theme_color":"#FF8A24",
+  "background_color":"#FFF9F2",
+  "theme_color":"#FF7A16",
   "icons":[{"src":"assets/images/app-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
