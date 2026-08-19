@@ -22,6 +22,14 @@ if (!localStorage.getItem('shiguang-v2-state')) {
   }));
 }
 
+function loadStyle(src, id) {
+  if (id && document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = src;
+  if (id) link.id = id;
+  document.head.appendChild(link);
+}
 function loadModule(src, id) {
   if (id && document.getElementById(id)) return;
   const script = document.createElement('script');
@@ -38,6 +46,13 @@ loadModule('./shopping-loader-v11009.js', 'shoppingLoaderV11009Module');
 loadModule('./auth-persistence-v10017.js', 'authPersistenceModule');
 loadModule('./recipe-favorites-v11009.js', 'recipeFavoritesV11009Module');
 
-// 最后加载新的 App Shell / Design System 和真实数据细节增强。
+// v1.1.010 · 小饭桌 AA 账本。
+loadStyle('./group-ledger-v11010.css', 'groupLedgerV11010CSS');
+loadModule('./group-ledger-v11010.js', 'groupLedgerV11010Module');
+
+// Warm Dining App Shell / Design System。
 loadModule('./warm-dining-v11009.js', 'warmDiningV11009Module');
 loadModule('./warm-dining-polish-v11009.js', 'warmDiningPolishV11009Module');
+
+// 最后守护本次对外版本号。
+loadModule('./version-v11010.js', 'versionV11010Module');
