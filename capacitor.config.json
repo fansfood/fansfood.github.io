@@ -1,0 +1,14 @@
+{
+  "appId":"io.github.fansfood.eatingtime",
+  "appName":"食光",
+  "webDir":"www",
+  "server":{
+    "url":"https://fansfood.github.io",
+    "cleartext":false,
+    "allowNavigation":["fansfood.github.io","wcjcbbnvaejwynnrhfld.supabase.co"]
+  },
+  "android":{
+    "allowMixedContent":false,
+    "captureInput":true
+  }
+}
