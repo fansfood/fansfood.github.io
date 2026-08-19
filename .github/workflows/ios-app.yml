@@ -1,0 +1,89 @@
+name: Build Eating Time iOS App
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'assets/**'
+      - 'apple/**'
+      - '.github/workflows/ios-app.yml'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  build-ios-simulator:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install JavaScript dependencies
+        run: npm install
+      - name: Generate Capacitor iOS project
+        run: |
+          rm -rf ios
+          npx cap add ios
+          npx cap sync ios
+      - name: Generate Eating Time iOS assets
+        run: npx @capacitor/assets generate --ios --iconBackgroundColor '#FFF9F2' --splashBackgroundColor '#FFF9F2'
+      - name: Verify iOS app identity and remote production URL
+        run: |
+          grep -F 'io.github.fansfood.eatingtime' capacitor.config.json
+          grep -F 'https://fansfood.github.io' capacitor.config.json
+          test -d ios/App/App.xcworkspace
+      - name: Build unsigned iOS Simulator app
+        run: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build/ios \
+            MARKETING_VERSION=1.1.1 \
+            CURRENT_PROJECT_VERSION=11001 \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+      - name: Package simulator app
+        run: |
+          APP_PATH=$(find build/ios/Build/Products -type d -name 'App.app' | head -n 1)
+          test -n "$APP_PATH"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" Eating-Time-iOS-v1.1.001-Simulator.zip
+      - name: Upload iOS simulator artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Eating-Time-iOS-v1.1.001-Simulator
+          path: Eating-Time-iOS-v1.1.001-Simulator.zip
+          retention-days: 30
+      - name: Signal iOS simulator build success
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE='IOS_SIMULATOR_BUILD_OK v1.1.001'
+          EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          BODY="iOS Simulator build succeeded for $GITHUB_SHA. Bundle ID: io.github.fansfood.eatingtime. The artifact is unsigned and intended for Simulator validation; physical-device IPA distribution still requires Apple signing/provisioning."
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
+      - name: Signal iOS build failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE='IOS_SIMULATOR_BUILD_FAIL v1.1.001'
+          EXISTING=$(gh issue list --state all --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          BODY="iOS Simulator build failed for $GITHUB_SHA. Inspect the Build Eating Time iOS App workflow logs."
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
