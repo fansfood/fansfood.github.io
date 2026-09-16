@@ -11,7 +11,7 @@ const flags = [{key:'重点',label:'重点 / Key',icon:'★'},{key:'考试',labe
 const state = {
   user: null, sessionId: null, entries: [], notes: '', isListening: false,
   interim: '', recognition: null, shouldRestart: false, aiReady: null,
-  saving: 0, history: [], titleTimer: null,
+  saving: 0, history: [], titleTimer: null, pendingSignupEmail: '',
 }
 
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -176,7 +176,11 @@ async function saveSessionMeta(){
 
 async function signIn(email,password){const {error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error}
 async function signUp(email,password){const {data,error}=await supabase.auth.signUp({email,password});if(error)throw error;return data}
+async function verifySignupOtp(email,token){const {data,error}=await supabase.auth.verifyOtp({email,token,type:'email'});if(error)throw error;return data}
+async function resendSignupOtp(email){const {data,error}=await supabase.auth.resend({type:'signup',email});if(error)throw error;return data}
 function showAuthMessage(msg,bad=false){$('authMessage').textContent=msg;$('authMessage').classList.toggle('bad',bad)}
+function showOtpPanel(email){state.pendingSignupEmail=email;$('otpEmail').textContent=email;$('authForm').hidden=true;$('otpPanel').hidden=false;$('otpCode').value='';showAuthMessage('请输入邮箱中的验证码。 / Enter the verification code from your email.')}
+function hideOtpPanel(){$('otpPanel').hidden=true;$('authForm').hidden=false;$('otpCode').value='';state.pendingSignupEmail=''}
 
 async function enterApp(session){
   state.user=session?.user||null
@@ -192,7 +196,10 @@ async function enterApp(session){
 }
 
 $('authForm').onsubmit=async(e)=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');try{await signIn($('authEmail').value.trim(),$('authPassword').value);showAuthMessage('登录成功 / Signed in')}catch(err){const raw=String(err?.message||'');const friendly=/invalid login credentials/i.test(raw)?'邮箱或密码不正确。如果还没有 ClassFlow 账号，请先点击“注册 ClassFlow / Sign up”。 / Incorrect email or password. If you do not have a ClassFlow account yet, please tap Sign up first.':(raw||'登录失败 / Sign-in failed');showAuthMessage(friendly,true)}}
-$('signupButton').onclick=async()=>{showAuthMessage('正在注册… / Signing up');try{const d=await signUp($('authEmail').value.trim(),$('authPassword').value);showAuthMessage(d.session?'注册并登录成功 / Signed up and signed in':'注册成功，请检查邮箱完成确认后再登录。 / Sign-up complete; please check your email before signing in.')}catch(err){const msg=err.message?.includes('Anonymous sign-ins are disabled')?'注册服务暂时不可用，请稍后重试。 / Sign-up is temporarily unavailable; please try again later.':(err.message||'注册失败 / Sign-up failed');showAuthMessage(msg,true)}}
+$('signupButton').onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email){showAuthMessage('请先填写邮箱。 / Enter your email first.',true);return}if(password.length<6){showAuthMessage('密码至少需要 6 位。 / Password must be at least 6 characters.',true);return}showAuthMessage('正在创建账号并发送验证码… / Creating account and sending code…');try{const d=await signUp(email,password);if(d.session){showAuthMessage('注册并登录成功 / Signed up and signed in');return}showOtpPanel(email)}catch(err){const raw=String(err?.message||'');let msg=raw||'注册失败 / Sign-up failed';if(/already registered|user already registered/i.test(raw))msg='这个邮箱已经注册过，请直接登录。 / This email is already registered; please sign in.';showAuthMessage(msg,true)}}
+$('verifyOtpButton').onclick=async()=>{const email=state.pendingSignupEmail||$('authEmail').value.trim(),token=$('otpCode').value.trim();if(!email||!token){showAuthMessage('请输入邮箱验证码。 / Enter the email verification code.',true);return}showAuthMessage('正在验证… / Verifying…');try{await verifySignupOtp(email,token);showAuthMessage('邮箱验证成功，正在进入 ClassFlow… / Email verified. Opening ClassFlow…');$('otpPanel').hidden=true}catch(err){const raw=String(err?.message||'');const msg=/expired|invalid/i.test(raw)?'验证码无效或已过期，请重新发送后再试。 / The code is invalid or expired; resend and try again.':(raw||'验证失败 / Verification failed');showAuthMessage(msg,true)}}
+$('resendOtpButton').onclick=async()=>{const email=state.pendingSignupEmail||$('authEmail').value.trim();if(!email)return;showAuthMessage('正在重新发送验证码… / Resending code…');try{await resendSignupOtp(email);showAuthMessage('新的验证码已发送，请检查邮箱。 / A new code has been sent.')}catch(err){showAuthMessage(err.message||'重新发送失败 / Resend failed',true)}}
+$('backToLoginButton').onclick=()=>{hideOtpPanel();showAuthMessage('可以使用已验证的 ClassFlow 账号登录。 / Sign in with your verified ClassFlow account.')}
 $('logoutButton').onclick=async()=>{stop();await supabase.auth.signOut();state.user=null;state.sessionId=null;state.entries=[];state.notes='';$('accountPopover').hidden=true;await enterApp(null)}
 $('recordButton').onclick=()=>state.isListening?stop():start()
 $('generateNotes').onclick=generateNotes
