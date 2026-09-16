@@ -36,13 +36,14 @@ function render(){
   $('originalStream').innerHTML=orig+(state.interim?`<article class="speech-card interim"><div class="meta"><span>正在识别 / Listening</span></div><p>${esc(state.interim)}</p></article>`:'') || empty('点击下方“开始听课 / Start”，老师的讲话会显示在这里。 / Tap Start and the teacher’s speech will appear here.')
   const trans=state.entries.map(e=>`<article class="speech-card translated"><div class="meta"><span>${esc(e.time)}</span></div><p class="${e.translation?.startsWith('⚠')?'error':''}">${esc(e.translation||'翻译中… / Translating')}</p><div class="flag-row">${flags.map(f=>`<button data-entry="${esc(e.id)}" data-flag="${esc(f.key)}" class="${e.flags.includes(f.key)?'selected':''}">${f.icon} ${esc(f.label||f.key)}</button>`).join('')}</div></article>`).join('')
   $('translationStream').innerHTML=trans||empty('识别完成后会自动翻译，并和原文按时间对应。 / Translation appears automatically after recognition and stays aligned by time.')
-  $('notesArea').innerHTML=state.notes?`<pre>${esc(state.notes)}</pre>`:empty('下课后点击“生成 AI 课堂笔记 / Generate AI Notes”。 / Generate AI notes after class.')
-  $('generateNotes').disabled=!state.entries.length || state.aiReady===false
+  const reviewTranslations=state.entries.map(e=>`<article class="review-entry"><div class="review-meta"><span>${esc(e.time)}</span>${e.flags.map(f=>`<b>${esc(f)}</b>`).join('')}</div><p class="${e.translation?.startsWith('⚠')?'error':''}">${esc(e.translation||'翻译中… / Translating')}</p></article>`).join('')
+  const notesBlock=state.notes?`<section class="generated-notes"><div class="generated-notes-title">AI 课堂笔记 / AI Class Notes</div><pre>${esc(state.notes)}</pre></section>`:''
+  $('reviewArea').innerHTML=(reviewTranslations||empty('这里会连续显示整堂课的全部中文译文，方便课后回顾。 / The full translated lesson will appear here continuously for review.'))+notesBlock
+  $('generateNotes').disabled=!state.entries.length
   $('exportMd').disabled=$('exportWord').disabled=!state.entries.length
-  $('aiNotice').hidden=state.aiReady!==false
   document.querySelectorAll('.flag-row button').forEach(btn=>btn.onclick=()=>toggleFlag(btn.dataset.entry,btn.dataset.flag))
   persistLocal()
-  requestAnimationFrame(()=>['originalStream','translationStream'].forEach(id=>{const el=$(id);el.scrollTop=el.scrollHeight}))
+  requestAnimationFrame(()=>['originalStream','translationStream','reviewArea'].forEach(id=>{const el=$(id);if(el)el.scrollTop=el.scrollHeight}))
 }
 
 async function ensureCloudSession(){
@@ -86,7 +87,7 @@ async function checkAI(){
 
 async function translateEntry(entry){
   if($('sourceLanguage').value==='zh-CN'){entry.translation=entry.original;await updateSegment(entry,{translation:entry.translation});render();return}
-  if(state.aiReady===false){entry.translation='⚠ AI 翻译后端尚未配置 / AI translation backend not configured';render();return}
+  if(state.aiReady===false){entry.translation='⚠ 翻译服务暂时不可用 / Translation temporarily unavailable';render();return}
   try{
     const d=await callAI({action:'translate',text:entry.original,sourceLanguage:$('sourceLanguage').value,courseTitle:$('classTitle').value})
     entry.translation=d.translation||''; await updateSegment(entry,{translation:entry.translation})
@@ -125,7 +126,8 @@ async function toggleFlag(id,flag){
 function markLatest(flag){const e=state.entries.at(-1);if(e)toggleFlag(e.id,flag)}
 
 async function generateNotes(){
-  if(!state.entries.length||state.aiReady===false)return
+  if(!state.entries.length)return
+  if(state.aiReady===false){setStatus('AI 课堂笔记暂时不可用，请稍后重试 / AI class notes are temporarily unavailable; please try again later');return}
   const b=$('generateNotes');b.disabled=true;b.textContent='正在整理… / Generating';setStatus('正在生成课堂笔记 / Generating class notes')
   try{
     const d=await callAI({action:'notes',title:$('classTitle').value,entries:state.entries})
@@ -133,7 +135,7 @@ async function generateNotes(){
     const {error}=await supabase.from('classflow_sessions').update({notes:state.notes,updated_at:new Date().toISOString()}).eq('id',state.sessionId);setSync(false)
     if(error)throw error;setStatus('AI 课堂笔记已生成并保存 / AI class notes generated and saved')
   }catch(err){setSync(false);setStatus(err.message||'生成笔记失败 / Note generation failed')}
-  finally{b.textContent='生成 AI 课堂笔记 / Generate AI Notes';render()}
+  finally{b.textContent='生成课堂笔记 / Generate Class Notes';render()}
 }
 
 function blobDownload(content,type,ext){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`${$('classTitle').value||'课堂记录'}_${new Date().toISOString().slice(0,10)}.${ext}`;a.click();URL.revokeObjectURL(url)}
@@ -189,8 +191,8 @@ async function enterApp(session){
   setStatus('云端已连接 / Cloud connected');render();await Promise.all([loadHistory(),checkAI()])
 }
 
-$('authForm').onsubmit=async(e)=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');try{await signIn($('authEmail').value.trim(),$('authPassword').value);showAuthMessage('登录成功 / Signed in')}catch(err){const raw=String(err?.message||'');const friendly=/invalid login credentials/i.test(raw)?'邮箱或密码不正确，或该 ClassFlow 账号尚未注册。 / Incorrect email or password, or this ClassFlow account has not been registered yet.':(raw||'登录失败 / Sign-in failed');showAuthMessage(friendly,true)}}
-$('signupButton').onclick=async()=>{showAuthMessage('正在注册… / Signing up');try{const d=await signUp($('authEmail').value.trim(),$('authPassword').value);showAuthMessage(d.session?'注册并登录成功 / Signed up and signed in':'注册成功，请检查邮箱完成确认后再登录 / Sign-up complete; check your email before signing in')}catch(err){showAuthMessage(err.message||'注册失败 / Sign-up failed',true)}}
+$('authForm').onsubmit=async(e)=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');try{await signIn($('authEmail').value.trim(),$('authPassword').value);showAuthMessage('登录成功 / Signed in')}catch(err){const raw=String(err?.message||'');const friendly=/invalid login credentials/i.test(raw)?'邮箱或密码不正确。如果还没有 ClassFlow 账号，请先点击“注册 ClassFlow / Sign up”。 / Incorrect email or password. If you do not have a ClassFlow account yet, please tap Sign up first.':(raw||'登录失败 / Sign-in failed');showAuthMessage(friendly,true)}}
+$('signupButton').onclick=async()=>{showAuthMessage('正在注册… / Signing up');try{const d=await signUp($('authEmail').value.trim(),$('authPassword').value);showAuthMessage(d.session?'注册并登录成功 / Signed up and signed in':'注册成功，请检查邮箱完成确认后再登录。 / Sign-up complete; please check your email before signing in.')}catch(err){const msg=err.message?.includes('Anonymous sign-ins are disabled')?'注册服务暂时不可用，请稍后重试。 / Sign-up is temporarily unavailable; please try again later.':(err.message||'注册失败 / Sign-up failed');showAuthMessage(msg,true)}}
 $('logoutButton').onclick=async()=>{stop();await supabase.auth.signOut();state.user=null;state.sessionId=null;state.entries=[];state.notes='';$('accountPopover').hidden=true;await enterApp(null)}
 $('recordButton').onclick=()=>state.isListening?stop():start()
 $('generateNotes').onclick=generateNotes
