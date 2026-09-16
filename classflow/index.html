@@ -17,15 +17,15 @@
 <body>
   <div class="auth-gate" id="authGate" hidden>
     <section class="auth-card">
-      <div class="brand-mark large">C</div>
-      <p class="eyebrow">CLASSFLOW CLOUD</p>
-      <h1>登录后开始上课</h1>
-      <p class="auth-copy">使用和“食光”相同的 Supabase 账号即可。课堂记录只保存在你的账号下。</p>
+      <div class="brand-mark large brand-translate" title="Translate / 翻译"><span class="mark-zh">译</span><span class="mark-en">T</span></div>
+      <p class="eyebrow">CLASSFLOW CLOUD · 课堂云端</p>
+      <h1>登录后开始上课 <small>/ Sign in to start</small></h1>
+      <p class="auth-copy">使用和“食光”相同的 Supabase 账号即可。课堂记录只保存在你的账号下。<br><span class="en-copy">Use the same Supabase account as Eating Time. Your class records stay private to your account.</span></p>
       <form id="authForm">
-        <label>邮箱<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
-        <label>密码<input id="authPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位" /></label>
-        <button class="primary wide" id="loginButton" type="submit">登录</button>
-        <button class="secondary wide" id="signupButton" type="button">注册账号</button>
+        <label>邮箱 / Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
+        <label>密码 / Password<input id="authPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位 / 6+ characters" /></label>
+        <button class="primary wide" id="loginButton" type="submit">登录 / Sign in</button>
+        <button class="secondary wide" id="signupButton" type="button">注册账号 / Sign up</button>
       </form>
       <p class="auth-message" id="authMessage"></p>
     </section>
@@ -34,74 +34,74 @@
   <main class="app-shell" id="appShell" hidden>
     <header class="topbar">
       <div class="brand-wrap">
-        <div class="brand-mark">C</div>
-        <div><div class="brand">ClassFlow</div><div class="subtitle">AI Classroom Translator · Cloud</div></div>
+        <div class="brand-mark brand-translate" title="Translate / 翻译"><span class="mark-zh">译</span><span class="mark-en">T</span></div>
+        <div><div class="brand">ClassFlow</div><div class="subtitle"><span class="subtitle-zh">更快、更清晰地翻译课堂内容</span><span class="subtitle-en">Faster, clearer classroom translation</span></div></div>
       </div>
       <div class="top-actions">
-        <span class="sync-pill" id="syncPill">☁ 已连接</span>
+        <span class="sync-pill" id="syncPill">☁ 已连接 / Connected</span>
         <span class="live-pill" id="livePill"><span class="dot"></span><span id="liveText">READY</span></span>
-        <button class="ghost compact" id="historyButton">历史</button>
-        <button class="ghost compact" id="accountButton">账号</button>
+        <button class="ghost compact" id="historyButton">历史 / History</button>
+        <button class="ghost compact" id="accountButton">账号 / Account</button>
       </div>
     </header>
 
     <aside class="history-drawer" id="historyDrawer" aria-hidden="true">
-      <div class="drawer-head"><div><span class="eyebrow">CLOUD HISTORY</span><h2>课堂历史</h2></div><button class="icon-button" id="closeHistory">×</button></div>
+      <div class="drawer-head"><div><span class="eyebrow">CLOUD HISTORY · 云端历史</span><h2>课堂历史 <small>/ Class History</small></h2></div><button class="icon-button" id="closeHistory">×</button></div>
       <div class="history-list" id="historyList"></div>
     </aside>
     <div class="drawer-mask" id="drawerMask" hidden></div>
 
     <section class="hero-panel">
       <div class="hero-main">
-        <label class="eyebrow">CURRENT CLASS</label>
+        <label class="eyebrow">CURRENT CLASS · 当前课堂</label>
         <input class="class-title" id="classTitle" value="Mechatronics" aria-label="课程名称" />
-        <div class="status-line"><span id="status">正在连接云端…</span> · <span id="recordCount">0 条记录</span></div>
+        <div class="status-line"><span id="status">正在连接云端… / Connecting to cloud…</span> · <span id="recordCount">0 条记录 / records</span></div>
       </div>
       <div class="settings-row">
-        <label>老师语言
+        <label>老师语言 / Teacher Language
           <select id="sourceLanguage">
             <option value="en-US">English</option>
             <option value="ru-RU">Русский</option>
             <option value="zh-CN">中文</option>
           </select>
         </label>
-        <label>翻译为<select disabled><option>简体中文</option></select></label>
-        <button class="new-class" id="newSession">＋ 新建课堂</button>
+        <label>翻译为 / Translate to<select disabled><option>简体中文 / Simplified Chinese</option></select></label>
+        <button class="new-class" id="newSession">＋ 新建课堂 / New Class</button>
       </div>
     </section>
 
     <section class="notice" id="aiNotice" hidden>
-      <strong>AI 翻译后端待配置</strong><span>课堂语音仍会实时识别并云端保存；配置 OpenAI API Key 后会自动开启翻译和 AI 笔记。</span>
+      <strong>AI 翻译后端待配置 / AI backend not configured</strong><span>课堂语音仍会实时识别并云端保存；配置 OpenAI API Key 后会自动开启翻译和 AI 笔记。 / Speech recognition and cloud saving still work; translation and AI notes turn on after the API key is configured.</span>
     </section>
 
     <section class="workspace">
       <section class="column">
-        <div class="column-head"><div><span class="head-kicker">01</span><h2>Original</h2></div><span>原始字幕</span></div>
+        <div class="column-head"><div><span class="head-kicker">01</span><h2>Original / 原文</h2></div><span>原始字幕 / Live transcript</span></div>
         <div class="stream" id="originalStream"></div>
       </section>
       <section class="column">
-        <div class="column-head"><div><span class="head-kicker">02</span><h2>Translation</h2></div><span>中文翻译</span></div>
+        <div class="column-head"><div><span class="head-kicker">02</span><h2>Translation / 翻译</h2></div><span>中文翻译 / Chinese</span></div>
         <div class="stream" id="translationStream"></div>
       </section>
       <section class="column notes-column">
-        <div class="column-head"><div><span class="head-kicker">03</span><h2>Notes</h2></div><span>AI 课堂笔记</span></div>
+        <div class="column-head"><div><span class="head-kicker">03</span><h2>Notes / 笔记</h2></div><span>AI 课堂笔记 / AI notes</span></div>
         <div class="notes-area" id="notesArea"></div>
-        <button class="notes-button" id="generateNotes">生成 AI 课堂笔记</button>
+        <button class="notes-button" id="generateNotes">生成 AI 课堂笔记 / Generate AI Notes</button>
       </section>
     </section>
 
     <footer class="control-dock">
       <div class="quick-flags" id="quickFlags">
-        <button data-flag="重点">★ 重点</button><button data-flag="考试">✓ 考试</button><button data-flag="没听懂">? 没听懂</button><button data-flag="例子">◇ 例子</button>
+        <button data-flag="重点">★ 重点 / Key</button><button data-flag="考试">✓ 考试 / Exam</button><button data-flag="没听懂">? 没听懂 / Unsure</button><button data-flag="例子">◇ 例子 / Example</button>
       </div>
-      <button class="record-button" id="recordButton"><span class="record-icon">●</span><span id="recordLabel">开始听课</span></button>
+      <button class="record-button" id="recordButton"><span class="record-icon">●</span><span id="recordLabel">开始听课 / Start</span></button>
       <div class="exports"><button id="exportMd">Markdown</button><button id="exportWord">Word</button></div>
     </footer>
 
     <div class="account-popover" id="accountPopover" hidden>
       <strong id="accountEmail">—</strong>
-      <span>课堂记录已启用云同步</span>
-      <button id="logoutButton">退出登录</button>
+      <span>课堂记录已启用云同步 / Cloud sync enabled</span>
+      <button id="logoutButton">退出登录 / Sign out</button>
     </div>
   </main>
 
