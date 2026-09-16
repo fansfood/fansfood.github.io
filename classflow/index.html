@@ -10,15 +10,15 @@
   <title>ClassFlow · AI 实时课堂翻译</title>
   <meta name="description" content="英语/俄语课堂实时语音识别、中文翻译、云端记录和 AI 课堂笔记" />
   <link rel="manifest" href="./manifest.json" />
-  <link rel="icon" href="./icon.svg?v=5" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="./icon.svg?v=5" />
-  <link rel="stylesheet" href="./style.css" />
-  <link rel="stylesheet" href="./layout-fix.css?v=5" />
+  <link rel="icon" href="./icon.svg?v=6" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icon.svg?v=6" />
+  <link rel="stylesheet" href="./style.css?v=6" />
+  <link rel="stylesheet" href="./layout-fix.css?v=6" />
 </head>
 <body>
   <div class="auth-gate" id="authGate" hidden>
     <section class="auth-card">
-      <img class="brand-logo large" src="./icon.svg?v=5" alt="ClassFlow Translate / 翻译" />
+      <img class="brand-logo large" src="./icon.svg?v=6" alt="ClassFlow Translate / 翻译" />
       <p class="eyebrow">CLASSFLOW CLOUD · 课堂云端</p>
       <h1>登录后开始上课 <small>/ Sign in to start</small></h1>
       <p class="auth-copy">ClassFlow 使用独立账号系统，与“食光”完全分开。课堂记录只保存在你的 ClassFlow 账号下。<br><span class="en-copy">ClassFlow uses its own account system, fully separate from Eating Time. Your class records stay private to your ClassFlow account.</span></p>
@@ -29,6 +29,20 @@
         <button class="primary wide" id="loginButton" type="submit">登录 / Sign in</button>
         <button class="secondary wide" id="signupButton" type="button">注册 ClassFlow / Sign up</button>
       </form>
+      <section class="otp-panel" id="otpPanel" hidden aria-live="polite">
+        <div class="otp-icon">✉</div>
+        <h2>验证邮箱 / Verify Email</h2>
+        <p>验证码已发送到 <strong id="otpEmail">—</strong>。请直接在 ClassFlow 输入邮件中的验证码，无需打开 Supabase 页面。</p>
+        <p class="otp-en">A verification code was sent to your email. Enter it directly in ClassFlow; no Supabase confirmation page is required.</p>
+        <label class="otp-label">邮箱验证码 / Verification code
+          <input id="otpCode" class="otp-code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="请输入验证码 / Enter code" />
+        </label>
+        <button class="primary wide" id="verifyOtpButton" type="button">确认并完成注册 / Verify & continue</button>
+        <div class="otp-actions">
+          <button class="link-button" id="resendOtpButton" type="button">重新发送验证码 / Resend</button>
+          <button class="link-button" id="backToLoginButton" type="button">返回登录 / Back to sign in</button>
+        </div>
+      </section>
       <p class="auth-message" id="authMessage"></p>
     </section>
   </div>
@@ -36,7 +50,7 @@
   <main class="app-shell" id="appShell" hidden>
     <header class="topbar">
       <div class="brand-wrap">
-        <img class="brand-logo" src="./icon.svg?v=5" alt="ClassFlow Translate / 翻译" />
+        <img class="brand-logo" src="./icon.svg?v=6" alt="ClassFlow Translate / 翻译" />
         <div><div class="brand">ClassFlow</div><div class="subtitle"><span class="subtitle-zh">更快、更清晰地翻译课堂内容</span><span class="subtitle-en">Faster, clearer classroom translation</span></div></div>
       </div>
       <div class="top-actions">
@@ -106,6 +120,6 @@
     </div>
   </main>
 
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./app.js?v=6"></script>
 </body>
 </html>
