@@ -10,17 +10,18 @@
   <title>ClassFlow · AI 实时课堂翻译</title>
   <meta name="description" content="英语/俄语课堂实时语音识别、中文翻译、云端记录和 AI 课堂笔记" />
   <link rel="manifest" href="./manifest.json" />
-  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="icon" href="./icon.svg?v=4" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icon.svg?v=4" />
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="auth-gate" id="authGate" hidden>
     <section class="auth-card">
-      <div class="brand-mark large brand-translate" title="Translate / 翻译" aria-label="Translate / 翻译"><span class="mark-zh">译</span><span class="mark-en">T</span><span class="mark-slash" aria-hidden="true">/</span></div>
+      <img class="brand-logo large" src="./icon.svg?v=4" alt="ClassFlow Translate / 翻译" />
       <p class="eyebrow">CLASSFLOW CLOUD · 课堂云端</p>
       <h1>登录后开始上课 <small>/ Sign in to start</small></h1>
       <p class="auth-copy">ClassFlow 使用独立账号系统，与“食光”完全分开。课堂记录只保存在你的 ClassFlow 账号下。<br><span class="en-copy">ClassFlow uses its own account system, fully separate from Eating Time. Your class records stay private to your ClassFlow account.</span></p>
+      <div class="auth-hint"><strong>如果还没有注册，请先点击下方“注册 ClassFlow / Sign up”。</strong><span>If you do not have a ClassFlow account yet, please tap “Sign up” first.</span></div>
       <form id="authForm">
         <label>邮箱 / Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
         <label>密码 / Password<input id="authPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位 / 6+ characters" /></label>
@@ -34,19 +35,19 @@
   <main class="app-shell" id="appShell" hidden>
     <header class="topbar">
       <div class="brand-wrap">
-        <div class="brand-mark brand-translate" title="Translate / 翻译" aria-label="Translate / 翻译"><span class="mark-zh">译</span><span class="mark-en">T</span><span class="mark-slash" aria-hidden="true">/</span></div>
+        <img class="brand-logo" src="./icon.svg?v=4" alt="ClassFlow Translate / 翻译" />
         <div><div class="brand">ClassFlow</div><div class="subtitle"><span class="subtitle-zh">更快、更清晰地翻译课堂内容</span><span class="subtitle-en">Faster, clearer classroom translation</span></div></div>
       </div>
       <div class="top-actions">
         <span class="sync-pill" id="syncPill">☁ 已连接 / Connected</span>
         <span class="live-pill" id="livePill"><span class="dot"></span><span id="liveText">READY</span></span>
-        <button class="ghost compact" id="historyButton">历史 / History</button>
+        <button class="ghost compact" id="historyButton">我的课程 / My Courses</button>
         <button class="ghost compact" id="accountButton">账号 / Account</button>
       </div>
     </header>
 
     <aside class="history-drawer" id="historyDrawer" aria-hidden="true">
-      <div class="drawer-head"><div><span class="eyebrow">CLOUD HISTORY · 云端历史</span><h2>课堂历史 <small>/ Class History</small></h2></div><button class="icon-button" id="closeHistory">×</button></div>
+      <div class="drawer-head"><div><span class="eyebrow">MY COURSES · 我的课程</span><h2>我的课程 <small>/ My Courses</small></h2></div><button class="icon-button" id="closeHistory">×</button></div>
       <div class="history-list" id="historyList"></div>
     </aside>
     <div class="drawer-mask" id="drawerMask" hidden></div>
@@ -70,10 +71,6 @@
       </div>
     </section>
 
-    <section class="notice" id="aiNotice" hidden>
-      <strong>AI 翻译后端待配置 / AI backend not configured</strong><span>课堂语音仍会实时识别并云端保存；配置 OpenAI API Key 后会自动开启翻译和 AI 笔记。 / Speech recognition and cloud saving still work; translation and AI notes turn on after the API key is configured.</span>
-    </section>
-
     <section class="workspace">
       <section class="column">
         <div class="column-head"><div><span class="head-kicker">01</span><h2>Original / 原文</h2></div><span>原始字幕 / Live transcript</span></div>
@@ -83,10 +80,10 @@
         <div class="column-head"><div><span class="head-kicker">02</span><h2>Translation / 翻译</h2></div><span>中文翻译 / Chinese</span></div>
         <div class="stream" id="translationStream"></div>
       </section>
-      <section class="column notes-column">
-        <div class="column-head"><div><span class="head-kicker">03</span><h2>Notes / 笔记</h2></div><span>AI 课堂笔记 / AI notes</span></div>
-        <div class="notes-area" id="notesArea"></div>
-        <button class="notes-button" id="generateNotes">生成 AI 课堂笔记 / Generate AI Notes</button>
+      <section class="column review-column">
+        <div class="column-head"><div><span class="head-kicker">03</span><h2>Full Translation / 全文翻译</h2></div><span>连续课堂译文 / Continuous view</span></div>
+        <div class="review-area" id="reviewArea"></div>
+        <button class="notes-button" id="generateNotes">生成课堂笔记 / Generate Class Notes</button>
       </section>
     </section>
 
