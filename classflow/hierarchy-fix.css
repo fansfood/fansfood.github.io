@@ -1,0 +1,39 @@
+/* ClassFlow v9: rebalance visual hierarchy */
+.topbar{padding:10px 6px;margin-bottom:16px}
+.top-actions{gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.live-pill,.sync-pill{padding:10px 13px;font-size:11.5px;letter-spacing:.025em;min-height:40px}
+.live-pill .dot{width:8px;height:8px}
+.ghost.compact{padding:10px 14px;font-size:12px;min-height:40px;background:rgba(255,255,255,.55)}
+
+.hero-panel{padding:20px 24px;align-items:center;gap:28px}
+.hero-main{flex:1 1 440px;min-width:0;max-width:620px}
+.hero-panel .eyebrow{font-size:10px;margin-bottom:6px}
+.class-title{width:min(100%,560px);font-size:clamp(24px,2.6vw,38px);line-height:1.08;font-weight:800;letter-spacing:-.045em;padding-bottom:3px}
+.status-line{margin-top:7px;font-size:12.5px;line-height:1.45}
+
+.settings-row{flex:0 0 auto;display:flex;gap:12px;align-items:end;justify-content:flex-end}
+.settings-row label{gap:7px;font-size:10px;letter-spacing:.055em}
+.settings-row select{min-width:190px;min-height:46px;padding:12px 14px;border-radius:14px;font-size:13px;font-weight:650;background:#fff}
+.settings-row label:nth-child(2) select{min-width:230px}
+.new-class{min-height:46px;padding:12px 17px;border-radius:14px;font-size:12.5px;font-weight:750;background:#fff;white-space:nowrap}
+
+@media(max-width:1180px){
+  .hero-panel{align-items:stretch;flex-direction:column;gap:18px}
+  .hero-main{max-width:none;flex:auto}
+  .class-title{width:100%;max-width:640px}
+  .settings-row{width:100%;justify-content:flex-start;display:grid;grid-template-columns:minmax(170px,1fr) minmax(210px,1.25fr) auto}
+  .settings-row select{width:100%;min-width:0}
+  .settings-row label:nth-child(2) select{min-width:0}
+}
+
+@media(max-width:760px){
+  .top-actions{width:100%;justify-content:flex-start;gap:7px}
+  .live-pill,.sync-pill,.ghost.compact{min-height:36px;padding:8px 10px;font-size:10.5px}
+  .hero-panel{padding:17px 16px;gap:15px}
+  .class-title{font-size:28px;line-height:1.12}
+  .status-line{font-size:11.5px}
+  .settings-row{grid-template-columns:1fr 1fr;gap:9px}
+  .settings-row label{font-size:9.5px}
+  .settings-row select{min-height:44px;padding:11px 12px;font-size:12px}
+  .new-class{grid-column:1/-1;min-height:44px;font-size:12px}
+}
