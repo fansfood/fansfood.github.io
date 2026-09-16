@@ -1,7 +1,7 @@
 {
-  "name": "ClassFlow AI Classroom Translator",
+  "name": "ClassFlow · 课堂翻译 / AI Classroom Translator",
   "short_name": "ClassFlow",
-  "description": "实时课堂语音识别、中文翻译、云端记录和 AI 笔记",
+  "description": "更快、更清晰地翻译课堂内容 · Faster, clearer classroom translation",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
