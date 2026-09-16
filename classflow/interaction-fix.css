@@ -1,0 +1,33 @@
+/* ClassFlow v10: semantic flag colors + notes placement */
+
+/* Bottom shortcuts use soft category colors as a visual legend. */
+.quick-flags button[data-flag="重点"],
+.flag-row button[data-flag="重点"]{background:#eef5ff;border-color:#c7d9ff;color:#315d9e}
+.quick-flags button[data-flag="考试"],
+.flag-row button[data-flag="考试"]{background:#fff0f2;border-color:#f2c0c7;color:#ae4353}
+.quick-flags button[data-flag="没听懂"],
+.flag-row button[data-flag="没听懂"]{background:#fff4e5;border-color:#f0cca0;color:#aa692b}
+.quick-flags button[data-flag="例子"],
+.flag-row button[data-flag="例子"]{background:#eef8f0;border-color:#c4e1ca;color:#4d8559}
+
+/* Selected tags are stronger, especially Key and Exam. */
+.flag-row button.selected[data-flag="重点"]{background:#d9e8ff;border-color:#8fb4f6;color:#1f4f8f;font-weight:850;box-shadow:0 0 0 2px rgba(143,180,246,.12)}
+.flag-row button.selected[data-flag="考试"]{background:#ffdde2;border-color:#e8919e;color:#962f40;font-weight:850;box-shadow:0 0 0 2px rgba(232,145,158,.12)}
+.flag-row button.selected[data-flag="没听懂"]{background:#ffe6c4;border-color:#e5af66;color:#94581e;font-weight:800}
+.flag-row button.selected[data-flag="例子"]{background:#daf0de;border-color:#94cea0;color:#2f7040;font-weight:800}
+
+/* Saved labels reuse the same semantic palette in Original and Full Translation. */
+.meta b[data-flag="重点"],.review-meta b[data-flag="重点"]{background:#d9e8ff;color:#1f4f8f}
+.meta b[data-flag="考试"],.review-meta b[data-flag="考试"]{background:#ffdde2;color:#962f40}
+.meta b[data-flag="没听懂"],.review-meta b[data-flag="没听懂"]{background:#ffe6c4;color:#94581e}
+.meta b[data-flag="例子"],.review-meta b[data-flag="例子"]{background:#daf0de;color:#2f7040}
+
+/* Notes live below the Generate button, never inside Full Translation. */
+.page-notes-action{margin-bottom:12px!important}
+.page-notes-output{max-width:1680px;margin:0 auto 112px;padding:0 8px}
+.page-notes-output .generated-notes{margin:0;padding:18px 20px 22px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.92);box-shadow:0 12px 30px rgba(35,45,35,.045)}
+.page-notes-output .generated-notes-title{font-size:17px;font-weight:900;margin-bottom:12px;letter-spacing:-.02em}
+.page-notes-output .generated-notes pre{white-space:pre-wrap;margin:0;font-family:inherit;font-size:14px;line-height:1.78;color:var(--ink);overflow-wrap:anywhere}
+
+@media(max-width:980px){.page-notes-output{margin-bottom:198px}}
+@media(max-width:680px){.page-notes-action{margin-bottom:10px!important}.page-notes-output{margin:0 auto 214px;padding:0 2px}.page-notes-output .generated-notes{border-radius:18px;padding:16px 15px 20px}.page-notes-output .generated-notes-title{font-size:16px}.page-notes-output .generated-notes pre{font-size:13px}}
