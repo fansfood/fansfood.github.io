@@ -17,15 +17,15 @@
 <body>
   <div class="auth-gate" id="authGate" hidden>
     <section class="auth-card">
-      <div class="brand-mark large brand-translate" title="Translate / 翻译"><span class="mark-zh">译</span><span class="mark-en">T</span></div>
+      <div class="brand-mark large brand-translate" title="Translate / 翻译" aria-label="Translate / 翻译"><span class="mark-zh">译</span><span class="mark-en">T</span><span class="mark-slash" aria-hidden="true">/</span></div>
       <p class="eyebrow">CLASSFLOW CLOUD · 课堂云端</p>
       <h1>登录后开始上课 <small>/ Sign in to start</small></h1>
-      <p class="auth-copy">使用和“食光”相同的 Supabase 账号即可。课堂记录只保存在你的账号下。<br><span class="en-copy">Use the same Supabase account as Eating Time. Your class records stay private to your account.</span></p>
+      <p class="auth-copy">登录你的 ClassFlow 账号，课堂记录只保存在你的账号下。<br><span class="en-copy">Sign in to your ClassFlow account. Your class records stay private to your account.</span></p>
       <form id="authForm">
         <label>邮箱 / Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
         <label>密码 / Password<input id="authPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位 / 6+ characters" /></label>
         <button class="primary wide" id="loginButton" type="submit">登录 / Sign in</button>
-        <button class="secondary wide" id="signupButton" type="button">注册账号 / Sign up</button>
+        <button class="secondary wide" id="signupButton" type="button">注册 ClassFlow / Sign up</button>
       </form>
       <p class="auth-message" id="authMessage"></p>
     </section>
@@ -34,7 +34,7 @@
   <main class="app-shell" id="appShell" hidden>
     <header class="topbar">
       <div class="brand-wrap">
-        <div class="brand-mark brand-translate" title="Translate / 翻译"><span class="mark-zh">译</span><span class="mark-en">T</span></div>
+        <div class="brand-mark brand-translate" title="Translate / 翻译" aria-label="Translate / 翻译"><span class="mark-zh">译</span><span class="mark-en">T</span><span class="mark-slash" aria-hidden="true">/</span></div>
         <div><div class="brand">ClassFlow</div><div class="subtitle"><span class="subtitle-zh">更快、更清晰地翻译课堂内容</span><span class="subtitle-en">Faster, clearer classroom translation</span></div></div>
       </div>
       <div class="top-actions">
