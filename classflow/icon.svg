@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <clipPath id="zhCut"><path d="M64 55H326V291L244 373H64Z"/></clipPath>
-    <clipPath id="tCut"><path d="M258 194H448V448H190V270Z"/></clipPath>
+    <clipPath id="zhClip"><path d="M54 48H326V262L270 318H54Z"/></clipPath>
+    <clipPath id="tClip"><path d="M250 206L306 150H458V458H250Z"/></clipPath>
   </defs>
-  <rect width="512" height="512" rx="118" fill="#17211b"/>
-  <text x="188" y="304" text-anchor="middle" clip-path="url(#zhCut)" fill="#d8ff73" font-size="224" font-weight="900" font-family="Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif">译</text>
-  <text x="351" y="416" text-anchor="middle" clip-path="url(#tCut)" fill="#d8ff73" font-size="190" font-weight="900" font-family="Arial, sans-serif">T</text>
-  <text x="256" y="340" text-anchor="middle" fill="#f3f4ee" font-size="265" font-weight="900" font-family="Arial, sans-serif" transform="rotate(-4 256 256)">/</text>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#17211b"/>
+  <text x="181" y="296" text-anchor="middle" clip-path="url(#zhClip)" fill="#d8ff73" font-size="218" font-weight="900" font-family="'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',Arial,sans-serif">译</text>
+  <text x="357" y="423" text-anchor="middle" clip-path="url(#tClip)" fill="#d8ff73" font-size="194" font-weight="900" font-family="Arial,Helvetica,sans-serif">T</text>
+  <line x1="220" y1="404" x2="315" y2="108" stroke="#f3f4ee" stroke-width="19" stroke-linecap="round"/>
 </svg>
