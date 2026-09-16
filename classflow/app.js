@@ -1,9 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/+esm'
 
-const SUPABASE_URL = 'https://wcjcbbnvaejwynnrhfld.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_ZY8d8JS8AqF47XzZP-GLSA_hsjNzhU3'
+const SUPABASE_URL = 'https://ozegqygkyoigvnfkbuyd.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_YTjdt2VvvyWIeRsTRgpe2g_Q2cO4Mwd'
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'classflow-auth-v1' },
 })
 
 const $ = (id) => document.getElementById(id)
@@ -189,7 +189,7 @@ async function enterApp(session){
   setStatus('云端已连接 / Cloud connected');render();await Promise.all([loadHistory(),checkAI()])
 }
 
-$('authForm').onsubmit=async(e)=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');try{await signIn($('authEmail').value.trim(),$('authPassword').value);showAuthMessage('登录成功 / Signed in')}catch(err){showAuthMessage(err.message||'登录失败 / Sign-in failed',true)}}
+$('authForm').onsubmit=async(e)=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');try{await signIn($('authEmail').value.trim(),$('authPassword').value);showAuthMessage('登录成功 / Signed in')}catch(err){const raw=String(err?.message||'');const friendly=/invalid login credentials/i.test(raw)?'邮箱或密码不正确，或该 ClassFlow 账号尚未注册。 / Incorrect email or password, or this ClassFlow account has not been registered yet.':(raw||'登录失败 / Sign-in failed');showAuthMessage(friendly,true)}}
 $('signupButton').onclick=async()=>{showAuthMessage('正在注册… / Signing up');try{const d=await signUp($('authEmail').value.trim(),$('authPassword').value);showAuthMessage(d.session?'注册并登录成功 / Signed up and signed in':'注册成功，请检查邮箱完成确认后再登录 / Sign-up complete; check your email before signing in')}catch(err){showAuthMessage(err.message||'注册失败 / Sign-up failed',true)}}
 $('logoutButton').onclick=async()=>{stop();await supabase.auth.signOut();state.user=null;state.sessionId=null;state.entries=[];state.notes='';$('accountPopover').hidden=true;await enterApp(null)}
 $('recordButton').onclick=()=>state.isListening?stop():start()
