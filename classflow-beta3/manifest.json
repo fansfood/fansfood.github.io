@@ -1,0 +1,13 @@
+{
+  "name": "ClassFlow Beta 3",
+  "short_name": "ClassFlow β3",
+  "description": "ClassFlow Beta 3.0 full classroom translation beta",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f4ee",
+  "theme_color": "#17211b",
+  "icons": [
+    {"src":"../classflow/icon.svg?v=13","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
