@@ -1,13 +1,13 @@
 {
-  "name": "ClassFlow · 课堂翻译 / AI Classroom Translator",
+  "name": "ClassFlow 2.0 · v13 · 课堂翻译",
   "short_name": "ClassFlow",
-  "description": "更快、更清晰地翻译课堂内容 · Faster, clearer classroom translation",
+  "description": "本地优先课堂语音识别与英中翻译 · Local-first classroom speech and EN→ZH translation",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f3f4ee",
   "theme_color": "#17211b",
   "icons": [
-    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+    {"src":"./icon.svg?v=13","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
   ]
 }
