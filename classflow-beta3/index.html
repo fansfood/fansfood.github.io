@@ -6,19 +6,19 @@
   <meta name="theme-color" content="#17211b" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="ClassFlow Beta 3" />
-  <title>ClassFlow Beta 3.0 · v1</title>
+  <title>ClassFlow Beta 3.0 · v2</title>
   <meta name="description" content="ClassFlow Beta 3.0：全功能课堂翻译内测，多模型翻译，AI 课堂总结暂不上线" />
-  <link rel="manifest" href="./manifest.json?v=1" />
+  <link rel="manifest" href="./manifest.json?v=2" />
   <link rel="icon" href="../classflow/icon.svg?v=13" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="../classflow/icon.svg?v=13" />
-  <link rel="stylesheet" href="./beta3.css?v=1" />
+  <link rel="stylesheet" href="./beta3.css?v=2" />
 </head>
 <body>
   <div class="auth-gate" id="authGate" hidden>
     <section class="auth-card">
       <div class="beta-brand">
         <img src="../classflow/icon.svg?v=13" alt="ClassFlow" />
-        <div><strong>ClassFlow</strong><span>BETA 3.0 · v1</span></div>
+        <div><strong>ClassFlow</strong><span>BETA 3.0 · v2</span></div>
       </div>
       <h1>进入 Beta 3 <small>/ Sign in</small></h1>
       <p>与正式版共用 ClassFlow 账号和课堂数据。Beta 3 恢复全量课堂功能，但 AI 课堂总结暂不上线。</p>
@@ -39,7 +39,7 @@
       <div class="brand-wrap">
         <img src="../classflow/icon.svg?v=13" alt="ClassFlow" />
         <div>
-          <div class="brand-line"><strong>ClassFlow</strong><span class="beta-badge">BETA 3.0 · v1</span></div>
+          <div class="brand-line"><strong>ClassFlow</strong><span class="beta-badge">BETA 3.0 · v2</span></div>
           <div class="tagline">全功能课堂翻译内测 · Full classroom translation beta</div>
         </div>
       </div>
@@ -120,7 +120,7 @@
         <div class="stream" id="translationStream"></div>
       </section>
       <section class="column review-column">
-        <div class="column-head"><div><span>03</span><h2>Full Translation / 全文翻译</h2></div><small>连续课堂译文 / Continuous view</small></div>
+        <div class="column-head"><div><span>03</span><h2>Full Translation / 全文翻译</h2></div><small>整理后的连续译文 / Clean paragraph view</small></div>
         <div class="review-area" id="reviewArea"></div>
       </section>
     </section>
@@ -140,7 +140,7 @@
     </section>
 
     <section class="notes-disabled">
-      <strong>AI 课堂总结暂未上线 / AI class summary is not enabled in Beta 3 v1</strong>
+      <strong>AI 课堂总结暂未上线 / AI class summary is not enabled in Beta 3 v2</strong>
       <span>先保证实时识别、翻译、全文回顾、录音与云同步稳定。</span>
     </section>
 
@@ -157,11 +157,12 @@
 
     <div class="account-popover" id="accountPopover" hidden>
       <strong id="accountEmail">—</strong>
-      <span>ClassFlow Beta 3.0 · v1</span>
+      <span>ClassFlow Beta 3.0 · v2</span>
       <button id="logoutButton">退出登录 / Sign out</button>
     </div>
   </main>
 
-  <script type="module" src="./app.js?v=1"></script>
+  <script type="module" src="./app.js?v=2"></script>
+  <script src="./review-clean-v2.js?v=2" defer></script>
 </body>
 </html>
