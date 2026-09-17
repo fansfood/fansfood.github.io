@@ -7,21 +7,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="ClassFlow Beta" />
-  <title>ClassFlow Beta 2.0 · v12 · 本地优先</title>
-  <meta name="description" content="ClassFlow Beta 2.0 v12：独立本地优先课堂语音识别，不调用 OpenAI" />
-  <link rel="manifest" href="./manifest.json?v=12" />
-  <link rel="icon" href="../classflow/icon.svg?v=12" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="../classflow/icon.svg?v=12" />
-  <link rel="stylesheet" href="../classflow/style.css?v=12" />
-  <link rel="stylesheet" href="../classflow/layout-fix.css?v=12" />
-  <link rel="stylesheet" href="../classflow/hierarchy-fix.css?v=12" />
-  <link rel="stylesheet" href="../classflow/interaction-fix.css?v=12" />
+  <title>ClassFlow Beta 2.0 · v13 · 本地识别与翻译</title>
+  <meta name="description" content="ClassFlow Beta 2.0 v13：本地优先课堂语音识别与英中翻译，不调用 OpenAI" />
+  <link rel="manifest" href="./manifest.json?v=13" />
+  <link rel="icon" href="../classflow/icon.svg?v=13" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../classflow/icon.svg?v=13" />
+  <link rel="stylesheet" href="../classflow/style.css?v=13" />
+  <link rel="stylesheet" href="../classflow/layout-fix.css?v=13" />
+  <link rel="stylesheet" href="../classflow/hierarchy-fix.css?v=13" />
+  <link rel="stylesheet" href="../classflow/interaction-fix.css?v=13" />
 </head>
 <body>
   <div class="auth-gate" id="authGate" hidden>
     <section class="auth-card">
-      <img class="brand-logo large" src="../classflow/icon.svg?v=12" alt="ClassFlow Translate / 翻译" />
-      <p class="eyebrow">CLASSFLOW BETA · 2.0 · v12</p>
+      <img class="brand-logo large" src="../classflow/icon.svg?v=13" alt="ClassFlow Translate / 翻译" />
+      <p class="eyebrow">CLASSFLOW BETA · 2.0 · v13</p>
       <h1>登录后开始上课 <small>/ Sign in to start</small></h1>
       <form id="authForm">
         <label>邮箱 / Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
@@ -29,7 +29,7 @@
         <button class="primary wide" id="loginButton" type="submit">登录 / Sign in</button>
         <button class="secondary wide" id="signupButton" type="button">注册 ClassFlow / Sign up</button>
       </form>
-      <div class="auth-hint"><strong>还没有账号？请先注册。v12 为本地优先测试版，不调用 OpenAI。</strong><span>New here? Sign up first. v12 is local-first and does not call OpenAI.</span></div>
+      <div class="auth-hint"><strong>还没有账号？请先注册。v13 使用本地识别与本地翻译，不调用 OpenAI。</strong><span>New here? Sign up first. v13 uses local speech and local translation with no OpenAI calls.</span></div>
       <p class="auth-message" id="authMessage"></p>
     </section>
   </div>
@@ -37,10 +37,10 @@
   <main class="app-shell" id="appShell" hidden>
     <header class="topbar">
       <div class="brand-wrap">
-        <img class="brand-logo" src="../classflow/icon.svg?v=12" alt="ClassFlow Translate / 翻译" />
+        <img class="brand-logo" src="../classflow/icon.svg?v=13" alt="ClassFlow Translate / 翻译" />
         <div>
           <div class="brand">ClassFlow</div>
-          <div class="subtitle"><span class="subtitle-zh">BETA 2.0 · v12 · 本地优先课堂识别</span><span class="subtitle-en">BETA 2.0 · v12 · Local-first classroom transcription</span></div>
+          <div class="subtitle"><span class="subtitle-zh">BETA 2.0 · v13 · 本地识别 + 本地翻译</span><span class="subtitle-en">BETA 2.0 · v13 · Local speech + local translation</span></div>
         </div>
       </div>
       <div class="top-actions">
@@ -55,7 +55,7 @@
       <div class="hero-main">
         <label class="eyebrow">CURRENT CLASS · 当前课堂</label>
         <input class="class-title" id="classTitle" value="Mechatronics" aria-label="课程名称" />
-        <div class="status-line"><span id="status">BETA 2.0 · v12 · 本地优先，不调用 OpenAI</span> · <span id="recordCount">0 条记录 / records</span></div>
+        <div class="status-line"><span id="status">BETA 2.0 · v13 · 本地优先</span> · <span id="recordCount">0 条记录 / records</span> · <span id="modelStatus">本地翻译模型：点击开始后加载 / Local model loads when Start is tapped</span></div>
       </div>
       <div class="settings-row">
         <label>老师语言 / Teacher Language
@@ -65,7 +65,7 @@
             <option value="zh-CN">中文</option>
           </select>
         </label>
-        <label>翻译 / Translation<select disabled><option>暂关闭 / Off in v12</option></select></label>
+        <label>翻译 / Translation<select disabled><option>本地简体中文 / Local Simplified Chinese</option></select></label>
         <button class="new-class" id="newSession">＋ 新建课堂 / New Class</button>
       </div>
     </section>
@@ -76,11 +76,11 @@
         <div class="stream" id="originalStream"></div>
       </section>
       <section class="column">
-        <div class="column-head"><div><span class="head-kicker">02</span><h2>Translation / 翻译</h2></div><span>v12 暂关闭 / Off</span></div>
+        <div class="column-head"><div><span class="head-kicker">02</span><h2>Translation / 翻译</h2></div><span>本地英中 / Local EN→ZH</span></div>
         <div class="stream" id="translationStream"></div>
       </section>
       <section class="column review-column">
-        <div class="column-head"><div><span class="head-kicker">03</span><h2>Full Translation / 全文翻译</h2></div><span>v12 暂关闭 / Off</span></div>
+        <div class="column-head"><div><span class="head-kicker">03</span><h2>Full Translation / 全文翻译</h2></div><span>连续本地译文 / Local continuous view</span></div>
         <div class="review-area" id="reviewArea"></div>
       </section>
     </section>
@@ -105,6 +105,6 @@
     </div>
   </main>
 
-  <script type="module" src="./local-v12.js?v=12"></script>
+  <script type="module" src="./local-v13.js?v=13"></script>
 </body>
 </html>
