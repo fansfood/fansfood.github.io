@@ -1,0 +1,13 @@
+{
+  "name": "ClassFlow Beta",
+  "short_name": "ClassFlow β",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f4ee",
+  "theme_color": "#17211b",
+  "description": "ClassFlow 2.0 internal beta",
+  "icons": [
+    {"src":"../classflow/icon.svg?v=10","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
