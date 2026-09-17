@@ -7,21 +7,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="ClassFlow Beta" />
-  <title>ClassFlow Beta 2.0 · v11 · 本地优先</title>
-  <meta name="description" content="ClassFlow Beta 2.0 v11：本地优先课堂语音识别，不调用 OpenAI" />
-  <link rel="manifest" href="./manifest.json?v=11" />
-  <link rel="icon" href="../classflow/icon.svg?v=11" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="../classflow/icon.svg?v=11" />
-  <link rel="stylesheet" href="../classflow/style.css?v=11" />
-  <link rel="stylesheet" href="../classflow/layout-fix.css?v=11" />
-  <link rel="stylesheet" href="../classflow/hierarchy-fix.css?v=11" />
-  <link rel="stylesheet" href="../classflow/interaction-fix.css?v=11" />
+  <title>ClassFlow Beta 2.0 · v12 · 本地优先</title>
+  <meta name="description" content="ClassFlow Beta 2.0 v12：独立本地优先课堂语音识别，不调用 OpenAI" />
+  <link rel="manifest" href="./manifest.json?v=12" />
+  <link rel="icon" href="../classflow/icon.svg?v=12" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../classflow/icon.svg?v=12" />
+  <link rel="stylesheet" href="../classflow/style.css?v=12" />
+  <link rel="stylesheet" href="../classflow/layout-fix.css?v=12" />
+  <link rel="stylesheet" href="../classflow/hierarchy-fix.css?v=12" />
+  <link rel="stylesheet" href="../classflow/interaction-fix.css?v=12" />
 </head>
 <body>
   <div class="auth-gate" id="authGate" hidden>
     <section class="auth-card">
-      <img class="brand-logo large" src="../classflow/icon.svg?v=11" alt="ClassFlow Translate / 翻译" />
-      <p class="eyebrow">CLASSFLOW BETA · 2.0 · v11</p>
+      <img class="brand-logo large" src="../classflow/icon.svg?v=12" alt="ClassFlow Translate / 翻译" />
+      <p class="eyebrow">CLASSFLOW BETA · 2.0 · v12</p>
       <h1>登录后开始上课 <small>/ Sign in to start</small></h1>
       <form id="authForm">
         <label>邮箱 / Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
@@ -29,7 +29,7 @@
         <button class="primary wide" id="loginButton" type="submit">登录 / Sign in</button>
         <button class="secondary wide" id="signupButton" type="button">注册 ClassFlow / Sign up</button>
       </form>
-      <div class="auth-hint"><strong>还没有账号？请先注册。v11 为本地优先测试版，不调用 OpenAI。</strong><span>New here? Sign up first. v11 is local-first and does not call OpenAI.</span></div>
+      <div class="auth-hint"><strong>还没有账号？请先注册。v12 为本地优先测试版，不调用 OpenAI。</strong><span>New here? Sign up first. v12 is local-first and does not call OpenAI.</span></div>
       <p class="auth-message" id="authMessage"></p>
     </section>
   </div>
@@ -37,10 +37,10 @@
   <main class="app-shell" id="appShell" hidden>
     <header class="topbar">
       <div class="brand-wrap">
-        <img class="brand-logo" src="../classflow/icon.svg?v=11" alt="ClassFlow Translate / 翻译" />
+        <img class="brand-logo" src="../classflow/icon.svg?v=12" alt="ClassFlow Translate / 翻译" />
         <div>
           <div class="brand">ClassFlow</div>
-          <div class="subtitle"><span class="subtitle-zh">BETA 2.0 · v11 · 本地优先课堂识别</span><span class="subtitle-en">BETA 2.0 · v11 · Local-first classroom transcription</span></div>
+          <div class="subtitle"><span class="subtitle-zh">BETA 2.0 · v12 · 本地优先课堂识别</span><span class="subtitle-en">BETA 2.0 · v12 · Local-first classroom transcription</span></div>
         </div>
       </div>
       <div class="top-actions">
@@ -51,17 +51,11 @@
       </div>
     </header>
 
-    <aside class="history-drawer" id="historyDrawer" aria-hidden="true">
-      <div class="drawer-head"><div><span class="eyebrow">MY COURSES · 我的课程</span><h2>我的课程 <small>/ My Courses</small></h2></div><button class="icon-button" id="closeHistory">×</button></div>
-      <div class="history-list" id="historyList"></div>
-    </aside>
-    <div class="drawer-mask" id="drawerMask" hidden></div>
-
     <section class="hero-panel">
       <div class="hero-main">
         <label class="eyebrow">CURRENT CLASS · 当前课堂</label>
         <input class="class-title" id="classTitle" value="Mechatronics" aria-label="课程名称" />
-        <div class="status-line"><span id="status">BETA 2.0 · v11 · 本地优先，不调用 OpenAI</span> · <span id="recordCount">0 条记录 / records</span></div>
+        <div class="status-line"><span id="status">BETA 2.0 · v12 · 本地优先，不调用 OpenAI</span> · <span id="recordCount">0 条记录 / records</span></div>
       </div>
       <div class="settings-row">
         <label>老师语言 / Teacher Language
@@ -71,7 +65,7 @@
             <option value="zh-CN">中文</option>
           </select>
         </label>
-        <label>翻译 / Translation<select disabled><option>暂关闭 / Off in v11</option></select></label>
+        <label>翻译 / Translation<select disabled><option>暂关闭 / Off in v12</option></select></label>
         <button class="new-class" id="newSession">＋ 新建课堂 / New Class</button>
       </div>
     </section>
@@ -82,11 +76,11 @@
         <div class="stream" id="originalStream"></div>
       </section>
       <section class="column">
-        <div class="column-head"><div><span class="head-kicker">02</span><h2>Translation / 翻译</h2></div><span>v11 暂关闭 / Off</span></div>
+        <div class="column-head"><div><span class="head-kicker">02</span><h2>Translation / 翻译</h2></div><span>v12 暂关闭 / Off</span></div>
         <div class="stream" id="translationStream"></div>
       </section>
       <section class="column review-column">
-        <div class="column-head"><div><span class="head-kicker">03</span><h2>Full Translation / 全文翻译</h2></div><span>v11 暂关闭 / Off</span></div>
+        <div class="column-head"><div><span class="head-kicker">03</span><h2>Full Translation / 全文翻译</h2></div><span>v12 暂关闭 / Off</span></div>
         <div class="review-area" id="reviewArea"></div>
       </section>
     </section>
@@ -94,7 +88,7 @@
     <section class="page-notes-action" aria-label="课堂笔记操作 / Class notes action">
       <button class="notes-button page-notes-button" id="generateNotes" disabled>本地模式暂不生成 AI 笔记 / AI Notes Off</button>
     </section>
-    <section class="page-notes-output" id="notesOutput" hidden aria-live="polite"></section>
+    <section class="page-notes-output" id="notesOutput" hidden></section>
 
     <footer class="control-dock">
       <div class="quick-flags" id="quickFlags">
@@ -106,13 +100,11 @@
 
     <div class="account-popover" id="accountPopover" hidden>
       <strong id="accountEmail">—</strong>
-      <span>ClassFlow 账号 / Account</span>
+      <span>ClassFlow 本地优先 / Local First</span>
       <button id="logoutButton">退出登录 / Sign out</button>
     </div>
   </main>
 
-  <script type="module" src="../classflow/app.js?v=11"></script>
-  <script src="../classflow/ui-hotfix.js?v=11" defer></script>
-  <script src="./local-v11.js?v=11" defer></script>
+  <script type="module" src="./local-v12.js?v=12"></script>
 </body>
 </html>
