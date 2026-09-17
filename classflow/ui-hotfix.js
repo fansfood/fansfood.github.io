@@ -172,4 +172,23 @@
   else schedule();
 
   new MutationObserver(schedule).observe(document.documentElement, {subtree:true, childList:true, characterData:true});
+
+  // Beta-only v10 loader. Stable ClassFlow is untouched.
+  if(location.pathname.includes('/classflow-beta/')){
+    const loadV10 = () => {
+      document.title = 'ClassFlow Beta 2.0 · v10 · 云端课堂翻译';
+      document.querySelectorAll('.eyebrow,.subtitle-zh,.subtitle-en').forEach((el) => {
+        el.textContent = el.textContent.replace(/v9/g,'v10');
+      });
+      if(!document.getElementById('classflowPriorityV10')){
+        const script = document.createElement('script');
+        script.id = 'classflowPriorityV10';
+        script.src = './priority-v10.js?v=10';
+        script.defer = true;
+        document.body.appendChild(script);
+      }
+    };
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadV10, {once:true});
+    else loadV10();
+  }
 })();
