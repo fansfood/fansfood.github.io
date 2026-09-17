@@ -7,43 +7,29 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="ClassFlow Beta" />
-  <title>ClassFlow Beta 2.0 · v9 · 稳定课堂翻译</title>
-  <meta name="description" content="ClassFlow Beta 2.0 v9：直接复用正式版已验证的稳定课堂翻译核心" />
-  <link rel="manifest" href="./manifest.json?v=9" />
-  <link rel="icon" href="../classflow/icon.svg?v=10" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="../classflow/icon.svg?v=10" />
-  <link rel="stylesheet" href="../classflow/style.css?v=10" />
-  <link rel="stylesheet" href="../classflow/layout-fix.css?v=10" />
-  <link rel="stylesheet" href="../classflow/hierarchy-fix.css?v=10" />
-  <link rel="stylesheet" href="../classflow/interaction-fix.css?v=10" />
+  <title>ClassFlow Beta 2.0 · v11 · 本地优先</title>
+  <meta name="description" content="ClassFlow Beta 2.0 v11：本地优先课堂语音识别，不调用 OpenAI" />
+  <link rel="manifest" href="./manifest.json?v=11" />
+  <link rel="icon" href="../classflow/icon.svg?v=11" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../classflow/icon.svg?v=11" />
+  <link rel="stylesheet" href="../classflow/style.css?v=11" />
+  <link rel="stylesheet" href="../classflow/layout-fix.css?v=11" />
+  <link rel="stylesheet" href="../classflow/hierarchy-fix.css?v=11" />
+  <link rel="stylesheet" href="../classflow/interaction-fix.css?v=11" />
 </head>
 <body>
   <div class="auth-gate" id="authGate" hidden>
     <section class="auth-card">
-      <img class="brand-logo large" src="../classflow/icon.svg?v=10" alt="ClassFlow Translate / 翻译" />
-      <p class="eyebrow">CLASSFLOW BETA · 2.0 · v9</p>
+      <img class="brand-logo large" src="../classflow/icon.svg?v=11" alt="ClassFlow Translate / 翻译" />
+      <p class="eyebrow">CLASSFLOW BETA · 2.0 · v11</p>
       <h1>登录后开始上课 <small>/ Sign in to start</small></h1>
-      <div class="auth-hint"><strong>还没有账号？请先点击“注册 ClassFlow / Sign up”。当前无需邮箱确认，注册成功后会直接进入。</strong><span>New here? Tap “Sign up”. Email confirmation is currently disabled, so successful registration signs you in immediately.</span></div>
       <form id="authForm">
         <label>邮箱 / Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
         <label>密码 / Password<input id="authPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位 / 6+ characters" /></label>
         <button class="primary wide" id="loginButton" type="submit">登录 / Sign in</button>
         <button class="secondary wide" id="signupButton" type="button">注册 ClassFlow / Sign up</button>
       </form>
-      <section class="otp-panel" id="otpPanel" hidden aria-live="polite">
-        <div class="otp-icon">✉</div>
-        <h2>验证邮箱 / Verify Email</h2>
-        <p>验证码已发送到 <strong id="otpEmail">—</strong>。请直接在 ClassFlow 输入邮件中的验证码，无需打开 Supabase 页面。</p>
-        <p class="otp-en">A verification code was sent to your email. Enter it directly in ClassFlow; no Supabase confirmation page is required.</p>
-        <label class="otp-label">邮箱验证码 / Verification code
-          <input id="otpCode" class="otp-code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="请输入验证码 / Enter code" />
-        </label>
-        <button class="primary wide" id="verifyOtpButton" type="button">确认并完成注册 / Verify & continue</button>
-        <div class="otp-actions">
-          <button class="link-button" id="resendOtpButton" type="button">重新发送验证码 / Resend</button>
-          <button class="link-button" id="backToLoginButton" type="button">返回登录 / Back to sign in</button>
-        </div>
-      </section>
+      <div class="auth-hint"><strong>还没有账号？请先注册。v11 为本地优先测试版，不调用 OpenAI。</strong><span>New here? Sign up first. v11 is local-first and does not call OpenAI.</span></div>
       <p class="auth-message" id="authMessage"></p>
     </section>
   </div>
@@ -51,14 +37,14 @@
   <main class="app-shell" id="appShell" hidden>
     <header class="topbar">
       <div class="brand-wrap">
-        <img class="brand-logo" src="../classflow/icon.svg?v=10" alt="ClassFlow Translate / 翻译" />
+        <img class="brand-logo" src="../classflow/icon.svg?v=11" alt="ClassFlow Translate / 翻译" />
         <div>
           <div class="brand">ClassFlow</div>
-          <div class="subtitle"><span class="subtitle-zh">BETA 2.0 · v9 · 更快、更清晰地翻译课堂内容</span><span class="subtitle-en">BETA 2.0 · v9 · Faster, clearer classroom translation</span></div>
+          <div class="subtitle"><span class="subtitle-zh">BETA 2.0 · v11 · 本地优先课堂识别</span><span class="subtitle-en">BETA 2.0 · v11 · Local-first classroom transcription</span></div>
         </div>
       </div>
       <div class="top-actions">
-        <span class="sync-pill" id="syncPill">☁ 已连接 / Connected</span>
+        <span class="sync-pill" id="syncPill">本地优先 / Local First</span>
         <span class="live-pill" id="livePill"><span class="dot"></span><span id="liveText">READY</span></span>
         <button class="ghost compact" id="historyButton">我的课程 / My Courses</button>
         <button class="ghost compact" id="accountButton">账号 / Account</button>
@@ -75,7 +61,7 @@
       <div class="hero-main">
         <label class="eyebrow">CURRENT CLASS · 当前课堂</label>
         <input class="class-title" id="classTitle" value="Mechatronics" aria-label="课程名称" />
-        <div class="status-line"><span id="status">正在连接云端… / Connecting to cloud…</span> · <span id="recordCount">0 条记录 / records</span></div>
+        <div class="status-line"><span id="status">BETA 2.0 · v11 · 本地优先，不调用 OpenAI</span> · <span id="recordCount">0 条记录 / records</span></div>
       </div>
       <div class="settings-row">
         <label>老师语言 / Teacher Language
@@ -85,28 +71,28 @@
             <option value="zh-CN">中文</option>
           </select>
         </label>
-        <label>翻译为 / Translate to<select disabled><option>简体中文 / Simplified Chinese</option></select></label>
+        <label>翻译 / Translation<select disabled><option>暂关闭 / Off in v11</option></select></label>
         <button class="new-class" id="newSession">＋ 新建课堂 / New Class</button>
       </div>
     </section>
 
     <section class="workspace">
       <section class="column">
-        <div class="column-head"><div><span class="head-kicker">01</span><h2>Original / 原文</h2></div><span>原始字幕 / Live transcript</span></div>
+        <div class="column-head"><div><span class="head-kicker">01</span><h2>Original / 原文</h2></div><span>本地语音识别 / Local speech</span></div>
         <div class="stream" id="originalStream"></div>
       </section>
       <section class="column">
-        <div class="column-head"><div><span class="head-kicker">02</span><h2>Translation / 翻译</h2></div><span>中文翻译 / Chinese</span></div>
+        <div class="column-head"><div><span class="head-kicker">02</span><h2>Translation / 翻译</h2></div><span>v11 暂关闭 / Off</span></div>
         <div class="stream" id="translationStream"></div>
       </section>
       <section class="column review-column">
-        <div class="column-head"><div><span class="head-kicker">03</span><h2>Full Translation / 全文翻译</h2></div><span>连续课堂译文 / Continuous view</span></div>
+        <div class="column-head"><div><span class="head-kicker">03</span><h2>Full Translation / 全文翻译</h2></div><span>v11 暂关闭 / Off</span></div>
         <div class="review-area" id="reviewArea"></div>
       </section>
     </section>
 
     <section class="page-notes-action" aria-label="课堂笔记操作 / Class notes action">
-      <button class="notes-button page-notes-button" id="generateNotes">生成课堂笔记 / Generate Class Notes</button>
+      <button class="notes-button page-notes-button" id="generateNotes" disabled>本地模式暂不生成 AI 笔记 / AI Notes Off</button>
     </section>
     <section class="page-notes-output" id="notesOutput" hidden aria-live="polite"></section>
 
@@ -120,13 +106,13 @@
 
     <div class="account-popover" id="accountPopover" hidden>
       <strong id="accountEmail">—</strong>
-      <span>课堂记录已启用云同步 / Cloud sync enabled</span>
+      <span>ClassFlow 账号 / Account</span>
       <button id="logoutButton">退出登录 / Sign out</button>
     </div>
   </main>
 
-  <!-- v9 deliberately uses the exact proven Stable core. No Beta speech wrappers are loaded. -->
-  <script type="module" src="../classflow/app.js?v=10"></script>
-  <script src="../classflow/ui-hotfix.js?v=10" defer></script>
+  <script type="module" src="../classflow/app.js?v=11"></script>
+  <script src="../classflow/ui-hotfix.js?v=11" defer></script>
+  <script src="./local-v11.js?v=11" defer></script>
 </body>
 </html>
