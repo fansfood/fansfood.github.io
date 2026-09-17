@@ -23,6 +23,13 @@
     }
   }
 
+  function reorderAuthCard(){
+    const form = document.getElementById('authForm');
+    const hint = document.querySelector('.auth-card .auth-hint');
+    if(!form || !hint) return;
+    if(form.nextElementSibling !== hint) form.insertAdjacentElement('afterend', hint);
+  }
+
   function isStandalone(){
     return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
@@ -38,6 +45,10 @@
     style.textContent = `
       .classflow-install-button{display:inline-flex;align-items:center;justify-content:center;gap:.45rem}
       .classflow-install-button::before{content:'↓';font-weight:800}
+      .auth-card #authForm{margin-bottom:0}
+      .auth-card .auth-hint{margin:12px 0 0}
+      .auth-card #installAppAuth{margin-top:12px}
+      .auth-card #signupButton{margin-top:2px}
       .classflow-install-mask{position:fixed;inset:0;z-index:9999;background:rgba(11,18,14,.62);backdrop-filter:blur(8px);display:grid;place-items:center;padding:20px}
       .classflow-install-card{width:min(92vw,430px);border-radius:24px;background:#f7f7f1;color:#17211b;box-shadow:0 28px 80px rgba(0,0,0,.28);padding:24px}
       .classflow-install-card h2{margin:0 0 10px;font-size:22px}
@@ -116,9 +127,11 @@
     installStyle();
 
     const authForm = document.getElementById('authForm');
+    const authHint = document.querySelector('.auth-card .auth-hint');
     if(authForm && !document.getElementById('installAppAuth')){
       const button = createInstallButton('installAppAuth', 'secondary wide', '安装 ClassFlow App / Install App');
-      authForm.insertAdjacentElement('afterend', button);
+      if(authHint) authHint.insertAdjacentElement('afterend', button);
+      else authForm.insertAdjacentElement('afterend', button);
     }
 
     const topActions = document.querySelector('.top-actions');
@@ -132,6 +145,7 @@
     scheduled = false;
     applyFlagColors();
     moveNotesBelowButton();
+    reorderAuthCard();
     ensureInstallButtons();
   }
 
