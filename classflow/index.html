@@ -6,19 +6,19 @@
   <meta name="theme-color" content="#17211b" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="ClassFlow" />
-  <title>ClassFlow 3.0 · v2 · 实时课堂翻译</title>
+  <title>ClassFlow 3.0 · v2.1 · 实时课堂翻译</title>
   <meta name="description" content="ClassFlow 3.0：实时课堂识别、多模型翻译、全文自然分段、课程记录与录音留存" />
-  <link rel="manifest" href="./manifest.json?v=3" />
+  <link rel="manifest" href="./manifest.json?v=3.0.2.1" />
   <link rel="icon" href="./icon.svg?v=13" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./icon.svg?v=13" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fansfood/fansfood.github.io@1d8fe4d1909b35f5505b9565d624a63fa5915d59/classflow-beta3/beta3.css" />
+  <link rel="stylesheet" href="../classflow-beta3/beta3.css?v=2" />
 </head>
 <body>
   <div class="auth-gate" id="authGate" hidden>
     <section class="auth-card">
       <div class="beta-brand">
         <img src="./icon.svg?v=13" alt="ClassFlow" />
-        <div><strong>ClassFlow</strong><span>3.0 · v2</span></div>
+        <div><strong>ClassFlow</strong><span>3.0 · v2.1</span></div>
       </div>
       <h1>登录后开始上课 <small>/ Sign in to start</small></h1>
       <p>使用你的 ClassFlow 独立账号。课堂记录、翻译和录音只保存在你的 ClassFlow 账户下。</p>
@@ -38,7 +38,7 @@
       <div class="brand-wrap">
         <img src="./icon.svg?v=13" alt="ClassFlow" />
         <div>
-          <div class="brand-line"><strong>ClassFlow</strong><span class="beta-badge">3.0 · v2</span></div>
+          <div class="brand-line"><strong>ClassFlow</strong><span class="beta-badge">3.0 · v2.1</span></div>
           <div class="tagline">更快、更清晰地翻译课堂内容 · Faster, clearer classroom translation</div>
         </div>
       </div>
@@ -119,7 +119,7 @@
         <div class="stream" id="translationStream"></div>
       </section>
       <section class="column review-column">
-        <div class="column-head"><div><span>03</span><h2>Full Translation / 全文翻译</h2></div><small>连续课堂译文 / Continuous view</small></div>
+        <div class="column-head"><div><span>03</span><h2>Full Translation / 全文翻译</h2></div><small>整理后的连续译文 / Clean paragraph view</small></div>
         <div class="review-area" id="reviewArea"></div>
       </section>
     </section>
@@ -156,19 +156,19 @@
 
     <div class="account-popover" id="accountPopover" hidden>
       <strong id="accountEmail">—</strong>
-      <span>ClassFlow 3.0 · v2</span>
+      <span>ClassFlow 3.0 · v2.1</span>
       <button id="logoutButton">退出登录 / Sign out</button>
     </div>
   </main>
 
-  <script type="module" src="https://cdn.jsdelivr.net/gh/fansfood/fansfood.github.io@1d8fe4d1909b35f5505b9565d624a63fa5915d59/classflow-beta3/app.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/fansfood/fansfood.github.io@1d8fe4d1909b35f5505b9565d624a63fa5915d59/classflow-beta3/review-clean-v2.js" defer></script>
+  <script type="module" src="../classflow-beta3/app.js?v=2"></script>
+  <script src="../classflow-beta3/review-clean-v2.js?v=2" defer></script>
   <script>
   (()=>{
     const rewrite=()=>{
-      document.title='ClassFlow 3.0 · v2 · 实时课堂翻译';
+      document.title='ClassFlow 3.0 · v2.1 · 实时课堂翻译';
       const status=document.getElementById('status');
-      if(status) status.textContent=status.textContent.replace(/BETA 3\.0 · v1/gi,'ClassFlow 3.0 · v2').replace(/Beta 3/gi,'ClassFlow 3.0');
+      if(status) status.textContent=status.textContent.replace(/BETA 3\.0 · v1/gi,'ClassFlow 3.0 · v2.1').replace(/Beta 3/gi,'ClassFlow 3.0');
     };
     const obs=new MutationObserver(rewrite);
     obs.observe(document.documentElement,{subtree:true,childList:true,characterData:true});
