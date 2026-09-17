@@ -3,7 +3,8 @@
   const SUPABASE_KEY='sb_publishable_YTjdt2VvvyWIeRsTRgpe2g_Q2cO4Mwd'
   const NativeRecognition=window.SpeechRecognition||window.webkitSpeechRecognition
   const CLOUD_ERRORS=new Set(['network','service-not-allowed','not-allowed','audio-capture','aborted'])
-  const CHUNK_MS=3200
+  const CHUNK_MS=3000
+  const TARGET_RATE=16000
   const MAX_PARALLEL=2
 
   function findAccessToken(value,depth=0){
@@ -29,24 +30,6 @@
     return''
   }
 
-  function mimeChoice(){
-    const list=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus']
-    return list.find(x=>window.MediaRecorder?.isTypeSupported?.(x))||''
-  }
-
-  function getSharedMic(){
-    const source=window.__classflowMicStream
-    if(!source?.active)return null
-    const track=source.getAudioTracks?.()[0]
-    if(!track||track.readyState!=='live')return null
-    try{
-      const clone=track.clone()
-      return {stream:new MediaStream([clone]),owned:true,source:'clone'}
-    }catch{
-      return {stream:source,owned:false,source:'shared'}
-    }
-  }
-
   function setCloudUi(active=true,detail=''){
     document.documentElement.dataset.classflowAudioCloud=active?'1':'0'
     const status=document.getElementById('status')
@@ -62,15 +45,70 @@
     console.error('[ClassFlow Audio Cloud]',message)
   }
 
+  function getSharedMic(){
+    const stream=window.__classflowMicStream
+    if(!stream?.active)return null
+    const track=stream.getAudioTracks?.()[0]
+    if(!track||track.readyState!=='live')return null
+    return stream
+  }
+
+  function concatFloat32(parts,total){
+    const out=new Float32Array(total)
+    let offset=0
+    for(const part of parts){out.set(part,offset);offset+=part.length}
+    return out
+  }
+
+  function resampleLinear(input,fromRate,toRate){
+    if(fromRate===toRate)return input
+    const ratio=fromRate/toRate
+    const length=Math.max(1,Math.floor(input.length/ratio))
+    const out=new Float32Array(length)
+    for(let i=0;i<length;i++){
+      const pos=i*ratio
+      const left=Math.floor(pos)
+      const right=Math.min(input.length-1,left+1)
+      const frac=pos-left
+      out[i]=input[left]*(1-frac)+input[right]*frac
+    }
+    return out
+  }
+
+  function wavBlob(samples,sampleRate){
+    const buffer=new ArrayBuffer(44+samples.length*2)
+    const view=new DataView(buffer)
+    const write=(offset,text)=>{for(let i=0;i<text.length;i++)view.setUint8(offset+i,text.charCodeAt(i))}
+    write(0,'RIFF')
+    view.setUint32(4,36+samples.length*2,true)
+    write(8,'WAVE')
+    write(12,'fmt ')
+    view.setUint32(16,16,true)
+    view.setUint16(20,1,true)
+    view.setUint16(22,1,true)
+    view.setUint32(24,sampleRate,true)
+    view.setUint32(28,sampleRate*2,true)
+    view.setUint16(32,2,true)
+    view.setUint16(34,16,true)
+    write(36,'data')
+    view.setUint32(40,samples.length*2,true)
+    let offset=44
+    for(let i=0;i<samples.length;i++,offset+=2){
+      const s=Math.max(-1,Math.min(1,samples[i]))
+      view.setInt16(offset,s<0?s*0x8000:s*0x7fff,true)
+    }
+    return new Blob([buffer],{type:'audio/wav'})
+  }
+
   class ResilientSpeechRecognition{
     constructor(){
       this.lang='en-US';this.continuous=true;this.interimResults=true
       this.onresult=null;this.onerror=null;this.onend=null;this.onstart=null
       this._native=NativeRecognition?new NativeRecognition():null
-      this._mode='native';this._stopped=true;this._stream=null;this._ownsStream=false;this._recorder=null
-      this._timer=null;this._watchdog=null;this._ctx=null;this._analyser=null;this._meter=null
-      this._maxLevel=0;this._gotResult=false
-      this._captureSeq=0;this._sendSeq=0;this._nextEmit=1
+      this._mode='native';this._stopped=true;this._stream=null;this._ownsStream=false
+      this._watchdog=null;this._ctx=null;this._source=null;this._processor=null;this._silentGain=null
+      this._pcm=[];this._pcmSamples=0;this._energy=0;this._energySamples=0
+      this._gotResult=false;this._sendSeq=0;this._nextEmit=1
       this._queue=[];this._results=new Map();this._inFlight=0
       if(this._native)this._bindNative()
     }
@@ -79,7 +117,7 @@
       this._native.onstart=()=>{
         this._mode='native';this._gotResult=false;this.onstart?.()
         clearTimeout(this._watchdog)
-        this._watchdog=setTimeout(()=>{if(!this._stopped&&!this._gotResult)this._switchToCloud('timeout')},7000)
+        this._watchdog=setTimeout(()=>{if(!this._stopped&&!this._gotResult)this._switchToCloud('timeout')},6500)
       }
       this._native.onresult=e=>{this._gotResult=true;clearTimeout(this._watchdog);this.onresult?.(e)}
       this._native.onerror=e=>{
@@ -100,6 +138,7 @@
         this._native.lang=this.lang;this._native.continuous=this.continuous;this._native.interimResults=this.interimResults
         try{this._native.start();return}catch{}
       }
+      this.onstart?.()
       this._switchToCloud('unavailable')
     }
 
@@ -119,74 +158,67 @@
       if(this._stopped||this._mode==='cloud')return
       this._mode='cloud';clearTimeout(this._watchdog)
       try{this._native?.abort()}catch{}
-      setCloudUi(true,`浏览器识别异常（${reason}），正在启动 OpenAI 音频云转写… / Browser recognition failed; starting Audio Cloud…`)
+      setCloudUi(true,`浏览器识别异常（${reason}），正在启动 PCM 音频云转写… / Starting PCM Audio Cloud…`)
       try{
         const shared=getSharedMic()
-        if(shared){
-          this._stream=shared.stream;this._ownsStream=shared.owned
-          setCloudUi(true,'正在复用当前麦克风，不再重复申请收音权限… / Reusing the active microphone…')
-        }else{
-          this._stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false})
-          this._ownsStream=true
-        }
-        if(!window.MediaRecorder)throw new Error('当前浏览器不支持 MediaRecorder / MediaRecorder unavailable')
-        this._startMeter()
-        this._recordCycle()
+        if(shared){this._stream=shared;this._ownsStream=false}
+        else{this._stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});this._ownsStream=true}
+        const AC=window.AudioContext||window.webkitAudioContext
+        if(!AC)throw new Error('当前浏览器不支持 Web Audio / Web Audio unavailable')
+        this._ctx=new AC()
+        if(this._ctx.state==='suspended')await this._ctx.resume().catch(()=>{})
+        this._source=this._ctx.createMediaStreamSource(this._stream)
+        const createProcessor=this._ctx.createScriptProcessor?.bind(this._ctx)
+        if(!createProcessor)throw new Error('当前浏览器缺少 PCM 音频处理能力 / PCM audio processor unavailable')
+        this._processor=createProcessor(4096,1,1)
+        this._silentGain=this._ctx.createGain()
+        this._silentGain.gain.value=0.00001
+        this._source.connect(this._processor)
+        this._processor.connect(this._silentGain)
+        this._silentGain.connect(this._ctx.destination)
+        this._processor.onaudioprocess=e=>this._onPcm(e)
+        setCloudUi(true,'PCM Audio Cloud 已启动，等待老师讲话… / PCM Audio Cloud ready; waiting for speech…')
       }catch(err){
         cloudError(String(err?.message||err))
         this.onerror?.({error:'audio-capture',message:String(err?.message||err)})
       }
     }
 
-    _startMeter(){
-      try{
-        this._ctx=new (window.AudioContext||window.webkitAudioContext)()
-        const src=this._ctx.createMediaStreamSource(this._stream)
-        this._analyser=this._ctx.createAnalyser();this._analyser.fftSize=256;src.connect(this._analyser)
-        const buf=new Uint8Array(this._analyser.fftSize)
-        this._meter=setInterval(()=>{
-          if(!this._analyser)return
-          this._analyser.getByteTimeDomainData(buf);let sum=0
-          for(const v of buf){const x=(v-128)/128;sum+=x*x}
-          const rms=Math.sqrt(sum/buf.length);this._maxLevel=Math.max(this._maxLevel,rms)
-        },100)
-      }catch(err){console.warn('[ClassFlow Audio Cloud] meter unavailable',err)}
+    _onPcm(event){
+      if(this._stopped||this._mode!=='cloud')return
+      const input=event.inputBuffer.getChannelData(0)
+      const copy=new Float32Array(input.length);copy.set(input)
+      let energy=0
+      for(let i=0;i<copy.length;i++)energy+=copy[i]*copy[i]
+      this._pcm.push(copy);this._pcmSamples+=copy.length
+      this._energy+=energy;this._energySamples+=copy.length
+      const needed=Math.floor(this._ctx.sampleRate*(CHUNK_MS/1000))
+      if(this._pcmSamples>=needed)this._finalizePcmChunk()
     }
 
-    _recordCycle(){
-      if(this._stopped||this._mode!=='cloud'||!this._stream?.active)return
-      const mime=mimeChoice(),chunks=[];this._maxLevel=0
-      let recorder
-      try{recorder=new MediaRecorder(this._stream,mime?{mimeType:mime,audioBitsPerSecond:48000}:{audioBitsPerSecond:48000})}
-      catch(err){cloudError(`无法建立音频切片：${String(err?.message||err)}`);return}
-      this._recorder=recorder
-      const capture=++this._captureSeq
-      recorder.onerror=e=>cloudError(`录音切片失败：${e?.error?.message||e?.error?.name||'unknown recorder error'}`)
-      recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)}
-      recorder.onstop=()=>{
-        const blob=new Blob(chunks,{type:recorder.mimeType||mime||'audio/webm'})
-        const outerLevel=Number(window.__classflowMicLevel||0)
-        const heard=this._maxLevel>.0035||outerLevel>.0035
-        if(!this._stopped)setTimeout(()=>this._recordCycle(),30)
-        if(!heard){
-          setCloudUi(true,'Audio Cloud 已就绪，等待老师讲话… / Audio Cloud ready; waiting for speech…')
-          return
-        }
-        if(blob.size<=700){cloudError(`音频片段过小（${blob.size} B），继续监听`);return}
-        const seq=++this._sendSeq
-        this._queue.push({seq,blob,capture})
-        this._updateQueueUi()
-        this._pump()
+    _finalizePcmChunk(){
+      const parts=this._pcm;const total=this._pcmSamples
+      const rms=this._energySamples?Math.sqrt(this._energy/this._energySamples):0
+      this._pcm=[];this._pcmSamples=0;this._energy=0;this._energySamples=0
+      const outer=Number(window.__classflowMicLevel||0)
+      const heard=rms>.0015||outer>.003
+      if(!heard){
+        setCloudUi(true,'PCM Audio Cloud 已就绪，等待老师讲话… / PCM Audio Cloud ready; waiting for speech…')
+        return
       }
-      try{recorder.start()}catch(err){cloudError(`录音启动失败：${String(err?.message||err)}`);return}
-      this._timer=setTimeout(()=>{try{if(recorder.state!=='inactive')recorder.stop()}catch{}},CHUNK_MS)
+      const merged=concatFloat32(parts,total)
+      const pcm=resampleLinear(merged,this._ctx.sampleRate,TARGET_RATE)
+      const blob=wavBlob(pcm,TARGET_RATE)
+      const seq=++this._sendSeq
+      this._queue.push({seq,blob})
+      if(this._queue.length>8)this._queue.splice(0,this._queue.length-8)
+      this._updateQueueUi()
+      this._pump()
     }
 
     _updateQueueUi(){
       if(this._mode!=='cloud')return
-      const pending=this._queue.length+this._inFlight
-      setCloudUi(true,`Audio Cloud 工作中 · 转写 ${this._inFlight}/${MAX_PARALLEL} · 等待 ${this._queue.length} / Transcribing ${this._inFlight}/${MAX_PARALLEL}, queued ${this._queue.length}`)
-      document.documentElement.dataset.classflowCloudBacklog=String(pending)
+      setCloudUi(true,`PCM Audio Cloud 工作中 · 转写 ${this._inFlight}/${MAX_PARALLEL} · 等待 ${this._queue.length} / Transcribing ${this._inFlight}/${MAX_PARALLEL}, queued ${this._queue.length}`)
     }
 
     _pump(){
@@ -208,10 +240,11 @@
         if(result?.error){cloudError(`第 ${seq} 段转写失败：${result.error}`);continue}
         const text=String(result?.text||'').trim()
         if(!text)continue
-        const alt={transcript:text,confidence:1},speechResult=[alt];speechResult.isFinal=true
+        const alt={transcript:text,confidence:1}
+        const speechResult=[alt];speechResult.isFinal=true
         this._gotResult=true
         this.onresult?.({resultIndex:0,results:[speechResult]})
-        setCloudUi(true,`Audio Cloud 正常 · 已完成第 ${seq} 段 / Audio Cloud active · chunk ${seq}`)
+        setCloudUi(true,`PCM Audio Cloud 正常 · 已完成第 ${seq} 段 / PCM Audio Cloud active · chunk ${seq}`)
       }
     }
 
@@ -223,7 +256,7 @@
       try{
         const res=await fetch(`${SUPABASE_URL}/functions/v1/classflow-transcribe-chunk`,{
           method:'POST',signal:controller.signal,
-          headers:{'Authorization':`Bearer ${token}`,'apikey':SUPABASE_KEY,'Content-Type':blob.type||'audio/webm','x-audio-mime':blob.type||'audio/webm','x-source-language':this.lang,'x-course-title':title,'x-classflow-chunk':String(seq)},
+          headers:{'Authorization':`Bearer ${token}`,'apikey':SUPABASE_KEY,'Content-Type':'audio/wav','x-audio-mime':'audio/wav','x-source-language':this.lang,'x-course-title':title,'x-classflow-chunk':String(seq)},
           body:blob
         })
         const raw=await res.text();let data={}
@@ -237,13 +270,16 @@
     }
 
     _stopCloud(){
-      clearTimeout(this._timer);clearInterval(this._meter);this._timer=null;this._meter=null
-      try{if(this._recorder&&this._recorder.state!=='inactive')this._recorder.stop()}catch{}
-      this._recorder=null
+      try{if(this._processor)this._processor.onaudioprocess=null}catch{}
+      try{this._source?.disconnect()}catch{}
+      try{this._processor?.disconnect()}catch{}
+      try{this._silentGain?.disconnect()}catch{}
+      this._source=null;this._processor=null;this._silentGain=null
       if(this._ownsStream)this._stream?.getTracks().forEach(t=>t.stop())
       this._stream=null;this._ownsStream=false
-      this._queue=[];this._results.clear();this._inFlight=0;this._nextEmit=1;this._sendSeq=0;this._captureSeq=0
-      try{this._ctx?.close()}catch{};this._ctx=null;this._analyser=null
+      try{this._ctx?.close()}catch{};this._ctx=null
+      this._pcm=[];this._pcmSamples=0;this._energy=0;this._energySamples=0
+      this._queue=[];this._results.clear();this._inFlight=0;this._nextEmit=1;this._sendSeq=0
       document.documentElement.dataset.classflowAudioCloud='0'
     }
   }
@@ -254,7 +290,7 @@
   setInterval(()=>{
     if(document.documentElement.dataset.classflowAudioCloud==='1'){
       const pill=document.getElementById('pipelinePill');if(pill)pill.textContent='管线 / Pipeline: Audio Cloud'
-      const rt=document.getElementById('realtimeStatus');if(rt)rt.textContent='OpenAI 音频云 / Audio Cloud'
+      const rt=document.getElementById('realtimeStatus');if(rt)rt.textContent='OpenAI PCM 云转写 / PCM Audio Cloud'
     }
   },500)
 })()
