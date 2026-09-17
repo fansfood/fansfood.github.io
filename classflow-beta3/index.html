@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#17211b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ClassFlow Beta 3" />
+  <title>ClassFlow Beta 3.0 · v1</title>
+  <meta name="description" content="ClassFlow Beta 3.0：全功能课堂翻译内测，多模型翻译，AI 课堂总结暂不上线" />
+  <link rel="manifest" href="./manifest.json?v=1" />
+  <link rel="icon" href="../classflow/icon.svg?v=13" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../classflow/icon.svg?v=13" />
+  <link rel="stylesheet" href="./beta3.css?v=1" />
+</head>
+<body>
+  <div class="auth-gate" id="authGate" hidden>
+    <section class="auth-card">
+      <div class="beta-brand">
+        <img src="../classflow/icon.svg?v=13" alt="ClassFlow" />
+        <div><strong>ClassFlow</strong><span>BETA 3.0 · v1</span></div>
+      </div>
+      <h1>进入 Beta 3 <small>/ Sign in</small></h1>
+      <p>与正式版共用 ClassFlow 账号和课堂数据。Beta 3 恢复全量课堂功能，但 AI 课堂总结暂不上线。</p>
+      <form id="authForm">
+        <label>邮箱 / Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
+        <label>密码 / Password<input id="authPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位 / 6+ characters" /></label>
+        <button class="primary wide" type="submit">登录 Beta 3 / Sign in</button>
+        <button class="secondary wide" id="signupButton" type="button">注册 ClassFlow / Sign up</button>
+      </form>
+      <div class="auth-hint"><strong>还没有账号？请先注册。</strong><span>New here? Create your ClassFlow account first.</span></div>
+      <p class="auth-message" id="authMessage"></p>
+      <a class="back-link" href="../classflow/">← 返回正式版 / Stable</a>
+    </section>
+  </div>
+
+  <main class="app-shell" id="appShell" hidden>
+    <header class="topbar">
+      <div class="brand-wrap">
+        <img src="../classflow/icon.svg?v=13" alt="ClassFlow" />
+        <div>
+          <div class="brand-line"><strong>ClassFlow</strong><span class="beta-badge">BETA 3.0 · v1</span></div>
+          <div class="tagline">全功能课堂翻译内测 · Full classroom translation beta</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="ghost" id="installButton" hidden>↓ 安装 App / Install</button>
+        <span class="pill synced" id="syncPill">☁ 已同步 / Synced</span>
+        <span class="pill" id="providerPill">翻译引擎 / Engine: —</span>
+        <span class="pill" id="pipelinePill">语音 / Speech: —</span>
+        <span class="pill" id="latencyPill">延迟 / Latency: —</span>
+        <button class="ghost" id="historyButton">我的课程 / My Courses</button>
+        <button class="ghost" id="accountButton">账号 / Account</button>
+      </div>
+    </header>
+
+    <aside class="history-drawer" id="historyDrawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div><span>MY COURSES · 我的课程</span><h2>我的课程 <small>/ My Courses</small></h2></div>
+        <button class="icon-button" id="closeHistory" type="button">×</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </aside>
+    <div class="drawer-mask" id="drawerMask" hidden></div>
+
+    <section class="hero">
+      <div class="hero-main">
+        <label>CURRENT CLASS · 当前课堂</label>
+        <input id="classTitle" value="Mechatronics" aria-label="课程名称" />
+        <div class="status-row"><span id="status">Beta 3 已准备 / Ready</span><span>·</span><span id="recordCount">0 条记录 / records</span></div>
+      </div>
+      <div class="settings">
+        <label>老师语言 / Teacher language
+          <select id="sourceLanguage">
+            <option value="en-US">English</option>
+            <option value="ru-RU">Русский</option>
+            <option value="zh-CN">中文</option>
+          </select>
+        </label>
+        <label>翻译引擎 / Translation engine
+          <select id="translationProvider">
+            <option value="auto">自动 / Auto · DeepSeek → OpenAI</option>
+            <option value="deepseek">DeepSeek Flash</option>
+            <option value="openai">OpenAI</option>
+            <option value="local">本地翻译 / Local</option>
+          </select>
+        </label>
+        <label>语音管线 / Speech pipeline
+          <select id="pipelineMode">
+            <option value="browser">稳定识别 / Stable browser</option>
+            <option value="cloud">云端转写 / Cloud · OpenAI</option>
+            <option value="realtime">Realtime · OpenAI 实验</option>
+          </select>
+        </label>
+        <label>断句 / Segmentation
+          <select id="segmentMode">
+            <option value="smart">智能断句 / Smart</option>
+            <option value="direct">直接断句 / Direct</option>
+          </select>
+        </label>
+        <button class="new-class" id="newSession">＋ 新建课堂 / New Class</button>
+      </div>
+    </section>
+
+    <section class="beta-strip">
+      <div><span class="dot" id="speechDot"></span><strong>语音识别 / Speech</strong><small id="speechStatus">待机 / Idle</small></div>
+      <div><span class="dot" id="translationDot"></span><strong>翻译 / Translation</strong><small id="translationStatus">检查引擎中 / Checking</small></div>
+      <div><span class="dot" id="recordingDot"></span><strong>录音留存 / Recording</strong><small id="recordingStatus">关闭 / Off</small></div>
+      <div><strong>智能断句 / Smart segmentation</strong><small id="segmentStatus">Smart merge</small></div>
+      <label class="switch"><input id="recordingToggle" type="checkbox" /><span></span><b>保留课堂录音 / Keep audio</b></label>
+    </section>
+
+    <section class="workspace">
+      <section class="column">
+        <div class="column-head"><div><span>01</span><h2>Original / 原文</h2></div><small>实时课堂字幕 / Live transcript</small></div>
+        <div class="stream" id="originalStream"></div>
+      </section>
+      <section class="column">
+        <div class="column-head"><div><span>02</span><h2>Translation / 翻译</h2></div><small>中文翻译 / Chinese</small></div>
+        <div class="stream" id="translationStream"></div>
+      </section>
+      <section class="column review-column">
+        <div class="column-head"><div><span>03</span><h2>Full Translation / 全文翻译</h2></div><small>连续课堂译文 / Continuous view</small></div>
+        <div class="review-area" id="reviewArea"></div>
+      </section>
+    </section>
+
+    <section class="diagnostics">
+      <div class="metric"><span>最近翻译</span><strong id="lastLatency">—</strong><small>原文完成 → 中文完成</small></div>
+      <div class="metric"><span>平均翻译</span><strong id="avgLatency">—</strong><small>最近 20 条</small></div>
+      <div class="metric"><span>翻译模型</span><strong id="lastModel">—</strong><small id="providerHealth">正在检查 API</small></div>
+      <div class="metric"><span>录音</span><strong id="recordingDuration">00:00</strong><small id="recordingChunks">0 段已上传</small></div>
+    </section>
+
+    <section class="recordings-panel">
+      <div class="section-head"><div><span>REC</span><h2>课堂录音 / Class Recording</h2></div><button class="ghost" id="retryUploads">重试上传 / Retry</button></div>
+      <p class="hint">录音为可选旁路功能，默认关闭，不允许影响主翻译链路。开启后约每 30 秒切片并保存到你的私有 ClassFlow 账户。</p>
+      <div class="recording-list" id="recordingList"></div>
+      <audio id="audioPlayer" controls hidden></audio>
+    </section>
+
+    <section class="notes-disabled">
+      <strong>AI 课堂总结暂未上线 / AI class summary is not enabled in Beta 3 v1</strong>
+      <span>先保证实时识别、翻译、全文回顾、录音与云同步稳定。</span>
+    </section>
+
+    <footer class="control-dock">
+      <div class="quick-flags" id="quickFlags">
+        <button data-flag="重点">★ 重点 / Key</button>
+        <button data-flag="考试">✓ 考试 / Exam</button>
+        <button data-flag="没听懂">? 没听懂 / Unsure</button>
+        <button data-flag="例子">◇ 例子 / Example</button>
+      </div>
+      <button class="record-button" id="recordButton"><span>●</span><b id="recordLabel">开始听课 / Start</b></button>
+      <div class="exports"><button id="exportMd">Markdown</button><button id="exportWord">Word</button><a href="../classflow/">正式版 / Stable</a></div>
+    </footer>
+
+    <div class="account-popover" id="accountPopover" hidden>
+      <strong id="accountEmail">—</strong>
+      <span>ClassFlow Beta 3.0 · v1</span>
+      <button id="logoutButton">退出登录 / Sign out</button>
+    </div>
+  </main>
+
+  <script type="module" src="./app.js?v=1"></script>
+</body>
+</html>
