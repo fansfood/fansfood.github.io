@@ -79,3 +79,13 @@ linear-gradient(transparent 62%,rgba(9,70,47,.18));}
   .home-brand .cf-logo-inline{width:42px;height:42px}
   .brand-wrap .cf-logo-inline{width:42px;height:42px}
 }
+
+/* Beta 1.005 final logo fix — real PNG embedded in HTML */
+.cf-logo-png{display:block!important;object-fit:cover;flex:0 0 auto;border:0!important;opacity:1!important;visibility:visible!important}
+.home-brand .cf-logo-png{width:50px!important;height:50px!important;border-radius:14px}
+.brand-wrap .cf-logo-png{width:48px!important;height:48px!important;border-radius:14px;transform:rotate(-4deg)}
+.beta-brand .cf-logo-png{width:54px!important;height:54px!important;border-radius:15px}
+@media(max-width:700px){
+  .home-brand .cf-logo-png{width:42px!important;height:42px!important}
+  .brand-wrap .cf-logo-png{width:42px!important;height:42px!important}
+}
