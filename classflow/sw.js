@@ -1,5 +1,5 @@
-const CACHE='classflow-shell-1-03-009';
-const ASSETS=['./','./index.html','./style.css?v=1.03.009','./app.js?v=1.03.009','./courses.js?v=1.03.009','./manifest.json','./classflow-logo-v4.png'];
+const CACHE='classflow-shell-1-03-010';
+const ASSETS=['./','./index.html','./style.css?v=1.03.010','./app.js?v=1.03.010','./courses.js?v=1.03.010','./manifest.json','./classflow-logo-v4.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()))
 });
