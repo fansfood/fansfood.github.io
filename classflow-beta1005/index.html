@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#17211b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ClassFlow" />
+  <title>ClassFlow Beta 1.005 · 课堂翻译</title>
+  <meta name="description" content="ClassFlow 4.0：实时课堂识别、多模型翻译、Course → Lesson 课程管理、全文自然分段与录音留存" />
+  <link rel="manifest" href="./manifest.json?v=1.005" />
+  <link rel="icon" href="./logo.png?v=1.005" type="image/png" />
+  <link rel="apple-touch-icon" href="./logo.png?v=1.005" />
+  <link rel="stylesheet" href="./style.css?v=1.005" />
+</head>
+<body>
+  <div class="auth-gate" id="authGate" hidden>
+    <section class="auth-card">
+      <div class="beta-brand">
+        <img class="brand-logo" style="display:block!important" src="./logo.png" alt="ClassFlow" />
+        <div><strong>ClassFlow</strong><span>Beta 1.005</span></div>
+      </div>
+      <h1>登录后开始上课 <small>/ Sign in to start</small></h1>
+      <p>使用你的 ClassFlow 账号。课程按 Course → Lesson 两级管理，每一节课独立保存原文、翻译、标记和录音。</p>
+      <form id="authForm">
+        <label>邮箱 / Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
+        <label>密码 / Password<input id="authPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位 / 6+ characters" /></label>
+        <button class="primary wide" type="submit">登录 / Sign in</button>
+        <button class="secondary wide" id="signupButton" type="button">注册 ClassFlow / Sign up</button>
+      </form>
+      <div class="auth-hint"><strong>还没有账号？请先注册。</strong><span>New here? Create your ClassFlow account first.</span></div>
+      <p class="auth-message" id="authMessage"></p>
+    </section>
+  </div>
+
+  
+  <main class="beta-home" id="homeShell" hidden>
+    <header class="home-topbar">
+      <div class="home-brand">
+        <img src="./logo.png" alt="ClassFlow">
+        <div class="home-brand-copy">
+          <div class="home-brand-line"><strong>ClassFlow</strong><span>Beta 1.005</span></div>
+          <small>Understand More. Go Further.</small>
+        </div>
+      </div>
+      <nav class="home-nav" aria-label="主导航">
+        <button class="active" data-home-nav="home"><b>⌂</b><span>首页<small>Home</small></span></button>
+        <button data-soon="日历 / Calendar"><b>▣</b><span>日历<small>Calendar</small></span></button>
+        <button data-soon="学习资源 / Resources"><b>▤</b><span>学习资源<small>Resources</small></span></button>
+        <button data-soon="学习社区 / Community"><b>◎</b><span>学习社区<small>Community</small></span></button>
+      </nav>
+      <div class="home-actions">
+        <button class="home-icon-btn" data-soon="搜索 / Search" aria-label="Search">⌕</button>
+        <button class="home-icon-btn notify" data-soon="通知 / Notifications" aria-label="Notifications">♢</button>
+        <button class="home-profile" id="homeProfile"><span class="avatar">C</span><span>你好<small>Welcome</small></span></button>
+      </div>
+    </header>
+
+    <section class="home-hero">
+      <div class="hero-copy">
+        <span class="eyebrow">WELCOME TO CLASSFLOW</span>
+        <h1>跨过语言，让知识真正被听懂。</h1>
+        <h2>Beyond Language, Into Understanding.</h2>
+        <p><strong>实时翻译 · 专注学习 · 连接世界</strong><br>Real-time Translation · Focused Learning · A More Connected You</p>
+        <button class="hero-cta" data-action="courses">开启学习之旅 <small>Start Learning</small><b>→</b></button>
+      </div>
+      <div class="hero-visual">
+        <div class="mountain m1"></div><div class="mountain m2"></div><div class="mountain m3"></div>
+        <div class="hero-handwriting">
+          <strong>跨过语言，让知识真正被听懂。</strong>
+          <span>Beyond Language, Into Understanding.</span>
+        </div>
+        <div class="knowledge-stone">KNOWLEDGE<br>HAS NO BORDERS</div>
+      </div>
+    </section>
+
+    <section class="module-grid">
+      <button class="module-card module-primary" data-action="courses">
+        <span class="module-icon">▰</span>
+        <span class="module-title">我的课程 <small>My Courses</small></span>
+        <span class="module-desc">查看课程，进入翻译工作台<br><small>View your courses and open the translation workspace.</small></span>
+        <span class="module-foot"><b>课程 → 课次</b><i>→</i></span>
+      </button>
+      <button class="module-card" data-action="quick">
+        <span class="module-icon">文A</span>
+        <span class="module-title">快速翻译 <small>Quick Translate</small></span>
+        <span class="module-desc">零散文本、语音，直接进入翻译<br><small>Translate one-off text or speech instantly.</small></span>
+        <span class="module-foot"><b>立即翻译</b><i>→</i></span>
+      </button>
+      <button class="module-card" data-action="live">
+        <span class="module-icon">●</span>
+        <span class="module-title">实时课堂 <small>Live Classroom</small></span>
+        <span class="module-desc">进入课堂实时识别、翻译与标记<br><small>Real-time speech, translation and flags.</small></span>
+        <span class="module-foot"><b>进入课堂</b><i>→</i></span>
+      </button>
+      <button class="module-card" data-action="recordings">
+        <span class="module-icon">∿</span>
+        <span class="module-title">录音回放 <small>Recording Replay</small></span>
+        <span class="module-desc">回听课堂录音并对照翻译文本<br><small>Replay class audio with translations.</small></span>
+        <span class="module-foot"><b>查看录音</b><i>→</i></span>
+      </button>
+      <button class="module-card compact" data-action="history">
+        <span class="module-icon">◷</span>
+        <span class="module-title">历史记录 <small>History</small></span>
+        <span class="module-desc">继续上次的课堂与翻译记录</span>
+      </button>
+      <button class="module-card compact" data-soon="收藏夹 / Favorites">
+        <span class="module-icon">★</span>
+        <span class="module-title">收藏夹 <small>Favorites</small></span>
+        <span class="module-desc">收藏重要内容，随时快速访问</span>
+      </button>
+      <button class="module-card compact" data-action="account">
+        <span class="module-icon">⚙</span>
+        <span class="module-title">账号设置 <small>Account Settings</small></span>
+        <span class="module-desc">管理账号、语言偏好和应用设置</span>
+      </button>
+      <div class="module-quote">
+        <span>“</span>
+        <strong>学习无国界，<br>好奇心让世界更近。</strong>
+        <small>No Borders in Learning.<br>Curiosity Brings the World Closer.</small>
+      </div>
+    </section>
+
+    <section class="home-workspace-preview">
+      <div class="preview-copy">
+        <span>FROM COURSE TO UNDERSTANDING</span>
+        <h3>从课程到理解</h3>
+        <p>打开课程或快速翻译，进入二级翻译工作台。主界面负责选择与管理，工作台专注于听懂课堂。</p>
+        <button data-action="quick">进入工作台 <small>Open Workspace</small> →</button>
+      </div>
+      <div class="preview-window">
+        <div class="preview-bar"><strong>ClassFlow</strong><span>我的课程 / My Courses</span><b>● Live</b></div>
+        <div class="preview-body">
+          <aside><b>课程内容</b><span class="selected">● 实时翻译</span><span>□ 课堂笔记</span><span>▤ 学习资料</span><span>∿ 录音回放</span></aside>
+          <section><small>老师语言 / Teacher Language</small><b>English 英语</b><div class="preview-text">Original Speech<br><p>The sensor converts the physical quantity into an electrical signal...</p></div></section>
+          <section><small>翻译为 / Translate To</small><b>中文 Chinese</b><div class="preview-text">Translation<br><p>传感器将物理量转换为电信号，然后由控制器处理。</p></div></section>
+          <section><small>笔记 / Notes</small><b>课堂重点</b><div class="preview-text"><p>1. 传感器原理<br>2. 控制系统<br>3. 重点标记</p></div></section>
+        </div>
+      </div>
+    </section>
+    <div class="home-toast" id="homeToast" hidden></div>
+  </main>
+
+
+  <main class="app-shell workspace-shell" id="appShell" hidden>
+    <header class="topbar">
+      <div class="brand-wrap">
+        <img class="brand-logo" style="display:block!important" src="./logo.png" alt="ClassFlow" />
+        <div>
+          <div class="brand-line"><strong>ClassFlow</strong><span class="beta-badge">Beta 1.005</span></div>
+          <div class="tagline">更快、更清晰地翻译课堂内容 · Faster, clearer classroom translation</div>
+        </div>
+      </div>
+      <div class="top-actions"><button class="ghost" id="backHomeButton">← 首页 / Home</button>
+        <button class="ghost" id="installButton" hidden>↓ 安装 App / Install</button>
+        <span class="pill synced" id="syncPill">☁ 已同步 / Synced</span>
+        <span class="pill" id="providerPill">翻译引擎 / Engine: —</span>
+        <span class="pill" id="pipelinePill">语音 / Speech: —</span>
+        <span class="pill" id="latencyPill">延迟 / Latency: —</span>
+        <button class="ghost" id="historyButton">我的课程 / My Courses</button>
+        <button class="ghost" id="accountButton">账号 / Account</button>
+      </div>
+    </header>
+
+    <aside class="history-drawer beta4-drawer" id="historyDrawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div><span>MY COURSES · 我的课程</span><h2>我的课程 <small>/ My Courses</small></h2></div>
+        <button class="icon-button" id="closeHistory" type="button">×</button>
+      </div>
+      <div class="course-toolbar" id="courseToolbar" hidden>
+        <button class="course-toolbar-button" id="selectAllCourses" type="button">☐ 全选 / Select all</button>
+        <button class="course-toolbar-button danger" id="deleteSelectedCourses" type="button" disabled>删除所选 / Delete selected</button>
+        <button class="course-toolbar-button primary-mini" id="newCourseButton" type="button">＋ 新建课程 / New Course</button>
+      </div>
+      <div class="course-help">Course = 一门课程；Lesson = 这门课程中的一次具体上课。</div>
+      <div class="history-list" id="historyList"></div>
+    </aside>
+    <div class="drawer-mask" id="drawerMask" hidden></div>
+
+    <section class="hero">
+      <div class="hero-main">
+        <label>CURRENT COURSE · 当前课程</label>
+        <input id="classTitle" value="Mechatronics" aria-label="课程名称" />
+        <div class="lesson-context" id="lessonContext">当前课次 / Current lesson: —</div>
+        <div class="status-row"><span id="status">ClassFlow 4.0 已准备 / Ready</span><span>·</span><span id="recordCount">0 条记录 / records</span></div>
+      </div>
+      <div class="settings">
+        <label>老师语言 / Teacher language
+          <select id="sourceLanguage">
+            <option value="en-US">English</option>
+            <option value="ru-RU">Русский</option>
+            <option value="zh-CN">中文</option>
+          </select>
+        </label>
+        <label>翻译引擎 / Translation engine
+          <select id="translationProvider">
+            <option value="auto">自动 / Auto · DeepSeek → OpenAI</option>
+            <option value="deepseek">DeepSeek Flash</option>
+            <option value="openai">OpenAI</option>
+            <option value="local">本地翻译 / Local</option>
+          </select>
+        </label>
+        <label>语音管线 / Speech pipeline
+          <select id="pipelineMode">
+            <option value="browser">稳定识别 / Stable browser</option>
+            <option value="cloud">云端转写 / Cloud · OpenAI</option>
+            <option value="realtime">Realtime · OpenAI 实验</option>
+          </select>
+        </label>
+        <label>断句 / Segmentation
+          <select id="segmentMode">
+            <option value="smart">智能断句 / Smart</option>
+            <option value="direct">直接断句 / Direct</option>
+          </select>
+        </label>
+        <button class="new-class" id="newSession">＋ 新增课次 / Add Lesson</button>
+      </div>
+    </section>
+
+    <section class="beta-strip">
+      <div><span class="dot" id="speechDot"></span><strong>语音识别 / Speech</strong><small id="speechStatus">待机 / Idle</small></div>
+      <div><span class="dot" id="translationDot"></span><strong>翻译 / Translation</strong><small id="translationStatus">检查引擎中 / Checking</small></div>
+      <div><span class="dot" id="recordingDot"></span><strong>录音留存 / Recording</strong><small id="recordingStatus">关闭 / Off</small></div>
+      <div><strong>智能断句 / Smart segmentation</strong><small id="segmentStatus">Smart merge</small></div>
+      <label class="switch"><input id="recordingToggle" type="checkbox" /><span></span><b>保留课堂录音 / Keep audio</b></label>
+    </section>
+
+    <section class="workspace">
+      <section class="column">
+        <div class="column-head"><div><span>01</span><h2>Original / 原文</h2></div><small>实时课堂字幕 / Live transcript</small></div>
+        <div class="stream" id="originalStream"></div>
+      </section>
+      <section class="column">
+        <div class="column-head"><div><span>02</span><h2>Translation / 翻译</h2></div><small>中文翻译 / Chinese</small></div>
+        <div class="stream" id="translationStream"></div>
+      </section>
+      <section class="column review-column">
+        <div class="column-head"><div><span>03</span><h2>Full Translation / 全文翻译</h2></div><small>整理后的连续译文 / Clean paragraph view</small></div>
+        <div class="review-area" id="reviewArea"></div>
+      </section>
+    </section>
+
+    <section class="diagnostics">
+      <div class="metric"><span>最近翻译</span><strong id="lastLatency">—</strong><small>原文完成 → 中文完成</small></div>
+      <div class="metric"><span>平均翻译</span><strong id="avgLatency">—</strong><small>最近 20 条</small></div>
+      <div class="metric"><span>翻译模型</span><strong id="lastModel">—</strong><small id="providerHealth">正在检查 API</small></div>
+      <div class="metric"><span>录音</span><strong id="recordingDuration">00:00</strong><small id="recordingChunks">0 段已上传</small></div>
+    </section>
+
+    <section class="recordings-panel">
+      <div class="section-head"><div><span>REC</span><h2>课堂录音 / Class Recording</h2></div><button class="ghost" id="retryUploads">重试上传 / Retry</button></div>
+      <p class="hint">录音为可选旁路功能，默认关闭，不影响主翻译链路。每个 Lesson 的录音独立保存。</p>
+      <div class="recording-list" id="recordingList"></div>
+      <audio id="audioPlayer" controls hidden></audio>
+    </section>
+
+    <section class="notes-disabled">
+      <strong>ClassFlow Beta 1.005：Course → Lesson 课程管理</strong>
+      <span>正式版优先保证实时识别、翻译、全文回顾、课程分层、录音与云同步稳定。</span>
+    </section>
+
+    <footer class="control-dock">
+      <div class="quick-flags" id="quickFlags">
+        <button data-flag="重点">★ 重点 / Key</button>
+        <button data-flag="考试">✓ 考试 / Exam</button>
+        <button data-flag="没听懂">? 没听懂 / Unsure</button>
+        <button data-flag="例子">◇ 例子 / Example</button>
+      </div>
+      <button class="record-button" id="recordButton"><span>●</span><b id="recordLabel">开始听课 / Start</b></button>
+      <div class="exports"><button id="exportMd">Markdown</button><button id="exportWord">Word</button></div>
+    </footer>
+
+    <div class="account-popover" id="accountPopover" hidden>
+      <strong id="accountEmail">—</strong>
+      <span>ClassFlow Beta 1.005</span>
+      <button id="logoutButton">退出登录 / Sign out</button>
+    </div>
+  </main>
+
+  <script type="module" src="./app.js?v=1.005"></script>
+  <script type="module" src="./courses.js?v=1.005"></script>
+  <script type="module" src="./home.js?v=1.005"></script>
+</body>
+</html>
