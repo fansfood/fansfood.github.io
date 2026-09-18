@@ -38,6 +38,31 @@ function updateMetrics(){
   $('recordingChunks').textContent=`${state.uploadedChunks} 段已上传`
 }
 
+
+const reviewNoiseWords=new Set(['嗯','哦','啊','呀','诶','唉','好','好的','行','对','对的','嗯嗯','哦哦','哈哈','呃','额','是的'])
+function cleanReviewText(text){
+  const raw=String(text||'').replace(/\s+/g,' ').replace(/^翻译中…?\s*\/\s*Translating\s*$/i,'').trim()
+  if(!raw||raw.startsWith('⚠'))return''
+  const compact=raw.replace(/\s+/g,'').replace(/[。！？!?…，,、；;：:]/g,'')
+  if(!compact||reviewNoiseWords.has(compact)||(compact.length<=1&&!/[A-Za-z0-9]/.test(compact)))return''
+  return raw
+}
+function buildReviewParagraphs(entries){
+  const out=[];let buffer=''
+  const join=(a,b)=>!a?b:!b?a:a+(/[A-Za-z0-9]$/.test(a)&&/^[A-Za-z0-9]/.test(b)?' ':'')+b
+  const len=s=>String(s||'').replace(/\s+/g,'').length
+  const texts=entries.filter(e=>!e.translationError).map(e=>cleanReviewText(e.translation)).filter(Boolean)
+  for(const text of texts){
+    buffer=join(buffer,text)
+    if((len(buffer)>=85&&/[。！？!?]$/.test(text.trim()))||len(buffer)>=150){out.push(buffer.trim());buffer=''}
+  }
+  if(buffer.trim()){
+    if(out.length&&len(buffer)<28)out[out.length-1]=join(out[out.length-1],buffer)
+    else out.push(buffer.trim())
+  }
+  return out
+}
+
 function render(){
   $('recordCount').textContent=`${state.entries.length} 条记录 / records`
   $('recordButton').classList.toggle('stop',state.isListening)
@@ -50,8 +75,10 @@ function render(){
   $('originalStream').innerHTML=orig+interim||empty('点击“开始听课 / Start”，这里会显示课堂原文。')
   const trans=state.entries.map(e=>`<article class="speech-card translated"><div class="meta"><span>${esc(e.time)}</span>${e.latencyMs?`<span>⚡ ${fmtMs(e.latencyMs)}</span>`:''}${e.provider?`<span class="provider-badge ${esc(e.provider)}">${esc(providerLabel(e.provider))}</span>`:''}</div><p class="${e.translationError?'error-text':''}">${esc(e.translation||'翻译中… / Translating')}</p><div class="flag-row">${flagDefs.map(f=>`<button data-entry="${esc(e.id)}" data-flag="${esc(f.key)}" class="${e.flags.includes(f.key)?'selected':''}">${f.icon} ${esc(f.label)}</button>`).join('')}</div></article>`).join('')
   $('translationStream').innerHTML=trans||empty('原文完成后立即翻译；云同步不会阻塞译文。')
-  const review=state.entries.map(e=>`<article class="review-entry"><div class="review-meta"><span>${esc(e.time)}</span>${renderFlags(e.flags)}${e.provider?`<span class="provider-badge ${esc(e.provider)}">${esc(providerLabel(e.provider))}</span>`:''}</div><p class="${e.translationError?'error-text':''}">${esc(e.translation||'翻译中… / Translating')}</p></article>`).join('')
-  $('reviewArea').innerHTML=review||empty('这里会连续显示整堂课的中文译文。')
+  const reviewParagraphs=buildReviewParagraphs(state.entries)
+  $('reviewArea').innerHTML=reviewParagraphs.length
+    ?`<div class="clean-full-translation">${reviewParagraphs.map(p=>`<p>${esc(p)}</p>`).join('')}</div>`
+    :empty('这里会以自然段连续显示整堂课的中文译文。')
   $('exportMd').disabled=$('exportWord').disabled=!state.entries.length
   document.querySelectorAll('.flag-row button').forEach(b=>b.onclick=()=>toggleFlag(b.dataset.entry,b.dataset.flag))
   persistLocal();updateMetrics()
@@ -284,7 +311,7 @@ async function enterApp(session){
   if(!state.user){$('authGate').hidden=false;$('appShell').hidden=true;return}
   $('authGate').hidden=true;$('appShell').hidden=false;$('accountEmail').textContent=state.user.email||'已登录'
   const draft=JSON.parse(localStorage.getItem(localKey())||'null');if(draft?.title)$('classTitle').value=draft.title;if(draft?.sourceLanguage)$('sourceLanguage').value=draft.sourceLanguage;if(draft?.translationProvider)$('translationProvider').value=draft.translationProvider;if(draft?.pipelineMode)$('pipelineMode').value=draft.pipelineMode;if(draft?.segmentMode)$('segmentMode').value=draft.segmentMode;if(Array.isArray(draft?.entries))state.entries=draft.entries;if(draft?.sessionId)state.sessionId=draft.sessionId
-  setStatus('BETA 3.0 · v1 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
+  setStatus('ClassFlow 4.0 · v4 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
 }
 
 $('authForm').onsubmit=async e=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');const {error}=await supabase.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(error){const raw=error.message||'';showAuthMessage(/invalid login credentials/i.test(raw)?'邮箱或密码不正确；没有账号请先注册。 / Incorrect email or password; sign up first if needed.':raw,true)}else showAuthMessage('登录成功 / Signed in')}
@@ -309,4 +336,4 @@ $('installButton').onclick=async()=>{if(!state.deferredInstall)return;state.defe
 window.addEventListener('beforeunload',()=>{state.shouldRestart=false;try{state.recognition?.stop()}catch{};stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user?.id!==state.user?.id)enterApp(session)})
 const {data:{session}}=await supabase.auth.getSession();await enterApp(session)
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1').catch(()=>{})
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=4.0.4').catch(()=>{})
