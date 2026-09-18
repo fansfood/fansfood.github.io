@@ -1,0 +1,11 @@
+{
+  "name":"ClassFlow Beta 1.005",
+  "short_name":"ClassFlow Beta",
+  "description":"ClassFlow Beta 1.005 · 两级课堂翻译体验",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#f5f7f0",
+  "theme_color":"#0b4e37",
+  "icons":[{"src":"./logo.png","sizes":"128x128","type":"image/png","purpose":"any maskable"}]
+}
