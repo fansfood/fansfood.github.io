@@ -69,3 +69,13 @@ linear-gradient(transparent 62%,rgba(9,70,47,.18));}
 .workspace-shell .topbar{position:sticky;top:0;z-index:30;background:rgba(245,247,240,.9);backdrop-filter:blur(16px)}
 @media(max-width:1100px){.home-nav{display:none}.home-topbar{grid-template-columns:1fr auto}.home-hero{grid-template-columns:1fr}.hero-visual{min-height:250px}.module-grid{grid-template-columns:repeat(2,1fr)}.home-workspace-preview{grid-template-columns:1fr}.preview-copy{display:none}}
 @media(max-width:700px){.beta-home{padding:10px 10px 92px}.home-topbar{border-radius:18px;padding:10px 12px}.home-brand img{width:42px;height:42px}.home-brand-line strong{font-size:21px}.home-actions .home-icon-btn{display:none}.home-profile>span:last-child{display:none}.home-hero{gap:10px}.hero-copy{padding:22px 18px}.hero-copy h1{font-size:32px}.hero-copy h2{font-size:17px}.hero-visual{min-height:220px}.hero-handwriting{left:7%;top:18%;max-width:86%}.knowledge-stone{display:none}.module-grid{grid-template-columns:1fr 1fr;gap:10px}.module-card{min-height:166px;padding:15px;border-radius:18px}.module-primary{grid-column:1/-1}.module-title{font-size:15px}.module-desc{font-size:10px}.module-desc small{font-size:9px}.module-card.compact{min-height:130px}.module-quote{grid-column:1/-1}.home-workspace-preview{display:none}}
+
+/* Beta 1.005 logo hotfix — render inline, no image loading dependency */
+.cf-logo-inline{display:block!important;flex:0 0 auto;overflow:visible}
+.home-brand .cf-logo-inline{width:50px;height:50px;border-radius:14px}
+.brand-wrap .cf-logo-inline{width:48px;height:48px;transform:rotate(-4deg)}
+.beta-brand .cf-logo-inline{width:54px;height:54px;border-radius:15px}
+@media(max-width:700px){
+  .home-brand .cf-logo-inline{width:42px;height:42px}
+  .brand-wrap .cf-logo-inline{width:42px;height:42px}
+}
