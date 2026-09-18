@@ -11,7 +11,7 @@ const state={
   micStream:null,peer:null,dataChannel:null,rtInterim:new Map(),realtimeStoppedAt:0,
   audioContext:null,audioSource:null,audioProcessor:null,cloudSamples:[],cloudStartedAt:0,cloudSeq:0,cloudNextResult:0,cloudResults:new Map(),
   recorder:null,recordingStream:null,recordingStartedAt:0,recordingTimer:null,recordingChunkIndex:0,uploadedChunks:0,recordings:[],
-  localTranslator:null,localTranslatorPromise:null,localQueue:[],localBusy:false,titleTimer:null,deferredInstall:null
+  localTranslator:null,localTranslatorPromise:null,localQueue:[],localBusy:false,localAsr:null,localAsrPromise:null,localAsrContext:null,localAsrSource:null,localAsrProcessor:null,localAsrGain:null,localAsrSamples:[],localAsrBusy:false,localAsrActive:false,localAsrGeneration:0,titleTimer:null,deferredInstall:null
 }
 
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -269,7 +269,11 @@ function startBrowserRecognition(gen=state.speechGeneration,isRestart=false){
         $('speechStatus').textContent='识别器重连 / Reconnecting'
         setStatus(huawei?'华为浏览器识别无返回，正在自动重建 / Huawei speech returned no result; rebuilding':'移动端识别无返回，正在自动重建 / Mobile speech returned no result; rebuilding')
         disposeRecognition(r)
-        scheduleBrowserRestart(gen,'mobile-no-result')
+        startLocalAsr(gen,'mobile-no-result').catch(err=>{
+          state.isListening=false;state.shouldRestart=false
+          $('speechDot').className='dot error';$('speechStatus').textContent='语音启动失败 / Speech failed'
+          setStatus(`本地语音备用通道启动失败 / Local speech fallback failed: ${err?.message||err}`);render()
+        })
       },12000)
     }
   }
@@ -309,6 +313,14 @@ function startBrowserRecognition(gen=state.speechGeneration,isRestart=false){
     if(gen!==state.speechGeneration||!state.isListening||!state.shouldRestart){render();return}
     if(!gotResult)state.speechRetryCount=(state.speechRetryCount||0)+1
     else state.speechRetryCount=0
+    if(state.speechRetryCount>=2&&mobile){
+      startLocalAsr(gen,'native-ended').catch(err=>{
+        state.isListening=false;state.shouldRestart=false
+        $('speechDot').className='dot error';$('speechStatus').textContent='语音启动失败 / Speech failed'
+        setStatus(`本地语音备用通道启动失败 / Local speech fallback failed: ${err?.message||err}`);render()
+      })
+      return
+    }
     if(state.speechRetryCount>=3){
       state.isListening=false;state.shouldRestart=false
       $('speechDot').className='dot error';$('speechStatus').textContent='识别无响应 / No response'
@@ -326,6 +338,126 @@ function startBrowserRecognition(gen=state.speechGeneration,isRestart=false){
 async function ensureMicStream(){if(state.micStream?.active)return state.micStream;state.micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}).catch(()=>navigator.mediaDevices.getUserMedia({audio:true}));return state.micStream}
 function stopMicStream(){try{state.micStream?.getTracks()?.forEach(t=>t.stop())}catch{}state.micStream=null}
 
+
+function mergeFloat32(parts){
+  const len=parts.reduce((n,a)=>n+a.length,0),out=new Float32Array(len);let off=0
+  for(const a of parts){out.set(a,off);off+=a.length}
+  return out
+}
+function resampleFloat32(input,fromRate,toRate=16000){
+  if(!input?.length)return new Float32Array(0)
+  if(fromRate===toRate)return input
+  const ratio=fromRate/toRate,len=Math.max(1,Math.floor(input.length/ratio)),out=new Float32Array(len)
+  for(let i=0;i<len;i++){
+    const pos=i*ratio,left=Math.floor(pos),right=Math.min(input.length-1,left+1),frac=pos-left
+    out[i]=input[left]*(1-frac)+input[right]*frac
+  }
+  return out
+}
+function whisperLanguage(){
+  const v=$('sourceLanguage')?.value||'en-US'
+  return v==='ru-RU'?'russian':v==='zh-CN'?'chinese':'english'
+}
+async function ensureLocalAsrModel(){
+  if(state.localAsr)return state.localAsr
+  if(state.localAsrPromise)return state.localAsrPromise
+  state.localAsrPromise=(async()=>{
+    $('speechDot').className='dot busy'
+    $('speechStatus').textContent='加载本地语音模型 / Loading local speech model'
+    setStatus('首次使用需要下载本地 Whisper 模型，请稍候 / First use: downloading local Whisper model')
+    const {pipeline}=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm')
+    state.localAsr=await pipeline('automatic-speech-recognition','Xenova/whisper-tiny',{dtype:'q8'})
+    return state.localAsr
+  })().catch(err=>{state.localAsrPromise=null;throw err})
+  return state.localAsrPromise
+}
+async function flushLocalAsr(gen=state.localAsrGeneration){
+  if(!state.localAsrActive||state.localAsrBusy||gen!==state.localAsrGeneration||!state.localAsrContext)return
+  if(!state.localAsrSamples.length)return
+  const samples=mergeFloat32(state.localAsrSamples);state.localAsrSamples=[]
+  if(samples.length<Math.max(8000,state.localAsrContext.sampleRate*.7))return
+  state.localAsrBusy=true
+  try{
+    const model=await ensureLocalAsrModel()
+    if(!state.localAsrActive||gen!==state.localAsrGeneration)return
+    const audio=resampleFloat32(samples,state.localAsrContext.sampleRate,16000)
+    $('speechDot').className='dot live'
+    $('speechStatus').textContent='本地 Whisper 识别 / Local Whisper'
+    setStatus('正在本地识别并翻译 / Local speech recognition active')
+    const out=await model(audio,{language:whisperLanguage(),task:'transcribe',return_timestamps:false})
+    const text=String(out?.text||'').replace(/\s+/g,' ').trim()
+    if(text&&state.localAsrActive&&gen===state.localAsrGeneration)queueTranscript(text,{source:'local-whisper'})
+  }catch(err){
+    if(state.localAsrActive&&gen===state.localAsrGeneration){
+      $('speechDot').className='dot error'
+      $('speechStatus').textContent='本地识别失败 / Local ASR failed'
+      setStatus(`本地 Whisper 识别失败 / Local Whisper failed: ${err?.message||err}`)
+    }
+  }finally{
+    state.localAsrBusy=false
+    if(state.localAsrActive&&gen===state.localAsrGeneration&&state.localAsrContext){
+      const pending=state.localAsrSamples.reduce((n,a)=>n+a.length,0)
+      if(pending>=state.localAsrContext.sampleRate*6)setTimeout(()=>flushLocalAsr(gen),0)
+    }
+  }
+}
+async function startLocalAsr(gen=state.speechGeneration,reason='fallback'){
+  if(gen!==state.speechGeneration||!state.isListening)return
+  disposeRecognition();clearSpeechTimers();stopLocalAsr(false)
+  const stream=await ensureMicStream()
+  const AC=window.AudioContext||window.webkitAudioContext
+  if(!AC)throw new Error('当前浏览器不支持 Web Audio / Web Audio unavailable')
+  const ctx=new AC()
+  if(ctx.state==='suspended')await ctx.resume().catch(()=>{})
+  const source=ctx.createMediaStreamSource(stream)
+  const processor=ctx.createScriptProcessor?.(4096,1,1)
+  if(!processor){try{await ctx.close()}catch{};throw new Error('当前浏览器缺少音频处理能力 / Audio processor unavailable')}
+  const gain=ctx.createGain();gain.gain.value=0
+  state.localAsrContext=ctx;state.localAsrSource=source;state.localAsrProcessor=processor;state.localAsrGain=gain
+  state.localAsrSamples=[];state.localAsrBusy=false;state.localAsrActive=true;state.localAsrGeneration=gen
+  source.connect(processor);processor.connect(gain);gain.connect(ctx.destination)
+  processor.onaudioprocess=e=>{
+    if(!state.localAsrActive||gen!==state.localAsrGeneration||!state.isListening)return
+    const ch=e.inputBuffer.getChannelData(0);state.localAsrSamples.push(new Float32Array(ch))
+    const total=state.localAsrSamples.reduce((n,a)=>n+a.length,0)
+    if(total>=ctx.sampleRate*7)flushLocalAsr(gen)
+  }
+  $('speechDot').className='dot busy'
+  $('speechStatus').textContent=isHuaweiDevice()?'华为本地识别 / Huawei Local ASR':'本地识别 / Local ASR'
+  setStatus(reason==='huawei'?'华为浏览器改用本地 Whisper 语音识别 / Huawei browser: using local Whisper':'浏览器语音无响应，已切换本地 Whisper / Browser speech unavailable; switched to local Whisper')
+  await ensureLocalAsrModel()
+  if(state.localAsrActive&&gen===state.localAsrGeneration){
+    $('speechDot').className='dot live'
+    $('speechStatus').textContent='本地 Whisper 识别 / Local Whisper'
+    setStatus('本地 Whisper 已就绪，正在听课 / Local Whisper ready · listening')
+  }
+}
+function stopLocalAsr(flush=true){
+  const gen=state.localAsrGeneration
+  state.localAsrActive=false;state.localAsrGeneration=(state.localAsrGeneration||0)+1
+  if(flush&&state.localAsrSamples.length&&!state.localAsrBusy){
+    const samples=state.localAsrSamples;state.localAsrSamples=[]
+    try{
+      const ctx=state.localAsrContext
+      if(ctx&&samples.length) {
+        const merged=mergeFloat32(samples)
+        if(merged.length>=Math.max(8000,ctx.sampleRate*.7)&&state.localAsr){
+          const audio=resampleFloat32(merged,ctx.sampleRate,16000)
+          state.localAsr(audio,{language:whisperLanguage(),task:'transcribe',return_timestamps:false}).then(out=>{
+            const text=String(out?.text||'').replace(/\s+/g,' ').trim()
+            if(text)queueTranscript(text,{source:'local-whisper'})
+          }).catch(()=>{})
+        }
+      }
+    }catch{}
+  }
+  try{state.localAsrProcessor&&(state.localAsrProcessor.onaudioprocess=null)}catch{}
+  try{state.localAsrProcessor?.disconnect()}catch{}
+  try{state.localAsrSource?.disconnect()}catch{}
+  try{state.localAsrGain?.disconnect()}catch{}
+  try{state.localAsrContext?.close()}catch{}
+  state.localAsrContext=null;state.localAsrSource=null;state.localAsrProcessor=null;state.localAsrGain=null;state.localAsrSamples=[];state.localAsrBusy=false
+}
 function floatToWav(samples,inputRate,targetRate=16000){
   const ratio=inputRate/targetRate,len=Math.max(1,Math.floor(samples.length/ratio)),out=new Float32Array(len)
   for(let i=0;i<len;i++){const start=Math.floor(i*ratio),end=Math.min(samples.length,Math.floor((i+1)*ratio));let sum=0,n=0;for(let j=start;j<end;j++){sum+=samples[j];n++}out[i]=n?sum/n:0}
@@ -404,8 +536,11 @@ async function start(){
   $('speechDot').className='dot busy';$('speechStatus').textContent='启动中 / Starting';render();ensureCloudSession().catch(()=>{})
   try{
     const mode=$('pipelineMode').value
-    if(mode==='browser')startBrowserRecognition(state.speechGeneration,false)
-    else if(mode==='cloud')await startCloudSpeech()
+    if(mode==='browser'){
+      const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition
+      if(isHuaweiDevice()||!Recognition)await startLocalAsr(state.speechGeneration,isHuaweiDevice()?'huawei':'unavailable')
+      else startBrowserRecognition(state.speechGeneration,false)
+    }else if(mode==='cloud')await startCloudSpeech()
     else await startRealtimeSpeech()
     if($('recordingToggle').checked)setTimeout(()=>{if(state.isListening)startRecordingBestEffort()},700)
   }catch(err){
@@ -414,13 +549,13 @@ async function start(){
     state.isListening=false;state.shouldRestart=false
     $('speechDot').className='dot error';$('speechStatus').textContent='启动失败 / Failed'
     setStatus(`语音管线启动失败 / Speech pipeline failed: ${err.message||err}`)
-    stopCloudSpeech();stopRealtimeSpeech();stopMicStream();render()
+    stopLocalAsr(false);stopCloudSpeech();stopRealtimeSpeech();stopMicStream();render()
   }
 }
 function stop(){
   state.shouldRestart=false;state.isListening=false
   state.speechGeneration=(state.speechGeneration||0)+1
-  clearSpeechTimers();flushPendingSegment();disposeRecognition()
+  clearSpeechTimers();flushPendingSegment();disposeRecognition();stopLocalAsr(true)
   stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()
   state.interim='';$('speechDot').className='dot';$('speechStatus').textContent='已暂停 / Paused'
   setStatus('已暂停，课堂记录已保留 / Paused · class record kept');render()
@@ -453,7 +588,7 @@ async function enterApp(session){
   if(!state.user){$('authGate').hidden=false;$('appShell').hidden=true;return}
   $('authGate').hidden=true;$('appShell').hidden=false;$('accountEmail').textContent=state.user.email||'已登录'
   const draft=JSON.parse(localStorage.getItem(localKey())||'null');if(draft?.title)$('classTitle').value=draft.title;if(draft?.sourceLanguage)$('sourceLanguage').value=draft.sourceLanguage;if(draft?.translationProvider)$('translationProvider').value=draft.translationProvider;if(draft?.pipelineMode)$('pipelineMode').value=draft.pipelineMode;if(draft?.segmentMode)$('segmentMode').value=draft.segmentMode;if(Array.isArray(draft?.entries))state.entries=draft.entries;if(draft?.sessionId)state.sessionId=draft.sessionId
-  setStatus('ClassFlow 1.03.006 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
+  setStatus('ClassFlow 1.03.007 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
 }
 
 $('authForm').onsubmit=async e=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');const {error}=await supabase.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(error){const raw=error.message||'';showAuthMessage(/invalid login credentials/i.test(raw)?'邮箱或密码不正确；没有账号请先注册。 / Incorrect email or password; sign up first if needed.':raw,true)}else showAuthMessage('登录成功 / Signed in')}
@@ -475,7 +610,7 @@ $('exportMd').onclick=exportMd;$('exportWord').onclick=exportWord
 
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();state.deferredInstall=e;$('installButton').hidden=false})
 $('installButton').onclick=async()=>{if(!state.deferredInstall)return;state.deferredInstall.prompt();await state.deferredInstall.userChoice;state.deferredInstall=null;$('installButton').hidden=true}
-window.addEventListener('beforeunload',()=>{state.shouldRestart=false;state.isListening=false;state.speechGeneration=(state.speechGeneration||0)+1;clearSpeechTimers();disposeRecognition();stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
+window.addEventListener('beforeunload',()=>{state.shouldRestart=false;state.isListening=false;state.speechGeneration=(state.speechGeneration||0)+1;clearSpeechTimers();disposeRecognition();stopLocalAsr(false);stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user?.id!==state.user?.id)enterApp(session)})
 const {data:{session}}=await supabase.auth.getSession();await enterApp(session)
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.006').catch(()=>{})
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.007').catch(()=>{})
