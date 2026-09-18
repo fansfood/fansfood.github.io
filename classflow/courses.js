@@ -25,9 +25,9 @@ function loadExpanded(){try{return new Set(JSON.parse(localStorage.getItem(expan
 function saveExpanded(){localStorage.setItem(expandedKey(),JSON.stringify([...expanded]))}
 
 function patchStableLabels(){
-  document.title='ClassFlow 1.03.005 · 实时课堂翻译'
+  document.title='ClassFlow 1.03.006 · 实时课堂翻译'
   const status=$('status')
-  if(status&&/BETA 3|Beta 3|BETA 4|Beta 4/i.test(status.textContent))status.textContent='ClassFlow 1.03.005 · Course → Lesson / 课程分层'
+  if(status&&/BETA 3|Beta 3|BETA 4|Beta 4/i.test(status.textContent))status.textContent='ClassFlow 1.03.006 · Course → Lesson / 课程分层'
   const btn=$('newSession');if(btn)btn.textContent='＋ 新增课次 / Add Lesson'
 }
 

@@ -190,6 +190,14 @@ function commitTranscript(text,meta={}){
 function isAppleMobile(){
   return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)
 }
+function isHuaweiDevice(){
+  const ua=navigator.userAgent||''
+  return /HUAWEI|HuaweiBrowser|HarmonyOS|HONOR/i.test(ua)
+}
+function isMobileSpeechBrowser(){
+  const ua=navigator.userAgent||''
+  return isAppleMobile()||isHuaweiDevice()||/Android|Mobile/i.test(ua)
+}
 function clearSpeechTimers(){
   clearTimeout(state.speechRestartTimer);clearTimeout(state.speechStartTimer)
   state.speechRestartTimer=null;state.speechStartTimer=null
@@ -222,9 +230,9 @@ function startBrowserRecognition(gen=state.speechGeneration,isRestart=false){
 
   // Never reuse a WebKit recognition instance between lessons or restart cycles.
   disposeRecognition()
-  const r=new Recognition(),apple=isAppleMobile()
+  const r=new Recognition(),apple=isAppleMobile(),huawei=isHuaweiDevice(),mobile=isMobileSpeechBrowser()
   r.lang=$('sourceLanguage').value
-  r.continuous=!apple
+  r.continuous=!mobile
   r.interimResults=true
   r.maxAlternatives=1
   state.recognition=r
@@ -252,8 +260,18 @@ function startBrowserRecognition(gen=state.speechGeneration,isRestart=false){
     if(!valid())return
     started=true;state.speechRetryCount=0;clearTimeout(state.speechStartTimer)
     $('speechDot').className='dot live'
-    $('speechStatus').textContent=apple?'iPhone/iPad 稳定识别 / iOS stable speech':'稳定识别中 / Stable speech active'
+    $('speechStatus').textContent=huawei?'华为移动识别 / Huawei mobile speech':apple?'iPhone/iPad 稳定识别 / iOS stable speech':mobile?'移动识别 / Mobile speech':'稳定识别中 / Stable speech active'
     setStatus('正在听课并翻译 / Listening and translating');render()
+    if(mobile){
+      state.speechStartTimer=setTimeout(()=>{
+        if(!valid()||gotResult)return
+        $('speechDot').className='dot busy'
+        $('speechStatus').textContent='识别器重连 / Reconnecting'
+        setStatus(huawei?'华为浏览器识别无返回，正在自动重建 / Huawei speech returned no result; rebuilding':'移动端识别无返回，正在自动重建 / Mobile speech returned no result; rebuilding')
+        disposeRecognition(r)
+        scheduleBrowserRestart(gen,'mobile-no-result')
+      },12000)
+    }
   }
   r.onresult=ev=>{
     if(!valid())return
@@ -435,7 +453,7 @@ async function enterApp(session){
   if(!state.user){$('authGate').hidden=false;$('appShell').hidden=true;return}
   $('authGate').hidden=true;$('appShell').hidden=false;$('accountEmail').textContent=state.user.email||'已登录'
   const draft=JSON.parse(localStorage.getItem(localKey())||'null');if(draft?.title)$('classTitle').value=draft.title;if(draft?.sourceLanguage)$('sourceLanguage').value=draft.sourceLanguage;if(draft?.translationProvider)$('translationProvider').value=draft.translationProvider;if(draft?.pipelineMode)$('pipelineMode').value=draft.pipelineMode;if(draft?.segmentMode)$('segmentMode').value=draft.segmentMode;if(Array.isArray(draft?.entries))state.entries=draft.entries;if(draft?.sessionId)state.sessionId=draft.sessionId
-  setStatus('ClassFlow 1.03.005 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
+  setStatus('ClassFlow 1.03.006 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
 }
 
 $('authForm').onsubmit=async e=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');const {error}=await supabase.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(error){const raw=error.message||'';showAuthMessage(/invalid login credentials/i.test(raw)?'邮箱或密码不正确；没有账号请先注册。 / Incorrect email or password; sign up first if needed.':raw,true)}else showAuthMessage('登录成功 / Signed in')}
@@ -460,4 +478,4 @@ $('installButton').onclick=async()=>{if(!state.deferredInstall)return;state.defe
 window.addEventListener('beforeunload',()=>{state.shouldRestart=false;state.isListening=false;state.speechGeneration=(state.speechGeneration||0)+1;clearSpeechTimers();disposeRecognition();stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user?.id!==state.user?.id)enterApp(session)})
 const {data:{session}}=await supabase.auth.getSession();await enterApp(session)
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.005').catch(()=>{})
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.006').catch(()=>{})
