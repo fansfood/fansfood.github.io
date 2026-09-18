@@ -121,19 +121,10 @@ async function updateSegment(entry,patch){if(!entry.cloudId)return;setSync(true)
 async function saveLatency(entry){if(!state.sessionId||!Number.isFinite(entry.latencyMs))return;supabase.from('classflow_latency_samples').insert({session_id:state.sessionId,segment_seq:entry.seq,pipeline:entry.source||$('pipelineMode').value,translation_ms:Math.round(entry.latencyMs),total_ms:Math.round(entry.latencyMs)}).then(()=>{}).catch(()=>{})}
 
 async function callAI(body){
-  let lastErr=null
-  for(let attempt=0;attempt<2;attempt++){
-    try{
-      const {data,error}=await supabase.functions.invoke('classflow-ai',{body})
-      if(error){let msg=error.message||'AI request failed';try{const ctx=await error.context?.json?.();if(ctx?.error)msg=ctx.error}catch{};throw new Error(msg)}
-      if(data?.error)throw new Error(data.error)
-      return data
-    }catch(err){
-      lastErr=err
-      if(attempt===0)await new Promise(r=>setTimeout(r,420))
-    }
-  }
-  throw lastErr||new Error('AI request failed')
+  const {data,error}=await supabase.functions.invoke('classflow-ai',{body})
+  if(error){let msg=error.message||'AI request failed';try{const ctx=await error.context?.json?.();if(ctx?.error)msg=ctx.error}catch{};throw new Error(msg)}
+  if(data?.error)throw new Error(data.error)
+  return data
 }
 
 async function ensureLocalTranslator(){
@@ -183,29 +174,10 @@ function terminal(text){return/[.!?。！？;；:]$/.test(String(text).trim())}
 function queueTranscript(text,meta={}){
   const clean=String(text||'').replace(/\s+/g,' ').trim();if(!clean)return
   if($('segmentMode').value==='direct'){commitTranscript(clean,meta);return}
-
-  if(state.pendingSegment){
-    state.pendingSegment.text=`${state.pendingSegment.text} ${clean}`.replace(/\s+/g,' ').trim()
-    state.pendingSegment.meta={...state.pendingSegment.meta,...meta}
-  }else{
-    state.pendingSegment={text:clean,meta:{...meta}}
-  }
-
-  const merged=state.pendingSegment.text
-  const words=merged.split(/\s+/).filter(Boolean).length
-  const compactLen=merged.replace(/\s+/g,'').length
-  const naturalEnd=terminal(clean)&&(words>=12||compactLen>=58)
-  const hardLimit=words>=30||compactLen>=180
-
-  if(naturalEnd||hardLimit){
-    clearTimeout(state.pendingTimer);state.pendingTimer=null
-    const p=state.pendingSegment;state.pendingSegment=null;state.interim=''
-    commitTranscript(p.text,p.meta);return
-  }
-
-  state.interim=merged;render()
-  clearTimeout(state.pendingTimer)
-  state.pendingTimer=setTimeout(flushPendingSegment,1500)
+  const words=clean.split(/\s+/).length
+  if(terminal(clean)||words>=20||clean.length>=120){flushPendingSegment();commitTranscript(clean,meta);return}
+  if(state.pendingSegment){state.pendingSegment.text=`${state.pendingSegment.text} ${clean}`.replace(/\s+/g,' ').trim();state.pendingSegment.meta={...state.pendingSegment.meta,...meta}}else state.pendingSegment={text:clean,meta:{...meta}}
+  state.interim=state.pendingSegment.text;render();clearTimeout(state.pendingTimer);state.pendingTimer=setTimeout(flushPendingSegment,650)
 }
 function flushPendingSegment(){clearTimeout(state.pendingTimer);state.pendingTimer=null;const p=state.pendingSegment;state.pendingSegment=null;if(p){state.interim='';commitTranscript(p.text,p.meta)}}
 function commitTranscript(text,meta={}){
@@ -364,4 +336,4 @@ $('installButton').onclick=async()=>{if(!state.deferredInstall)return;state.defe
 window.addEventListener('beforeunload',()=>{state.shouldRestart=false;try{state.recognition?.stop()}catch{};stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user?.id!==state.user?.id)enterApp(session)})
 const {data:{session}}=await supabase.auth.getSession();await enterApp(session)
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.004').catch(()=>{})
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=4.0.4').catch(()=>{})
