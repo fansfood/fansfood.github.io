@@ -11,7 +11,7 @@ const state={
   micStream:null,peer:null,dataChannel:null,rtInterim:new Map(),realtimeStoppedAt:0,
   audioContext:null,audioSource:null,audioProcessor:null,cloudSamples:[],cloudStartedAt:0,cloudSeq:0,cloudNextResult:0,cloudResults:new Map(),
   recorder:null,recordingStream:null,recordingStartedAt:0,recordingTimer:null,recordingChunkIndex:0,uploadedChunks:0,recordings:[],
-  localTranslator:null,localTranslatorPromise:null,localQueue:[],localBusy:false,localAsr:null,localAsrPromise:null,localAsrContext:null,localAsrSource:null,localAsrProcessor:null,localAsrGain:null,localAsrSamples:[],localAsrBusy:false,localAsrActive:false,localAsrGeneration:0,titleTimer:null,deferredInstall:null
+  localTranslator:null,localTranslatorPromise:null,localQueue:[],localBusy:false,localAsr:null,localAsrPromise:null,localAsrContext:null,localAsrSource:null,localAsrProcessor:null,localAsrGain:null,localAsrSamples:[],localAsrBusy:false,localAsrActive:false,localAsrGeneration:0,universalCaptureFrames:0,universalCaptureStartedAt:0,universalCaptureWatchdog:null,titleTimer:null,deferredInstall:null
 }
 
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -299,7 +299,7 @@ function startBrowserRecognition(gen=state.speechGeneration,isRestart=false){
     if(!valid())return
     started=true;state.speechRetryCount=0;clearTimeout(state.speechStartTimer)
     $('speechDot').className='dot live'
-    $('speechStatus').textContent=huawei?'华为移动识别 / Huawei mobile speech':apple?'iPhone/iPad 稳定识别 / iOS stable speech':mobile?'移动识别 / Mobile speech':'稳定识别中 / Stable speech active'
+    $('speechStatus').textContent=huawei?'华为移动识别 / Huawei mobile speech':apple?'iPhone/iPad 稳定识别 / iOS stable speech':mobile?'移动识别 / Mobile speech':'统一采集 / Universal capture'
     setStatus('正在听课并翻译 / Listening and translating');render()
     if(mobile){
       state.speechStartTimer=setTimeout(()=>{
@@ -374,7 +374,25 @@ function startBrowserRecognition(gen=state.speechGeneration,isRestart=false){
   }
 }
 
-async function ensureMicStream(){if(state.micStream?.active)return state.micStream;state.micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}).catch(()=>navigator.mediaDevices.getUserMedia({audio:true}));return state.micStream}
+async function ensureMicStream(){
+  if(state.micStream?.active)return state.micStream
+  if(!navigator.mediaDevices?.getUserMedia)throw new Error('当前浏览器不支持麦克风采集 / Microphone capture API unavailable')
+  try{
+    state.micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false})
+  }catch(firstErr){
+    try{
+      state.micStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false})
+    }catch(err){
+      const name=err?.name||firstErr?.name||''
+      if(name==='NotAllowedError'||name==='SecurityError')throw new Error('麦克风权限未允许 / Microphone permission denied')
+      if(name==='NotFoundError'||name==='DevicesNotFoundError')throw new Error('没有检测到麦克风 / No microphone found')
+      throw new Error(`无法启动麦克风采集 / Microphone capture failed: ${err?.message||firstErr?.message||name||'unknown'}`)
+    }
+  }
+  const track=state.micStream.getAudioTracks?.()[0]
+  if(!track||track.readyState!=='live')throw new Error('麦克风音轨不可用 / Microphone audio track unavailable')
+  return state.micStream
+}
 function stopMicStream(){try{state.micStream?.getTracks()?.forEach(t=>t.stop())}catch{}state.micStream=null}
 
 
@@ -405,7 +423,7 @@ async function ensureLocalAsrModel(){
     $('speechStatus').textContent='加载本地语音模型 / Loading local speech model'
     setStatus('首次使用需要下载本地 Whisper 模型，请稍候 / First use: downloading local Whisper model')
     const {pipeline}=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm')
-    state.localAsr=await pipeline('automatic-speech-recognition','Xenova/whisper-tiny',{dtype:'q8'})
+    state.localAsr=await pipeline('automatic-speech-recognition','Xenova/whisper-tiny',{dtype:'q4'})
     return state.localAsr
   })().catch(err=>{state.localAsrPromise=null;throw err})
   return state.localAsrPromise
@@ -440,38 +458,60 @@ async function flushLocalAsr(gen=state.localAsrGeneration){
     }
   }
 }
-async function startLocalAsr(gen=state.speechGeneration,reason='fallback'){
+async function startLocalAsr(gen=state.speechGeneration,reason='universal'){
   if(gen!==state.speechGeneration||!state.isListening)return
   disposeRecognition();clearSpeechTimers();stopLocalAsr(false)
   const stream=await ensureMicStream()
   const AC=window.AudioContext||window.webkitAudioContext
-  if(!AC)throw new Error('当前浏览器不支持 Web Audio / Web Audio unavailable')
+  if(!AC)throw new Error('当前浏览器不支持统一音频采集 / Web Audio unavailable')
   const ctx=new AC()
   if(ctx.state==='suspended')await ctx.resume().catch(()=>{})
+  if(ctx.state==='suspended')throw new Error('浏览器阻止了音频上下文启动，请再次点击开始 / AudioContext blocked; tap Start again')
   const source=ctx.createMediaStreamSource(stream)
   const processor=ctx.createScriptProcessor?.(4096,1,1)
-  if(!processor){try{await ctx.close()}catch{};throw new Error('当前浏览器缺少音频处理能力 / Audio processor unavailable')}
+  if(!processor){try{await ctx.close()}catch{};throw new Error('当前浏览器缺少 PCM 音频处理能力 / PCM audio processing unavailable')}
   const gain=ctx.createGain();gain.gain.value=0
   state.localAsrContext=ctx;state.localAsrSource=source;state.localAsrProcessor=processor;state.localAsrGain=gain
   state.localAsrSamples=[];state.localAsrBusy=false;state.localAsrActive=true;state.localAsrGeneration=gen
+  state.universalCaptureFrames=0;state.universalCaptureStartedAt=performance.now()
   source.connect(processor);processor.connect(gain);gain.connect(ctx.destination)
+
+  clearTimeout(state.universalCaptureWatchdog)
+  state.universalCaptureWatchdog=setTimeout(()=>{
+    if(!state.localAsrActive||gen!==state.localAsrGeneration||!state.isListening)return
+    if(state.universalCaptureFrames===0){
+      $('speechDot').className='dot error'
+      $('speechStatus').textContent='采集无数据 / No audio frames'
+      setStatus('麦克风已授权但没有收到音频帧，请检查浏览器麦克风占用 / Microphone granted but no audio frames received')
+    }
+  },3500)
+
   processor.onaudioprocess=e=>{
     if(!state.localAsrActive||gen!==state.localAsrGeneration||!state.isListening)return
-    const ch=e.inputBuffer.getChannelData(0);state.localAsrSamples.push(new Float32Array(ch))
+    const ch=e.inputBuffer.getChannelData(0)
+    state.universalCaptureFrames++
+    if(state.universalCaptureFrames===1){
+      $('speechDot').className='dot live'
+      $('speechStatus').textContent='统一采集中 / Universal capture'
+      setStatus('麦克风采集正常，正在准备本地识别 / Audio capture active · preparing transcription')
+    }
+    state.localAsrSamples.push(new Float32Array(ch))
     const total=state.localAsrSamples.reduce((n,a)=>n+a.length,0)
     if(total>=ctx.sampleRate*7)flushLocalAsr(gen)
   }
+
   $('speechDot').className='dot busy'
-  $('speechStatus').textContent=isHuaweiDevice()?'华为本地识别 / Huawei Local ASR':'本地识别 / Local ASR'
-  setStatus(reason==='huawei'?'华为浏览器改用本地 Whisper 语音识别 / Huawei browser: using local Whisper':'浏览器语音无响应，已切换本地 Whisper / Browser speech unavailable; switched to local Whisper')
+  $('speechStatus').textContent='启动统一采集 / Starting universal capture'
+  setStatus('正在启动统一麦克风采集 / Starting universal microphone capture')
   await ensureLocalAsrModel()
   if(state.localAsrActive&&gen===state.localAsrGeneration){
-    $('speechDot').className='dot live'
-    $('speechStatus').textContent='本地 Whisper 识别 / Local Whisper'
-    setStatus('本地 Whisper 已就绪，正在听课 / Local Whisper ready · listening')
+    $('speechDot').className=state.universalCaptureFrames>0?'dot live':'dot busy'
+    $('speechStatus').textContent=state.universalCaptureFrames>0?'统一采集 + Whisper / Universal + Whisper':'等待音频 / Waiting for audio'
+    setStatus(state.universalCaptureFrames>0?'统一采集已就绪，正在听课 / Universal capture ready · listening':'模型已就绪，等待浏览器提供音频帧 / Model ready · waiting for audio frames')
   }
 }
 function stopLocalAsr(flush=true){
+  clearTimeout(state.universalCaptureWatchdog);state.universalCaptureWatchdog=null;state.universalCaptureFrames=0;state.universalCaptureStartedAt=0
   const gen=state.localAsrGeneration
   state.localAsrActive=false;state.localAsrGeneration=(state.localAsrGeneration||0)+1
   if(flush&&state.localAsrSamples.length&&!state.localAsrBusy){
@@ -576,9 +616,7 @@ async function start(){
   try{
     const mode=$('pipelineMode').value
     if(mode==='browser'){
-      const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition
-      if(isHuaweiDevice()||!Recognition)await startLocalAsr(state.speechGeneration,isHuaweiDevice()?'huawei':'unavailable')
-      else startBrowserRecognition(state.speechGeneration,false)
+      await startLocalAsr(state.speechGeneration,'universal')
     }else if(mode==='cloud')await startCloudSpeech()
     else await startRealtimeSpeech()
     if($('recordingToggle').checked)setTimeout(()=>{if(state.isListening)startRecordingBestEffort()},700)
@@ -627,7 +665,7 @@ async function enterApp(session){
   if(!state.user){$('authGate').hidden=false;$('appShell').hidden=true;return}
   $('authGate').hidden=true;$('appShell').hidden=false;$('accountEmail').textContent=state.user.email||'已登录'
   const draft=JSON.parse(localStorage.getItem(localKey())||'null');if(draft?.title)$('classTitle').value=draft.title;if(draft?.sourceLanguage)$('sourceLanguage').value=draft.sourceLanguage;if(draft?.translationProvider)$('translationProvider').value=draft.translationProvider;if(draft?.pipelineMode)$('pipelineMode').value=draft.pipelineMode;if(draft?.segmentMode)$('segmentMode').value=draft.segmentMode;if(Array.isArray(draft?.entries))state.entries=draft.entries;if(draft?.sessionId)state.sessionId=draft.sessionId
-  setStatus('ClassFlow 1.03.008 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
+  setStatus('ClassFlow 1.03.009 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
 }
 
 $('authForm').onsubmit=async e=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');const {error}=await supabase.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(error){const raw=error.message||'';showAuthMessage(/invalid login credentials/i.test(raw)?'邮箱或密码不正确；没有账号请先注册。 / Incorrect email or password; sign up first if needed.':raw,true)}else showAuthMessage('登录成功 / Signed in')}
@@ -652,4 +690,4 @@ $('installButton').onclick=async()=>{if(!state.deferredInstall)return;state.defe
 window.addEventListener('beforeunload',()=>{state.shouldRestart=false;state.isListening=false;state.speechGeneration=(state.speechGeneration||0)+1;clearSpeechTimers();disposeRecognition();stopLocalAsr(false);stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user?.id!==state.user?.id)enterApp(session)})
 const {data:{session}}=await supabase.auth.getSession();await enterApp(session)
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.008').catch(()=>{})
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.009').catch(()=>{})
