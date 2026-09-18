@@ -22,7 +22,7 @@ function fmtDuration(ms){const s=Math.max(0,Math.floor(ms/1000)),m=Math.floor(s/
 function empty(text){return`<div class="empty">${esc(text)}</div>`}
 function setStatus(text){if($('status'))$('status').textContent=text}
 function setSync(busy=false){state.saving=Math.max(0,state.saving+(busy?1:-1));if($('syncPill'))$('syncPill').textContent=state.saving?'☁ 同步中… / Syncing':'☁ 已同步 / Synced'}
-function localKey(){return`classflow-prod-draft-1.03-${state.user?.id||'guest'}`}
+function localKey(){return`classflow-beta3-draft-${state.user?.id||'guest'}`}
 function persistLocal(){if(!state.user)return;localStorage.setItem(localKey(),JSON.stringify({sessionId:state.sessionId,title:$('classTitle')?.value||'',sourceLanguage:$('sourceLanguage')?.value||'en-US',translationProvider:$('translationProvider')?.value||'auto',pipelineMode:$('pipelineMode')?.value||'browser',segmentMode:$('segmentMode')?.value||'smart',entries:state.entries}))}
 function clearLocal(){localStorage.removeItem(localKey())}
 function renderFlags(flags=[]){return flags.map(f=>`<b data-flag="${esc(f)}">${esc(f)}</b>`).join('')}
@@ -187,53 +187,17 @@ function commitTranscript(text,meta={}){
   state.entries.push(entry);state.interim='';render();saveSegment(entry);translateEntry(entry)
 }
 
-async function preflightMicrophone(){
-  if(!navigator.mediaDevices?.getUserMedia)throw new Error('当前浏览器无法访问麦克风 / Microphone API unavailable')
-  let stream=null
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({audio:true})
-  }catch(err){
-    const name=err?.name||''
-    if(name==='NotAllowedError'||name==='SecurityError')throw new Error('麦克风权限被拒绝，请在浏览器地址栏允许麦克风 / Microphone permission denied')
-    if(name==='NotFoundError'||name==='DevicesNotFoundError')throw new Error('没有检测到可用麦克风 / No microphone found')
-    throw new Error(err?.message||'麦克风无法启动 / Microphone unavailable')
-  }finally{
-    try{stream?.getTracks()?.forEach(t=>t.stop())}catch{}
-  }
-}
-
-async function startBrowserRecognition(){
+function startBrowserRecognition(){
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition
   if(!Recognition)throw new Error('当前浏览器不支持网页语音识别 / SpeechRecognition unavailable')
-  await preflightMicrophone()
   const r=new Recognition();r.lang=$('sourceLanguage').value;r.continuous=true;r.interimResults=true;r.maxAlternatives=1
   state.recognition=r;state.shouldRestart=true
-  let started=false
-  const watchdog=setTimeout(()=>{
-    if(started||!state.isListening)return
-    state.shouldRestart=false;state.isListening=false
-    try{r.abort?.()}catch{}
-    $('speechDot').className='dot error';$('speechStatus').textContent='启动超时 / Startup timeout'
-    setStatus('语音识别启动超时，请检查麦克风权限后重试 / Speech startup timed out; check microphone permission')
-    render()
-  },6000)
-  r.onstart=()=>{started=true;clearTimeout(watchdog);$('speechDot').className='dot live';$('speechStatus').textContent='稳定识别中 / Stable speech active';setStatus('正在听课并翻译 / Listening and translating');render()}
+  r.onstart=()=>{$('speechDot').className='dot live';$('speechStatus').textContent='稳定识别中 / Stable speech active';setStatus('正在听课并翻译 / Listening and translating')}
   r.onresult=ev=>{let inter='';for(let i=ev.resultIndex;i<ev.results.length;i++){const res=ev.results[i],text=(res[0]?.transcript||'').trim();if(!text)continue;if(res.isFinal)queueTranscript(text,{source:'browser'});else inter+=(inter?' ':'')+text}state.interim=inter.trim();render()}
-  r.onerror=ev=>{
-    clearTimeout(watchdog)
-    const fatal=['not-allowed','service-not-allowed','audio-capture']
-    if(fatal.includes(ev.error)){
-      state.shouldRestart=false;state.isListening=false
-      $('speechDot').className='dot error';$('speechStatus').textContent=ev.error==='audio-capture'?'麦克风不可用 / Mic unavailable':'权限被拒绝 / Permission denied'
-      setStatus(ev.error==='audio-capture'?'无法使用麦克风，请检查系统和浏览器麦克风设置 / Microphone unavailable':'请允许麦克风权限后再次点击开始 / Allow microphone access and try again')
-      render();return
-    }
-    if(ev.error!=='no-speech'&&ev.error!=='aborted'){setStatus(`浏览器识别异常 / Speech error: ${ev.error}`);$('speechDot').className='dot error'}
-  }
-  r.onend=()=>{state.interim='';if(state.shouldRestart&&state.isListening&&$('pipelineMode').value==='browser')setTimeout(()=>{try{r.start()}catch(err){state.isListening=false;state.shouldRestart=false;setStatus(`语音重新启动失败 / Restart failed: ${err?.message||err}`);render()}},350);else render()}
-  try{r.start()}catch(err){clearTimeout(watchdog);throw err}
+  r.onerror=ev=>{if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){state.shouldRestart=false;state.isListening=false;$('speechDot').className='dot error';$('speechStatus').textContent='权限被拒绝 / Permission denied';setStatus('请允许麦克风权限 / Allow microphone access');render();return}if(ev.error!=='no-speech'&&ev.error!=='aborted'){setStatus(`浏览器识别异常 / Speech error: ${ev.error}`);$('speechDot').className='dot error'}}
+  r.onend=()=>{state.interim='';if(state.shouldRestart&&state.isListening&&$('pipelineMode').value==='browser')setTimeout(()=>{try{r.start()}catch{}},300);else render()}
+  r.start()
 }
-
 
 async function ensureMicStream(){if(state.micStream?.active)return state.micStream;state.micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}).catch(()=>navigator.mediaDevices.getUserMedia({audio:true}));return state.micStream}
 function stopMicStream(){try{state.micStream?.getTracks()?.forEach(t=>t.stop())}catch{}state.micStream=null}
@@ -312,7 +276,7 @@ async function start(){
   state.isListening=true;state.shouldRestart=true;state.interim='';$('speechDot').className='dot busy';$('speechStatus').textContent='启动中 / Starting';render();ensureCloudSession().catch(()=>{})
   try{
     const mode=$('pipelineMode').value
-    if(mode==='browser')await startBrowserRecognition();else if(mode==='cloud')await startCloudSpeech();else await startRealtimeSpeech()
+    if(mode==='browser')startBrowserRecognition();else if(mode==='cloud')await startCloudSpeech();else await startRealtimeSpeech()
     if($('recordingToggle').checked)setTimeout(()=>{if(state.isListening)startRecordingBestEffort()},700)
   }catch(err){state.isListening=false;state.shouldRestart=false;$('speechDot').className='dot error';$('speechStatus').textContent='启动失败 / Failed';setStatus(`语音管线启动失败 / Speech pipeline failed: ${err.message||err}`);stopCloudSpeech();stopRealtimeSpeech();stopMicStream();render()}
 }
@@ -346,8 +310,8 @@ async function enterApp(session){
   state.user=session?.user||null
   if(!state.user){$('authGate').hidden=false;$('appShell').hidden=true;return}
   $('authGate').hidden=true;$('appShell').hidden=false;$('accountEmail').textContent=state.user.email||'已登录'
-  const draft=JSON.parse(localStorage.getItem(localKey())||'null');if(draft?.title)$('classTitle').value=draft.title;if(draft?.sourceLanguage)$('sourceLanguage').value=draft.sourceLanguage;if(draft?.translationProvider)$('translationProvider').value=draft.translationProvider;$('pipelineMode').value=draft?.pipelineMode==='browser'?'browser':'browser';if(draft?.segmentMode)$('segmentMode').value=draft.segmentMode;if(Array.isArray(draft?.entries))state.entries=draft.entries;if(draft?.sessionId)state.sessionId=draft.sessionId
-  setStatus('ClassFlow 1.03.003 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
+  const draft=JSON.parse(localStorage.getItem(localKey())||'null');if(draft?.title)$('classTitle').value=draft.title;if(draft?.sourceLanguage)$('sourceLanguage').value=draft.sourceLanguage;if(draft?.translationProvider)$('translationProvider').value=draft.translationProvider;if(draft?.pipelineMode)$('pipelineMode').value=draft.pipelineMode;if(draft?.segmentMode)$('segmentMode').value=draft.segmentMode;if(Array.isArray(draft?.entries))state.entries=draft.entries;if(draft?.sessionId)state.sessionId=draft.sessionId
+  setStatus('ClassFlow 4.0 · v4 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
 }
 
 $('authForm').onsubmit=async e=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');const {error}=await supabase.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(error){const raw=error.message||'';showAuthMessage(/invalid login credentials/i.test(raw)?'邮箱或密码不正确；没有账号请先注册。 / Incorrect email or password; sign up first if needed.':raw,true)}else showAuthMessage('登录成功 / Signed in')}
@@ -372,4 +336,4 @@ $('installButton').onclick=async()=>{if(!state.deferredInstall)return;state.defe
 window.addEventListener('beforeunload',()=>{state.shouldRestart=false;try{state.recognition?.stop()}catch{};stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user?.id!==state.user?.id)enterApp(session)})
 const {data:{session}}=await supabase.auth.getSession();await enterApp(session)
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.003').catch(()=>{})
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=4.0.4').catch(()=>{})
