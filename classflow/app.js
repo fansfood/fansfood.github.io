@@ -6,7 +6,7 @@ const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true
 const $=id=>document.getElementById(id)
 const flagDefs=[{key:'重点',label:'重点 / Key',icon:'★'},{key:'考试',label:'考试 / Exam',icon:'✓'},{key:'没听懂',label:'没听懂 / Unsure',icon:'?'},{key:'例子',label:'例子 / Example',icon:'◇'}]
 const state={
-  user:null,sessionId:null,entries:[],history:[],isListening:false,interim:'',recognition:null,shouldRestart:false,
+  user:null,sessionId:null,entries:[],history:[],isListening:false,interim:'',recognition:null,shouldRestart:false,speechGeneration:0,speechRetryCount:0,speechRestartTimer:null,speechStartTimer:null,
   pendingSegment:null,pendingTimer:null,saving:0,latencies:[],providerHealth:null,lastProvider:'',lastModel:'',
   micStream:null,peer:null,dataChannel:null,rtInterim:new Map(),realtimeStoppedAt:0,
   audioContext:null,audioSource:null,audioProcessor:null,cloudSamples:[],cloudStartedAt:0,cloudSeq:0,cloudNextResult:0,cloudResults:new Map(),
@@ -187,16 +187,122 @@ function commitTranscript(text,meta={}){
   state.entries.push(entry);state.interim='';render();saveSegment(entry);translateEntry(entry)
 }
 
-function startBrowserRecognition(){
+function isAppleMobile(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)
+}
+function clearSpeechTimers(){
+  clearTimeout(state.speechRestartTimer);clearTimeout(state.speechStartTimer)
+  state.speechRestartTimer=null;state.speechStartTimer=null
+}
+function disposeRecognition(r=state.recognition){
+  if(!r)return
+  try{r.onstart=r.onresult=r.onerror=r.onend=null}catch{}
+  try{r.abort?.()}catch{try{r.stop?.()}catch{}}
+  if(state.recognition===r)state.recognition=null
+}
+function scheduleBrowserRestart(gen,reason=''){
+  if(gen!==state.speechGeneration||!state.isListening||!state.shouldRestart)return
+  clearTimeout(state.speechRestartTimer)
+  state.speechRestartTimer=setTimeout(()=>{
+    if(gen!==state.speechGeneration||!state.isListening||!state.shouldRestart)return
+    try{startBrowserRecognition(gen,true)}catch(err){
+      state.speechRetryCount=(state.speechRetryCount||0)+1
+      if(state.speechRetryCount>=3){
+        state.isListening=false;state.shouldRestart=false
+        $('speechDot').className='dot error';$('speechStatus').textContent='识别启动失败 / Speech failed'
+        setStatus(`无法重新启动语音识别 / Could not restart speech recognition: ${err?.message||err}`);render()
+      }else scheduleBrowserRestart(gen,'retry')
+    }
+  },isAppleMobile()?260:320)
+}
+function startBrowserRecognition(gen=state.speechGeneration,isRestart=false){
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition
   if(!Recognition)throw new Error('当前浏览器不支持网页语音识别 / SpeechRecognition unavailable')
-  const r=new Recognition();r.lang=$('sourceLanguage').value;r.continuous=true;r.interimResults=true;r.maxAlternatives=1
-  state.recognition=r;state.shouldRestart=true
-  r.onstart=()=>{$('speechDot').className='dot live';$('speechStatus').textContent='稳定识别中 / Stable speech active';setStatus('正在听课并翻译 / Listening and translating')}
-  r.onresult=ev=>{let inter='';for(let i=ev.resultIndex;i<ev.results.length;i++){const res=ev.results[i],text=(res[0]?.transcript||'').trim();if(!text)continue;if(res.isFinal)queueTranscript(text,{source:'browser'});else inter+=(inter?' ':'')+text}state.interim=inter.trim();render()}
-  r.onerror=ev=>{if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){state.shouldRestart=false;state.isListening=false;$('speechDot').className='dot error';$('speechStatus').textContent='权限被拒绝 / Permission denied';setStatus('请允许麦克风权限 / Allow microphone access');render();return}if(ev.error!=='no-speech'&&ev.error!=='aborted'){setStatus(`浏览器识别异常 / Speech error: ${ev.error}`);$('speechDot').className='dot error'}}
-  r.onend=()=>{state.interim='';if(state.shouldRestart&&state.isListening&&$('pipelineMode').value==='browser')setTimeout(()=>{try{r.start()}catch{}},300);else render()}
-  r.start()
+  if(gen!==state.speechGeneration||!state.isListening)return
+
+  // Never reuse a WebKit recognition instance between lessons or restart cycles.
+  disposeRecognition()
+  const r=new Recognition(),apple=isAppleMobile()
+  r.lang=$('sourceLanguage').value
+  r.continuous=!apple
+  r.interimResults=true
+  r.maxAlternatives=1
+  state.recognition=r
+
+  let started=false,gotResult=false,ended=false
+  const valid=()=>gen===state.speechGeneration&&state.isListening&&state.recognition===r
+
+  clearTimeout(state.speechStartTimer)
+  state.speechStartTimer=setTimeout(()=>{
+    if(!valid()||started)return
+    state.speechRetryCount=(state.speechRetryCount||0)+1
+    $('speechDot').className='dot busy'
+    $('speechStatus').textContent='正在重新连接 / Reconnecting'
+    setStatus('语音识别没有响应，正在重新建立识别器 / Speech recognizer did not respond; rebuilding')
+    disposeRecognition(r)
+    if(state.speechRetryCount>=3){
+      state.isListening=false;state.shouldRestart=false
+      $('speechDot').className='dot error';$('speechStatus').textContent='识别无响应 / No response'
+      setStatus('语音识别连续三次无响应，请再次点击开始 / Speech recognition did not respond; tap Start again')
+      render()
+    }else scheduleBrowserRestart(gen,'startup-timeout')
+  },4500)
+
+  r.onstart=()=>{
+    if(!valid())return
+    started=true;state.speechRetryCount=0;clearTimeout(state.speechStartTimer)
+    $('speechDot').className='dot live'
+    $('speechStatus').textContent=apple?'iPhone/iPad 稳定识别 / iOS stable speech':'稳定识别中 / Stable speech active'
+    setStatus('正在听课并翻译 / Listening and translating');render()
+  }
+  r.onresult=ev=>{
+    if(!valid())return
+    gotResult=true;state.speechRetryCount=0;clearTimeout(state.speechStartTimer)
+    let inter=''
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      const res=ev.results[i],text=(res[0]?.transcript||'').trim()
+      if(!text)continue
+      if(res.isFinal)queueTranscript(text,{source:'browser'})
+      else inter+=(inter?' ':'')+text
+    }
+    state.interim=inter.trim();render()
+  }
+  r.onerror=ev=>{
+    if(!valid())return
+    clearTimeout(state.speechStartTimer)
+    const fatal=ev.error==='not-allowed'||ev.error==='service-not-allowed'||ev.error==='audio-capture'
+    if(fatal){
+      state.shouldRestart=false;state.isListening=false
+      $('speechDot').className='dot error'
+      $('speechStatus').textContent=ev.error==='audio-capture'?'麦克风不可用 / Mic unavailable':'权限被拒绝 / Permission denied'
+      setStatus(ev.error==='audio-capture'?'无法访问麦克风 / Microphone unavailable':'请允许麦克风权限 / Allow microphone access')
+      disposeRecognition(r);render();return
+    }
+    if(ev.error!=='no-speech'&&ev.error!=='aborted'){
+      $('speechDot').className='dot busy'
+      $('speechStatus').textContent='重新连接 / Reconnecting'
+      setStatus(`浏览器识别异常，正在恢复 / Speech error, recovering: ${ev.error}`)
+    }
+  }
+  r.onend=()=>{
+    if(ended)return;ended=true
+    clearTimeout(state.speechStartTimer)
+    if(state.recognition===r)state.recognition=null
+    if(gen!==state.speechGeneration||!state.isListening||!state.shouldRestart){render();return}
+    if(!gotResult)state.speechRetryCount=(state.speechRetryCount||0)+1
+    else state.speechRetryCount=0
+    if(state.speechRetryCount>=3){
+      state.isListening=false;state.shouldRestart=false
+      $('speechDot').className='dot error';$('speechStatus').textContent='识别无响应 / No response'
+      setStatus('语音识别连续结束且没有原文，请再次点击开始 / Speech repeatedly ended without transcript; tap Start again')
+      render();return
+    }
+    scheduleBrowserRestart(gen,gotResult?'cycle':'ended-without-result')
+  }
+
+  try{r.start()}catch(err){
+    clearTimeout(state.speechStartTimer);disposeRecognition(r);throw err
+  }
 }
 
 async function ensureMicStream(){if(state.micStream?.active)return state.micStream;state.micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}).catch(()=>navigator.mediaDevices.getUserMedia({audio:true}));return state.micStream}
@@ -273,15 +379,33 @@ async function playRecording(path){const {data,error}=await supabase.storage.fro
 
 async function start(){
   if(state.isListening)return
-  state.isListening=true;state.shouldRestart=true;state.interim='';$('speechDot').className='dot busy';$('speechStatus').textContent='启动中 / Starting';render();ensureCloudSession().catch(()=>{})
+  clearSpeechTimers();disposeRecognition()
+  state.speechGeneration=(state.speechGeneration||0)+1
+  state.speechRetryCount=0
+  state.isListening=true;state.shouldRestart=true;state.interim=''
+  $('speechDot').className='dot busy';$('speechStatus').textContent='启动中 / Starting';render();ensureCloudSession().catch(()=>{})
   try{
     const mode=$('pipelineMode').value
-    if(mode==='browser')startBrowserRecognition();else if(mode==='cloud')await startCloudSpeech();else await startRealtimeSpeech()
+    if(mode==='browser')startBrowserRecognition(state.speechGeneration,false)
+    else if(mode==='cloud')await startCloudSpeech()
+    else await startRealtimeSpeech()
     if($('recordingToggle').checked)setTimeout(()=>{if(state.isListening)startRecordingBestEffort()},700)
-  }catch(err){state.isListening=false;state.shouldRestart=false;$('speechDot').className='dot error';$('speechStatus').textContent='启动失败 / Failed';setStatus(`语音管线启动失败 / Speech pipeline failed: ${err.message||err}`);stopCloudSpeech();stopRealtimeSpeech();stopMicStream();render()}
+  }catch(err){
+    state.speechGeneration=(state.speechGeneration||0)+1
+    clearSpeechTimers();disposeRecognition()
+    state.isListening=false;state.shouldRestart=false
+    $('speechDot').className='dot error';$('speechStatus').textContent='启动失败 / Failed'
+    setStatus(`语音管线启动失败 / Speech pipeline failed: ${err.message||err}`)
+    stopCloudSpeech();stopRealtimeSpeech();stopMicStream();render()
+  }
 }
 function stop(){
-  state.shouldRestart=false;state.isListening=false;flushPendingSegment();try{state.recognition?.stop()}catch{}state.recognition=null;stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream();state.interim='';$('speechDot').className='dot';$('speechStatus').textContent='已暂停 / Paused';setStatus('已暂停，课堂记录已保留 / Paused · class record kept');render()
+  state.shouldRestart=false;state.isListening=false
+  state.speechGeneration=(state.speechGeneration||0)+1
+  clearSpeechTimers();flushPendingSegment();disposeRecognition()
+  stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()
+  state.interim='';$('speechDot').className='dot';$('speechStatus').textContent='已暂停 / Paused'
+  setStatus('已暂停，课堂记录已保留 / Paused · class record kept');render()
 }
 
 function toggleFlag(id,flag){const e=state.entries.find(x=>x.id===id);if(!e)return;e.flags=e.flags.includes(flag)?e.flags.filter(x=>x!==flag):[...e.flags,flag];render();updateSegment(e,{flags:e.flags})}
@@ -311,7 +435,7 @@ async function enterApp(session){
   if(!state.user){$('authGate').hidden=false;$('appShell').hidden=true;return}
   $('authGate').hidden=true;$('appShell').hidden=false;$('accountEmail').textContent=state.user.email||'已登录'
   const draft=JSON.parse(localStorage.getItem(localKey())||'null');if(draft?.title)$('classTitle').value=draft.title;if(draft?.sourceLanguage)$('sourceLanguage').value=draft.sourceLanguage;if(draft?.translationProvider)$('translationProvider').value=draft.translationProvider;if(draft?.pipelineMode)$('pipelineMode').value=draft.pipelineMode;if(draft?.segmentMode)$('segmentMode').value=draft.segmentMode;if(Array.isArray(draft?.entries))state.entries=draft.entries;if(draft?.sessionId)state.sessionId=draft.sessionId
-  setStatus('ClassFlow 4.0 · v4 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
+  setStatus('ClassFlow 1.03.005 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
 }
 
 $('authForm').onsubmit=async e=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');const {error}=await supabase.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(error){const raw=error.message||'';showAuthMessage(/invalid login credentials/i.test(raw)?'邮箱或密码不正确；没有账号请先注册。 / Incorrect email or password; sign up first if needed.':raw,true)}else showAuthMessage('登录成功 / Signed in')}
@@ -333,7 +457,7 @@ $('exportMd').onclick=exportMd;$('exportWord').onclick=exportWord
 
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();state.deferredInstall=e;$('installButton').hidden=false})
 $('installButton').onclick=async()=>{if(!state.deferredInstall)return;state.deferredInstall.prompt();await state.deferredInstall.userChoice;state.deferredInstall=null;$('installButton').hidden=true}
-window.addEventListener('beforeunload',()=>{state.shouldRestart=false;try{state.recognition?.stop()}catch{};stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
+window.addEventListener('beforeunload',()=>{state.shouldRestart=false;state.isListening=false;state.speechGeneration=(state.speechGeneration||0)+1;clearSpeechTimers();disposeRecognition();stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user?.id!==state.user?.id)enterApp(session)})
 const {data:{session}}=await supabase.auth.getSession();await enterApp(session)
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=4.0.4').catch(()=>{})
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.005').catch(()=>{})
