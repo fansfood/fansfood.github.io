@@ -121,10 +121,35 @@ async function updateSegment(entry,patch){if(!entry.cloudId)return;setSync(true)
 async function saveLatency(entry){if(!state.sessionId||!Number.isFinite(entry.latencyMs))return;supabase.from('classflow_latency_samples').insert({session_id:state.sessionId,segment_seq:entry.seq,pipeline:entry.source||$('pipelineMode').value,translation_ms:Math.round(entry.latencyMs),total_ms:Math.round(entry.latencyMs)}).then(()=>{}).catch(()=>{})}
 
 async function callAI(body){
-  const {data,error}=await supabase.functions.invoke('classflow-ai',{body})
-  if(error){let msg=error.message||'AI request failed';try{const ctx=await error.context?.json?.();if(ctx?.error)msg=ctx.error}catch{};throw new Error(msg)}
-  if(data?.error)throw new Error(data.error)
-  return data
+  let lastErr=null
+  for(let attempt=0;attempt<2;attempt++){
+    try{
+      const {data,error}=await supabase.functions.invoke('classflow-ai',{body})
+      if(error){
+        let msg=error.message||'AI request failed',status=0
+        try{status=Number(error.context?.status||0)}catch{}
+        try{
+          const ctx=await error.context?.clone?.().json?.()
+          if(ctx?.error)msg=ctx.error
+        }catch{}
+        if((status===401||/jwt|token|unauthor/i.test(msg))&&attempt===0){
+          await supabase.auth.refreshSession().catch(()=>{})
+          await new Promise(r=>setTimeout(r,250))
+          continue
+        }
+        throw new Error(msg)
+      }
+      if(data?.error)throw new Error(data.error)
+      return data
+    }catch(err){
+      lastErr=err
+      if(attempt===0){
+        await new Promise(r=>setTimeout(r,450))
+        continue
+      }
+    }
+  }
+  throw lastErr||new Error('AI request failed')
 }
 
 async function ensureLocalTranslator(){
@@ -148,6 +173,7 @@ async function translateLocal(text){
 
 async function translateEntry(entry){
   const start=performance.now();entry.translationError=false
+  let cloudError=null
   try{
     let provider=$('translationProvider').value
     if($('sourceLanguage').value==='zh-CN'){
@@ -155,16 +181,29 @@ async function translateEntry(entry){
     }else if(provider==='local'){
       entry.translation=await translateLocal(entry.original);entry.provider='local';entry.model='opus-mt-en-zh'
     }else{
-      const d=await callAI({action:'translate',provider,text:entry.original,sourceLanguage:$('sourceLanguage').value,courseTitle:$('classTitle').value})
-      entry.translation=d.translation||'';entry.provider=d.provider||provider;entry.model=d.model||''
+      try{
+        const d=await callAI({action:'translate',provider,text:entry.original,sourceLanguage:$('sourceLanguage').value,courseTitle:$('classTitle').value})
+        entry.translation=d.translation||'';entry.provider=d.provider||provider;entry.model=d.model||''
+      }catch(err){
+        cloudError=err
+        if($('sourceLanguage').value==='en-US'){
+          $('translationDot').className='dot busy'
+          $('translationStatus').textContent='云翻译波动，切换本地 / Cloud issue · local fallback'
+          entry.translation=await translateLocal(entry.original)
+          entry.provider='local';entry.model='opus-mt-en-zh-fallback'
+        }else{
+          throw err
+        }
+      }
     }
     if(!entry.translation)throw new Error('Empty translation')
     entry.translationDone=true
     entry.latencyMs=Math.max(0,performance.now()-start);state.latencies.push(entry.latencyMs)
     state.lastProvider=entry.provider;state.lastModel=entry.model||providerLabel(entry.provider)
-    $('translationDot').className='dot live';$('translationStatus').textContent=`${providerLabel(entry.provider)} 翻译正常 / Translation active`
+    $('translationDot').className='dot live'
+    $('translationStatus').textContent=cloudError?'本地兜底翻译正常 / Local fallback active':`${providerLabel(entry.provider)} 翻译正常 / Translation active`
   }catch(err){
-    entry.translation=`⚠ ${err?.message||'翻译失败 / Translation failed'}`;entry.translationError=true;entry.translationDone=true;entry.latencyMs=Math.max(0,performance.now()-start);state.latencies.push(entry.latencyMs)
+    entry.translation=`⚠ ${err?.message||cloudError?.message||'翻译失败 / Translation failed'}`;entry.translationError=true;entry.translationDone=true;entry.latencyMs=Math.max(0,performance.now()-start);state.latencies.push(entry.latencyMs)
     $('translationDot').className='dot error';$('translationStatus').textContent='翻译失败 / Translation failed'
   }
   render();if(entry.cloudId)updateSegment(entry,{translation:entry.translation});saveLatency(entry)
@@ -588,7 +627,7 @@ async function enterApp(session){
   if(!state.user){$('authGate').hidden=false;$('appShell').hidden=true;return}
   $('authGate').hidden=true;$('appShell').hidden=false;$('accountEmail').textContent=state.user.email||'已登录'
   const draft=JSON.parse(localStorage.getItem(localKey())||'null');if(draft?.title)$('classTitle').value=draft.title;if(draft?.sourceLanguage)$('sourceLanguage').value=draft.sourceLanguage;if(draft?.translationProvider)$('translationProvider').value=draft.translationProvider;if(draft?.pipelineMode)$('pipelineMode').value=draft.pipelineMode;if(draft?.segmentMode)$('segmentMode').value=draft.segmentMode;if(Array.isArray(draft?.entries))state.entries=draft.entries;if(draft?.sessionId)state.sessionId=draft.sessionId
-  setStatus('ClassFlow 1.03.007 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
+  setStatus('ClassFlow 1.03.008 · 翻译优先 / Translation first');render();loadHistory();checkProviders();if(state.sessionId)loadRecordings();retryPendingUploads()
 }
 
 $('authForm').onsubmit=async e=>{e.preventDefault();showAuthMessage('正在登录… / Signing in');const {error}=await supabase.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(error){const raw=error.message||'';showAuthMessage(/invalid login credentials/i.test(raw)?'邮箱或密码不正确；没有账号请先注册。 / Incorrect email or password; sign up first if needed.':raw,true)}else showAuthMessage('登录成功 / Signed in')}
@@ -613,4 +652,4 @@ $('installButton').onclick=async()=>{if(!state.deferredInstall)return;state.defe
 window.addEventListener('beforeunload',()=>{state.shouldRestart=false;state.isListening=false;state.speechGeneration=(state.speechGeneration||0)+1;clearSpeechTimers();disposeRecognition();stopLocalAsr(false);stopCloudSpeech();stopRealtimeSpeech();stopRecording();stopMicStream()})
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user?.id!==state.user?.id)enterApp(session)})
 const {data:{session}}=await supabase.auth.getSession();await enterApp(session)
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.007').catch(()=>{})
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.03.008').catch(()=>{})
